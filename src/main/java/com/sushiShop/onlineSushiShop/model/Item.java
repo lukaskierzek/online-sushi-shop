@@ -2,8 +2,6 @@ package com.sushiShop.onlineSushiShop.model;
 
 import jakarta.persistence.*;
 
-import java.math.BigDecimal;
-
 @Entity
 @Table(name = "Items")
 public class Item {

@@ -1,9 +1,6 @@
 package com.sushiShop.onlineSushiShop.enums;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-
-import java.util.Arrays;
 
 public enum IsHidden {
     NO(0),
@@ -20,11 +17,4 @@ public enum IsHidden {
         return value;
     }
 
-//    @JsonCreator
-//    public static IsHidden fromValue(int value) {
-//        return Arrays.stream(values())
-//                .filter(isHidden -> isHidden.value == value)
-//                .findFirst()
-//                .orElseThrow(() -> new IllegalArgumentException("Invalid value for IsHidden: " + value));
-//    }
 }
