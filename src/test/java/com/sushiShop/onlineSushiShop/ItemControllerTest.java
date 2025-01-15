@@ -2,7 +2,6 @@ package com.sushiShop.onlineSushiShop;
 
 import com.sushiShop.onlineSushiShop.controller.ItemController;
 import com.sushiShop.onlineSushiShop.enums.IsHidden;
-import com.sushiShop.onlineSushiShop.model.AdditionalInformation;
 import com.sushiShop.onlineSushiShop.model.Item;
 import com.sushiShop.onlineSushiShop.service.ItemService;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -45,7 +42,7 @@ public class ItemControllerTest {
 
     @Test
     void getAllItems_shouldReturnListOfAllItems() {
-        List<Item> mockAllItems = getItems();
+        List<Item> mockAllItems = MockItems.getItems();
 
         when(itemService.getAllItems()).thenReturn(mockAllItems);
 
@@ -55,7 +52,7 @@ public class ItemControllerTest {
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().size()).isEqualTo(2);
+        assertThat(response.getBody().size()).isEqualTo(3);
 
         assertThat(response.getBody().get(0).getItemName()).isEqualTo("Rools1");
         assertThat(response.getBody().get(1).getItemName()).isEqualTo("Rools2");
@@ -68,7 +65,7 @@ public class ItemControllerTest {
 
     @Test
     void getNonHiddenItems_shouldReturnListOfNonHiddenItems() throws Exception {
-        List<Item> mockNonHiddenItems = getItems().stream()
+        List<Item> mockNonHiddenItems = MockItems.getItems().stream()
                 .filter(item -> IsHidden.NO.equals(item.getAdditionalInformation().getIsHidden()))
                 .collect(Collectors.toList());
 
@@ -80,32 +77,14 @@ public class ItemControllerTest {
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(Objects.requireNonNull(response.getBody()).size()).isEqualTo(1);
+        assertThat(Objects.requireNonNull(response.getBody()).size()).isEqualTo(2);
 
         assertThat(response.getBody().getFirst().getAdditionalInformation().getIsHidden()).isEqualTo(IsHidden.NO);
         assertThat(response.getBody().getFirst().getAdditionalInformation().getIsHidden()).isNotEqualTo(IsHidden.YES);
 
+        assertThat(response.getBody().get(1).getAdditionalInformation().getIsHidden()).isEqualTo(IsHidden.NO);
+        assertThat(response.getBody().get(1).getAdditionalInformation().getIsHidden()).isNotEqualTo(IsHidden.YES);
+
         verify(itemService, times(1)).getNonHiddenItems();
-    }
-
-    private static List<Item> getItems() {
-        AdditionalInformation additionalInformationIsHiddenNo = new AdditionalInformation(
-                IsHidden.NO,
-                LocalDateTime.of(2023, Month.JANUARY, 10, 0, 0, 0, 0),
-                LocalDateTime.of(2023, Month.JANUARY, 10, 0, 0, 0, 0)
-        );
-
-        AdditionalInformation additionalInformationIsHiddenYes = new AdditionalInformation(
-                IsHidden.YES,
-                LocalDateTime.of(2023, Month.JANUARY, 11, 0, 0, 0, 0),
-                LocalDateTime.of(2023, Month.JANUARY, 11, 0, 0, 0, 0)
-        );
-
-
-        List<Item> mockAllItems = List.of(
-                new Item(1L, "Rools1", 20, 10, "http", additionalInformationIsHiddenNo),
-                new Item(2L, "Rools2", 20, 10, "http", additionalInformationIsHiddenYes)
-        );
-        return mockAllItems;
     }
 }
