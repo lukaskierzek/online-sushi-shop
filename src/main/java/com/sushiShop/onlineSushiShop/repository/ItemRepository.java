@@ -10,7 +10,6 @@ import java.util.List;
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    @Query(value = "SELECT * FROM Items WHERE Items_is_hidden = 0", nativeQuery = true)
-//    @Query("SELECT i FROM Item i WHERE i.additionalInformation.isHidden = 0")
+    @Query(value = "SELECT * FROM Items i LEFT JOIN comments c on c.comments_id = i.items_comments_id WHERE i.items_is_hidden = 0", nativeQuery = true)
     List<Item> findNonHiddenItems();
 }

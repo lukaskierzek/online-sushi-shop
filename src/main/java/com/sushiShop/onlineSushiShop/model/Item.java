@@ -1,5 +1,6 @@
 package com.sushiShop.onlineSushiShop.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -31,16 +32,22 @@ public class Item {
     })
     private AdditionalInformation additionalInformation;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "Items_comments_Id", referencedColumnName = "comments_id")
+    @JsonManagedReference
+    private Comment comment;
+
     public Item() {
     }
 
-    public Item(Long itemId, String itemName, Integer itemActualPrice, Integer itemOldPrice, String itemImageUrl, AdditionalInformation additionalInformation) {
+    public Item(Long itemId, String itemName, Integer itemActualPrice, Integer itemOldPrice, String itemImageUrl, AdditionalInformation additionalInformation, Comment comment) {
         this.ItemId = itemId;
         this.ItemName = itemName;
         this.ItemActualPrice = itemActualPrice;
         this.ItemOldPrice = itemOldPrice;
         this.ItemImageUrl = itemImageUrl;
         this.additionalInformation = additionalInformation;
+        this.comment = comment;
     }
 
     public Long getItemId() {
@@ -91,6 +98,14 @@ public class Item {
         this.additionalInformation = additionalInformation;
     }
 
+    public Comment getComment() {
+        return comment;
+    }
+
+    public void setComment(Comment comment) {
+        this.comment = comment;
+    }
+
     @Override
     public String toString() {
         return "Item{" +
@@ -100,6 +115,7 @@ public class Item {
                 ", ItemOldPrice=" + ItemOldPrice +
                 ", ItemImageUrl='" + ItemImageUrl + '\'' +
                 ", additionalInformation=" + additionalInformation +
+                ", comment=" + comment +
                 '}';
     }
 }

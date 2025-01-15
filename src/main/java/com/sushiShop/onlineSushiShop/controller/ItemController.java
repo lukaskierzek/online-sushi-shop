@@ -23,6 +23,7 @@ public class ItemController {
         this.itemService = itemService;
     }
 
+    //region Item
     @GetMapping(path = "all")
     public ResponseEntity<List<Item>> getAllItems() {
         List<Item> allItemsList = itemService.getAllItems();
@@ -34,4 +35,5 @@ public class ItemController {
         List<Item> nonHiddenItemsList = itemService.getNonHiddenItems();
         return new ResponseEntity<>(nonHiddenItemsList, HttpStatus.OK);
     }
+    //endregion
 }
