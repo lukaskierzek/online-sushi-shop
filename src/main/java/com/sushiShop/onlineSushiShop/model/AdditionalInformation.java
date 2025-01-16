@@ -56,4 +56,13 @@ public class AdditionalInformation {
     public void setUpdateAt(LocalDateTime updateAt) {
         this.updateAt = updateAt;
     }
+
+    @Override
+    public String toString() {
+        return "AdditionalInformation{" +
+                "isHidden=" + isHidden +
+                ", createdAt=" + createdAt +
+                ", updateAt=" + updateAt +
+                '}';
+    }
 }

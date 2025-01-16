@@ -37,10 +37,15 @@ public class Item {
     @JsonManagedReference
     private Comment comment;
 
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "items_main_categories_id", nullable = false)
+    @JsonManagedReference
+    private MainCategory mainCategory;
+
     public Item() {
     }
 
-    public Item(Long itemId, String itemName, Integer itemActualPrice, Integer itemOldPrice, String itemImageUrl, AdditionalInformation additionalInformation, Comment comment) {
+    public Item(Long itemId, String itemName, Integer itemActualPrice, Integer itemOldPrice, String itemImageUrl, AdditionalInformation additionalInformation, Comment comment, MainCategory mainCategory) {
         this.ItemId = itemId;
         this.ItemName = itemName;
         this.ItemActualPrice = itemActualPrice;
@@ -48,6 +53,7 @@ public class Item {
         this.ItemImageUrl = itemImageUrl;
         this.additionalInformation = additionalInformation;
         this.comment = comment;
+        this.mainCategory = mainCategory;
     }
 
     public Long getItemId() {
@@ -106,6 +112,14 @@ public class Item {
         this.comment = comment;
     }
 
+    public MainCategory getMainCategory() {
+        return mainCategory;
+    }
+
+    public void setMainCategory(MainCategory mainCategory) {
+        this.mainCategory = mainCategory;
+    }
+
     @Override
     public String toString() {
         return "Item{" +
@@ -116,6 +130,7 @@ public class Item {
                 ", ItemImageUrl='" + ItemImageUrl + '\'' +
                 ", additionalInformation=" + additionalInformation +
                 ", comment=" + comment +
+                ", mainCategory=" + mainCategory +
                 '}';
     }
 }

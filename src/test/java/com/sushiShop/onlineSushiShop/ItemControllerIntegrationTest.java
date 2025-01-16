@@ -30,17 +30,21 @@ public class ItemControllerIntegrationTest {
 
     @Test
     void getNonHiddenItems_shouldReturnListOfNonHiddenItemsGet() throws Exception {
-        mockMvc.perform(get("http://localhost:8080/api/onlinesushishop/item/non-hidden"))
+        mockMvc.perform(get("http://localhost:8080/api/onlinesushishop/raw/item/non-hidden"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].itemName").value("Rools1"))
-                .andExpect(jsonPath("$[0].additionalInformation.isHidden").value("0"))
                 .andExpect(jsonPath("$[1].itemName").value("Rools3"))
-                .andExpect(jsonPath("$[1].additionalInformation.isHidden").value("0"));
+                .andExpect(jsonPath("$[0].additionalInformation.isHidden").value("0"))
+                .andExpect(jsonPath("$[1].additionalInformation.isHidden").value("0"))
+                .andExpect(jsonPath("$[0].mainCategory.mainCategoryName").value("Main Category 1"))
+                .andExpect(jsonPath("$[1].mainCategory.mainCategoryName").value("Main Category 1"))
+                .andExpect(jsonPath("$[0].comment.commentText").value("Comment text 1"))
+                .andExpect(jsonPath("$[1].comment.commentText").value("Comment text 3"));
     }
 
     @Test
     void getAllItems_shouldReturnListOfAllItemsGet() throws Exception {
-        mockMvc.perform(get("http://localhost:8080/api/onlinesushishop/item/all"))
+        mockMvc.perform(get("http://localhost:8080/api/onlinesushishop/raw/item/all"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].additionalInformation.isHidden").value("0"))
                 .andExpect(jsonPath("$.[1].additionalInformation.isHidden").value("1"))

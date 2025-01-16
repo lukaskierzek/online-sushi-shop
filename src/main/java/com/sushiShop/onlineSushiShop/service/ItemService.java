@@ -16,7 +16,6 @@ public class ItemService {
         this.itemRepository = itemRepository;
     }
 
-    //region Item
     public List<Item> getAllItems() {
         return itemRepository.findAll();
     }
@@ -24,5 +23,4 @@ public class ItemService {
     public List<Item> getNonHiddenItems() {
         return itemRepository.findNonHiddenItems();
     }
-    //endregion
 }

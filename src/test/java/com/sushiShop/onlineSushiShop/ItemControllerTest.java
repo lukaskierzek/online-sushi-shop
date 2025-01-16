@@ -60,6 +60,9 @@ public class ItemControllerTest {
         assertThat(response.getBody().get(0).getAdditionalInformation().getIsHidden()).isEqualTo(IsHidden.NO);
         assertThat(response.getBody().get(1).getAdditionalInformation().getIsHidden()).isEqualTo(IsHidden.YES);
 
+        assertThat(response.getBody().get(0).getMainCategory().getMainCategoryName()).isEqualTo("Main Category 1");
+        assertThat(response.getBody().get(1).getMainCategory().getMainCategoryName()).isEqualTo("Main Category 2");
+
         verify(itemService, times(1)).getAllItems();
     }
 
@@ -84,6 +87,9 @@ public class ItemControllerTest {
 
         assertThat(response.getBody().get(1).getAdditionalInformation().getIsHidden()).isEqualTo(IsHidden.NO);
         assertThat(response.getBody().get(1).getAdditionalInformation().getIsHidden()).isNotEqualTo(IsHidden.YES);
+
+        assertThat(response.getBody().get(0).getMainCategory().getMainCategoryName()).isEqualTo("Main Category 1");
+        assertThat(response.getBody().get(1).getMainCategory().getMainCategoryName()).isEqualTo("Main Category 1");
 
         verify(itemService, times(1)).getNonHiddenItems();
     }

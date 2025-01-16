@@ -14,7 +14,7 @@ import java.util.List;
 //	http://localhost:8080/swagger-ui/index.html
 
 @RestController
-@RequestMapping(path = "api/onlinesushishop/item")
+@RequestMapping(path = "api/onlinesushishop/raw/item")
 public class ItemController {
     private final ItemService itemService;
 
@@ -23,7 +23,7 @@ public class ItemController {
         this.itemService = itemService;
     }
 
-    //region Item
+    //region Get
     @GetMapping(path = "all")
     public ResponseEntity<List<Item>> getAllItems() {
         List<Item> allItemsList = itemService.getAllItems();
