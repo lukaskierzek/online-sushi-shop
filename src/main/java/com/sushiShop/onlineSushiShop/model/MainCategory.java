@@ -12,7 +12,8 @@ public class MainCategory {
     private static final String COLUMN_NAME = "main_categories_";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "main_category_seq")
+    @SequenceGenerator(name = "main_category_seq", sequenceName = "main_category_sequence", allocationSize = 1)
     @Column(name = COLUMN_NAME + "id")
     private Long mainCategoryId;
 

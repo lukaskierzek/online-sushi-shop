@@ -8,7 +8,8 @@ import jakarta.persistence.*;
 public class Comment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "comment_seq")
+    @SequenceGenerator(name = "comment_seq", sequenceName = "comment_sequence", allocationSize = 1)
     @Column(name = "Comments_Id")
     private Long CommentId;
 
