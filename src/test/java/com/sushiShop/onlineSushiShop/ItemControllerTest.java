@@ -23,7 +23,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.*;
 
 
-@AutoConfigureMockMvc
 public class ItemControllerTest {
 
     private MockMvc mockMvc;
