@@ -23,4 +23,5 @@ public class ItemService {
     public List<Item> getNonHiddenItems() {
         return itemRepository.findNonHiddenItems();
     }
+
 }
