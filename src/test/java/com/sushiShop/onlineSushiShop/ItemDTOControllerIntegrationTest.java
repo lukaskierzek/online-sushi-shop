@@ -34,7 +34,10 @@ public class ItemDTOControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].itemName").value("Rools1"))
                 .andExpect(jsonPath("$.[1].itemName").value("Rools2"))
-                .andExpect(jsonPath("$.[2].itemName").value("Rools3"));
+                .andExpect(jsonPath("$.[2].itemName").value("Rools3"))
+                .andExpect(jsonPath("$.[0].itemIsHidden").value(0))
+                .andExpect(jsonPath("$.[1].itemIsHidden").value(1))
+                .andExpect(jsonPath("$.[2].itemIsHidden").value(0));
     }
 
     @Test
@@ -42,6 +45,8 @@ public class ItemDTOControllerIntegrationTest {
         mockMvc.perform(get("http://localhost:8080/api/onlinesushishop/item/non-hidden"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].itemName").value("Rools1"))
-                .andExpect(jsonPath("$.[1].itemName").value("Rools3"));
+                .andExpect(jsonPath("$.[1].itemName").value("Rools3"))
+                .andExpect(jsonPath("$.[0].itemIsHidden").value(0))
+                .andExpect(jsonPath("$.[1].itemIsHidden").value(0));
     }
 }

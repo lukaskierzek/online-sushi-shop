@@ -6,7 +6,7 @@ public class ItemDTO {
     private Integer itemActualPrice;
     private Integer itemOldPrice;
     private String itemImageUrl;
-    //    private Integer itemIsHidden;
+    private Integer itemIsHidden;
     private String itemComment;
     private String itemMainCategory;
 
@@ -50,13 +50,13 @@ public class ItemDTO {
         this.itemImageUrl = itemImageUrl;
     }
 
-//    public Integer getItemIsHidden() {
-//        return itemIsHidden;
-//    }
-//
-//    public void setItemIsHidden(Integer itemIsHidden) {
-//        this.itemIsHidden = itemIsHidden;
-//    }
+    public Integer getItemIsHidden() {
+        return itemIsHidden;
+    }
+
+    public void setItemIsHidden(Integer itemIsHidden) {
+        this.itemIsHidden = itemIsHidden;
+    }
 
     public String getItemComment() {
         return itemComment;
