@@ -1,8 +1,8 @@
 package com.sushiShop.onlineSushiShop.service;
 
+import com.sushiShop.onlineSushiShop.mapper.ItemMapper;
 import com.sushiShop.onlineSushiShop.model.Item;
 import com.sushiShop.onlineSushiShop.model.dto.ItemDTO;
-import com.sushiShop.onlineSushiShop.mapper.ItemMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,12 @@ public class ItemDTOService {
     }
 
     public List<ItemDTO> getNonHiddenItemsDTO() {
-        var nonHiddenItemList = itemService.getNonHiddenItems();
+        List<Item> nonHiddenItemList = itemService.getNonHiddenItems();
         return itemMapper.itemListToItemDTOList(nonHiddenItemList);
+    }
+
+    public ItemDTO getNonHiddenItemDTOById(Long itemId) {
+        Item nonHiddenItem = itemService.getNonHiddenItemById(itemId);
+        return itemMapper.itemToItemDTO(nonHiddenItem);
     }
 }

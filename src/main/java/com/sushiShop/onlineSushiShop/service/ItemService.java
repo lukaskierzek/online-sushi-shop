@@ -24,4 +24,8 @@ public class ItemService {
         return itemRepository.findNonHiddenItems();
     }
 
+    public Item getNonHiddenItemById(Long itemId) {
+        return itemRepository.findNonHiddenItem(itemId)
+                .orElseThrow(() -> new IllegalStateException(String.format("Item by %s was not found", itemId)));
+    }
 }

@@ -1,12 +1,15 @@
 package com.sushiShop.onlineSushiShop;
 
 import com.sushiShop.onlineSushiShop.repository.ItemRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -14,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 public class ItemControllerIntegrationTest {
 
     @Autowired
@@ -22,10 +26,20 @@ public class ItemControllerIntegrationTest {
     @Autowired
     private ItemRepository itemRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @BeforeEach
     public void setup() {
         itemRepository.deleteAll();
+        jdbcTemplate.execute("ALTER SEQUENCE item_sequence RESTART WITH 1");
         itemRepository.saveAll(MockItems.getItems());
+    }
+
+    @AfterEach
+    public void cleanup() {
+        itemRepository.deleteAll();
+        jdbcTemplate.execute("ALTER SEQUENCE item_sequence RESTART WITH 1");
     }
 
     @Test
@@ -49,5 +63,14 @@ public class ItemControllerIntegrationTest {
                 .andExpect(jsonPath("$.[0].additionalInformation.isHidden").value("0"))
                 .andExpect(jsonPath("$.[1].additionalInformation.isHidden").value("1"))
                 .andExpect(jsonPath("$.[2].additionalInformation.isHidden").value("0"));
+    }
+
+    @Test
+    void getItemById_shouldReturnItemById() throws Exception {
+        mockMvc.perform(get("http://localhost:8080/api/onlinesushishop/raw/item/non-hidden/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.itemId").value(1))
+                .andExpect(jsonPath("$.additionalInformation.isHidden").value(0))
+                .andExpect(jsonPath("$.itemName").value("Rools1"));
     }
 }
