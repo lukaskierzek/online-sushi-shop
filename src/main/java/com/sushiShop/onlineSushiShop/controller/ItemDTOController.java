@@ -44,7 +44,7 @@ public class ItemDTOController {
         }
     }
 
-    @GetMapping(path = "/non-hidden/{itemId}")
+    @GetMapping(path = "non-hidden/{itemId}")
     public ResponseEntity<ItemDTO> getNonHiddenItemDTOById(@PathVariable("itemId") Long itemId) {
         try {
             ItemDTO itemDTONonHidden = itemDTOService.getNonHiddenItemDTOById(itemId);
