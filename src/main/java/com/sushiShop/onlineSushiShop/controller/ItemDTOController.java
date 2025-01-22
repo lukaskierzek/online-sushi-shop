@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -25,20 +26,32 @@ public class ItemDTOController {
     //region Get
     @GetMapping(path = "all")
     public ResponseEntity<List<ItemDTO>> getAllItemDTO() {
-        List<ItemDTO> itemDTOList = itemDTOService.getAllItemsDTO();
-        return new ResponseEntity<>(itemDTOList, HttpStatus.OK);
+        try {
+            List<ItemDTO> itemDTOList = itemDTOService.getAllItemsDTO();
+            return ResponseEntity.ok(itemDTOList);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+        }
     }
 
     @GetMapping(path = "non-hidden")
     public ResponseEntity<List<ItemDTO>> getNonHiddenItemsDTO() {
-        List<ItemDTO> nonHiddenItemsList = itemDTOService.getNonHiddenItemsDTO();
-        return new ResponseEntity<>(nonHiddenItemsList, HttpStatus.OK);
+        try {
+            List<ItemDTO> nonHiddenItemsList = itemDTOService.getNonHiddenItemsDTO();
+            return ResponseEntity.ok(nonHiddenItemsList);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+        }
     }
 
     @GetMapping(path = "/non-hidden/{itemId}")
     public ResponseEntity<ItemDTO> getNonHiddenItemDTOById(@PathVariable("itemId") Long itemId) {
-        ItemDTO itemDTONonHidden = itemDTOService.getNonHiddenItemDTOById(itemId);
-        return new ResponseEntity<>(itemDTONonHidden, HttpStatus.OK);
+        try {
+            ItemDTO itemDTONonHidden = itemDTOService.getNonHiddenItemDTOById(itemId);
+            return itemDTONonHidden != null ? ResponseEntity.ok(itemDTONonHidden) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
     //endregion
 }
