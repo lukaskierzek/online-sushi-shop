@@ -5,7 +5,6 @@ import com.sushiShop.onlineSushiShop.model.AdditionalInformation;
 import com.sushiShop.onlineSushiShop.model.Comment;
 import com.sushiShop.onlineSushiShop.model.Item;
 import com.sushiShop.onlineSushiShop.model.MainCategory;
-import org.jboss.jandex.Main;
 
 import java.time.LocalDateTime;
 import java.time.Month;

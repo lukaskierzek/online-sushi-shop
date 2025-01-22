@@ -13,8 +13,8 @@ public class CreateViewRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        String ViewItemNonHiddenQuery = """
-                CREATE VIEW item_non_hidden AS
+        String view_item_non_hidden_name = "item_non_hidden";
+        String view_item_non_hidden_body = """
                 SELECT
                     *
                 FROM
@@ -24,12 +24,26 @@ public class CreateViewRunner implements CommandLineRunner {
                 WHERE
                     I.ITEMS_IS_HIDDEN = 0
                 """;
+        createView(view_item_non_hidden_name, view_item_non_hidden_body);
+    }
 
-        String checkIfViewViewItemNonHiddenExists = "SELECT EXISTS (SELECT 1 FROM pg_views WHERE viewname = 'item_non_hidden')";
+    private Boolean viewExists(String viewName) {
+        String queryViewNameExists = "SELECT EXISTS (SELECT 1 FROM pg_views WHERE viewname = '%s')".formatted(viewName);
+        return jdbcTemplate.queryForObject(queryViewNameExists, Boolean.class);
+    }
 
-        Boolean ifViewExistsQuery = jdbcTemplate.queryForObject(checkIfViewViewItemNonHiddenExists, Boolean.class);
+    private void createView(String viewName, String viewBody) throws IllegalStateException {
+        if (viewName == null) throw new IllegalStateException("viewName cannot be null");
+        if (viewBody == null) throw new IllegalStateException("viewBody cannot be null");
 
-        if (Boolean.FALSE.equals(ifViewExistsQuery))
-            jdbcTemplate.execute(ViewItemNonHiddenQuery);
+        String viewQuery = """
+                CREATE VIEW %s AS
+                %s
+                """.formatted(viewName, viewBody);
+
+        Boolean ifViewExists = viewExists(viewName);
+
+        if (Boolean.FALSE.equals(ifViewExists))
+            jdbcTemplate.execute(viewQuery);
     }
 }
