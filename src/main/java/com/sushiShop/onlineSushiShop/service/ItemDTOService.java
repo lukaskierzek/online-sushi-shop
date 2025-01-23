@@ -58,19 +58,19 @@ public class ItemDTOService {
 
         var comment = new Comment(
                 null,
-                itemPostDTO.getItemComment(),
+                itemPostDTO.itemComment(),
                 null,
                 additionInformation
         );
 
-        MainCategory mainCategory = mainCategoryService.getMainCategoryById(itemPostDTO.getItemMainCategoryId());
+        MainCategory mainCategory = mainCategoryService.getMainCategoryById(itemPostDTO.itemMainCategoryId());
 
         Item item = new Item(
                 null,
-                itemPostDTO.getItemName(),
-                itemPostDTO.getItemActualPrice(),
-                itemPostDTO.getItemOldPrice(),
-                itemPostDTO.getItemImageUrl(),
+                itemPostDTO.itemName(),
+                itemPostDTO.itemActualPrice(),
+                itemPostDTO.itemOldPrice(),
+                itemPostDTO.itemImageUrl(),
                 additionInformation,
                 comment,
                 mainCategory
