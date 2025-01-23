@@ -38,24 +38,21 @@ public class CreateViewRunner implements CommandLineRunner {
                             LEFT JOIN MAIN_CATEGORIES MC ON MC.MAIN_CATEGORIES_ID = I.ITEMS_MAIN_CATEGORIES_ID
                         """);
     }
-
-    private Boolean viewExists(String viewName) {
-        String queryViewNameExists = "SELECT EXISTS (SELECT 1 FROM pg_views WHERE viewname = '%s')".formatted(viewName);
-        return jdbcTemplate.queryForObject(queryViewNameExists, Boolean.class);
-    }
+//
+//    private Boolean viewExists(String viewName) {
+//        String queryViewNameExists = "SELECT EXISTS (SELECT 1 FROM pg_views WHERE viewname = '%s')".formatted(viewName);
+//        return jdbcTemplate.queryForObject(queryViewNameExists, Boolean.class);
+//    }
 
     private void createView(String viewName, String viewBody) throws IllegalStateException {
         if (viewName == null) throw new IllegalStateException("viewName cannot be null");
         if (viewBody == null) throw new IllegalStateException("viewBody cannot be null");
 
         String viewQuery = """
-                CREATE VIEW %s AS
+                CREATE OR REPLACE VIEW %s AS
                 %s
                 """.formatted(viewName, viewBody);
 
-        Boolean ifViewExists = viewExists(viewName);
-
-        if (Boolean.FALSE.equals(ifViewExists))
-            jdbcTemplate.execute(viewQuery);
+        jdbcTemplate.execute(viewQuery);
     }
 }

@@ -47,7 +47,7 @@ public class ItemDTOService {
         return itemMapper.itemToItemDTO(item);
     }
 
-    public Item postNewItem(ItemPostDTO itemPostDTO) {
+    public Item postNewItemFromItemPostDTO(ItemPostDTO itemPostDTO) {
         if (itemPostDTO == null) return null;
 
         AdditionalInformation additionInformation = new AdditionalInformation(

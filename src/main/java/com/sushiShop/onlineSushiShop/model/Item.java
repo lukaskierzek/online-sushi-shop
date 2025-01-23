@@ -2,9 +2,11 @@ package com.sushiShop.onlineSushiShop.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Check;
 
 @Entity
 @Table(name = "Items")
+@Check(name = "Items_Actual_Price_and_old_price_check", constraints = "Items_Actual_Price > 0 AND Items_Old_Price > 0")
 public class Item {
 
     @Id
@@ -22,7 +24,7 @@ public class Item {
     @Column(name = "Items_Old_Price", nullable = false)
     private Integer ItemOldPrice;
 
-    @Column(name = "Items_Image_Url", nullable = false, length = 500)
+    @Column(name = "Items_Image_Url", nullable = false, length = 1024)
     private String ItemImageUrl;
 
     @Embedded

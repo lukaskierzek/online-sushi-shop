@@ -70,7 +70,7 @@ public class ItemDTOController {
     @PostMapping(path = "/add")
     public ResponseEntity<?> postItemDTO(@RequestBody ItemPostDTO itemPostDTO, UriComponentsBuilder uriComponentsBuilder) {
         try {
-            Item itemCreated = itemDTOService.postNewItem(itemPostDTO);
+            Item itemCreated = itemDTOService.postNewItemFromItemPostDTO(itemPostDTO);
             return ResponseEntity.created(uriComponentsBuilder.path("/{itemId}").buildAndExpand(itemCreated.getItemId()).toUri()).body(itemCreated);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating item: " + e.getMessage());

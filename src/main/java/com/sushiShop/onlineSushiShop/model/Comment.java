@@ -13,7 +13,7 @@ public class Comment {
     @Column(name = "Comments_Id")
     private Long CommentId;
 
-    @Column(name = "Comments_text")
+    @Column(name = "Comments_text", length = 1024)
     private String CommentText;
 
     @OneToOne(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
