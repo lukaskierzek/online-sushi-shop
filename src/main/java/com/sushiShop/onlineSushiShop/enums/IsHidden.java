@@ -17,4 +17,11 @@ public enum IsHidden {
         return value;
     }
 
+    public static IsHidden fromValue(int value) {
+        for (IsHidden isHidden : IsHidden.values())
+            if (isHidden.getValue() == value)
+                return isHidden;
+        throw new IllegalArgumentException("Invalid value " + value);
+    }
+
 }

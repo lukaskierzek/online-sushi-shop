@@ -37,7 +37,7 @@ public class AdditionalInformation {
         return isHidden;
     }
 
-    public void setIsDeleted(IsHidden isHidden) {
+    public void setIsHidden(IsHidden isHidden) {
         this.isHidden = isHidden;
     }
 

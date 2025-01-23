@@ -13,6 +13,7 @@ public class CreateViewRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        //region item_non_hidden
         String view_item_non_hidden_name = "item_non_hidden";
         String view_item_non_hidden_body = """
                 SELECT
@@ -25,6 +26,17 @@ public class CreateViewRunner implements CommandLineRunner {
                     I.ITEMS_IS_HIDDEN = 0
                 """;
         createView(view_item_non_hidden_name, view_item_non_hidden_body);
+        //endregion
+
+        createView("item_hidden_and_non_hidden",
+                """
+                        SELECT
+                            *
+                        FROM
+                            ITEMS I
+                            LEFT JOIN COMMENTS C ON C.COMMENTS_ID = I.ITEMS_COMMENTS_ID
+                            LEFT JOIN MAIN_CATEGORIES MC ON MC.MAIN_CATEGORIES_ID = I.ITEMS_MAIN_CATEGORIES_ID
+                        """);
     }
 
     private Boolean viewExists(String viewName) {

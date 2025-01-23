@@ -37,4 +37,14 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             	ITEMS_ID = :itemId
             """, nativeQuery = true)
     Optional<Item> findNonHiddenItem(@Param("itemId") Long itemId);
+
+    @Query(value = """
+            SELECT
+            	*
+            FROM
+            	ITEM_HIDDEN_AND_NON_HIDDEN
+            WHERE
+            	ITEMS_ID = :itemId
+            """, nativeQuery = true)
+    Optional<Item> findItemById(@Param("itemId") Long itemId);
 }

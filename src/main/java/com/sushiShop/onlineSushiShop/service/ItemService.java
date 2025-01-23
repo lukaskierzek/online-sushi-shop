@@ -28,4 +28,15 @@ public class ItemService {
         return itemRepository.findNonHiddenItem(itemId)
                 .orElseThrow(() -> new IllegalStateException(String.format("Item by %s was not found", itemId)));
     }
+
+    public Item getItemById(Long itemId) {
+        return itemRepository.findItemById(itemId)
+                .orElseThrow(() -> new IllegalStateException(String.format("Item by %s was not found", itemId)));
+    }
+
+    public Item postItem(Item item) {
+        return itemRepository.save(item);
+    }
+
+
 }
