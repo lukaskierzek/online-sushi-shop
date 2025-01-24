@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "api/onlinesushishop/item")
+@RequestMapping(path = "api/v1/onlinesushishop/item")
 public class ItemDTOController {
     private final ItemDTOService itemDTOService;
 
@@ -24,7 +24,7 @@ public class ItemDTOController {
     }
 
     //region Get
-    @GetMapping(path = "all")
+    @GetMapping()
     public ResponseEntity<List<ItemDTO>> getAllItemDTO() {
         try {
             List<ItemDTO> itemDTOList = itemDTOService.getAllItemsDTO();
@@ -67,7 +67,7 @@ public class ItemDTOController {
     //endregion
 
     //region Post
-    @PostMapping(path = "/add")
+    @PostMapping()
     public ResponseEntity<?> postItemDTO(@RequestBody ItemPostDTO itemPostDTO, UriComponentsBuilder uriComponentsBuilder) {
         try {
             Item itemCreated = itemDTOService.postNewItemFromItemPostDTO(itemPostDTO);

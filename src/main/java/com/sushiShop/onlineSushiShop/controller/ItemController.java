@@ -16,7 +16,7 @@ import java.util.List;
 //	http://localhost:8080/swagger-ui/index.html
 
 @RestController
-@RequestMapping(path = "api/onlinesushishop/raw/item")
+@RequestMapping(path = "api/v1/onlinesushishop/raw/item")
 public class ItemController {
     private final ItemService itemService;
 
@@ -26,13 +26,23 @@ public class ItemController {
     }
 
     //region Get
-    @GetMapping(path = "all")
+    @GetMapping()
     public ResponseEntity<List<Item>> getAllItems() {
         try {
             List<Item> allItemsList = itemService.getAllItems();
             return ResponseEntity.ok(allItemsList);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+        }
+    }
+
+    @GetMapping(path = "{itemId}")
+    public ResponseEntity<Item> getItemById(@PathVariable("itemId") Long itemId) {
+        try{
+            Item itemById = itemService.getItemById(itemId);
+            return ResponseEntity.ok(itemById);
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

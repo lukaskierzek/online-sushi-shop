@@ -23,7 +23,7 @@ public class ItemDTOControllerIntegrationTest {
 
     @Test
     void getAllItemDTO_shouldReturnListOfAllItemsDTOGet() throws Exception {
-        mockMvc.perform(get("http://localhost:8080/api/onlinesushishop/item/all"))
+        mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/item"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].itemName").value("Item1"))
                 .andExpect(jsonPath("$.[1].itemName").value("Item2"))
@@ -35,7 +35,7 @@ public class ItemDTOControllerIntegrationTest {
 
     @Test
     void getNonHiddenItemsDTO_shouldReturnListOfNonHiddenItemsDTOGet() throws Exception {
-        mockMvc.perform(get("http://localhost:8080/api/onlinesushishop/item/non-hidden"))
+        mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/item/non-hidden"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].itemName").value("Item1"))
                 .andExpect(jsonPath("$.[1].itemName").value("Item2"))
@@ -45,7 +45,7 @@ public class ItemDTOControllerIntegrationTest {
 
     @Test
     void getItemDTOById_shouldReturnItemDTOById() throws Exception {
-        mockMvc.perform(get("http://localhost:8080/api/onlinesushishop/item/non-hidden/1"))
+        mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/item/non-hidden/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.itemId").value(1))
                 .andExpect(jsonPath("$.itemIsHidden").value(0))
