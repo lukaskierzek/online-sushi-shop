@@ -1,6 +1,6 @@
 package com.sushiShop.onlineSushiShop.model.dto;
 
-public class mainCategoryDTO {
+public class MainCategoryDTO {
     private String mainCategoryName;
     private Integer mainCategoryIsHidden;
 
