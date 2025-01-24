@@ -38,10 +38,10 @@ public class ItemController {
 
     @GetMapping(path = "{itemId}")
     public ResponseEntity<Item> getItemById(@PathVariable("itemId") Long itemId) {
-        try{
+        try {
             Item itemById = itemService.getItemById(itemId);
             return ResponseEntity.ok(itemById);
-        } catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

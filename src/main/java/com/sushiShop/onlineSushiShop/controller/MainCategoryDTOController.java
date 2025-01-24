@@ -1,6 +1,5 @@
 package com.sushiShop.onlineSushiShop.controller;
 
-import com.sun.tools.javac.Main;
 import com.sushiShop.onlineSushiShop.model.MainCategory;
 import com.sushiShop.onlineSushiShop.model.dto.MainCategoryDTO;
 import com.sushiShop.onlineSushiShop.model.dto.MainCategoryPostDTO;
@@ -49,7 +48,7 @@ public class MainCategoryDTOController {
 
     //region Post
     @PostMapping()
-    public ResponseEntity<?> postManCategoryDTO(@RequestBody MainCategoryPostDTO mainCategoryPostDTO, UriComponentsBuilder uriComponentsBuilder){
+    public ResponseEntity<?> postManCategoryDTO(@RequestBody MainCategoryPostDTO mainCategoryPostDTO, UriComponentsBuilder uriComponentsBuilder) {
         try {
             MainCategory mainCategoryCreated = mainCategoryDTOService.postNewMainCategoryFromMainCategoryDTO(mainCategoryPostDTO);
             return ResponseEntity.created(

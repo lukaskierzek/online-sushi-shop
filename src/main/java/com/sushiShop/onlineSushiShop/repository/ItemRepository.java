@@ -26,7 +26,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
                     ITEM_NON_HIDDEN
                 WHERE
                     MAIN_CATEGORIES_NAME = :mainCategoryName
-            """,nativeQuery = true)
+            """, nativeQuery = true)
     List<Item> findNonHiddenItemsByCategory(@Param("mainCategoryName") String mainCategoryName);
 
     @Query(value = """

@@ -95,8 +95,8 @@ public class ItemDTOController {
             ).body(itemCreated);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-               "error", "Error creating item " + itemPostDTO.itemName(),
-               "message", e.getMessage()
+                    "error", "Error creating item " + itemPostDTO.itemName(),
+                    "message", e.getMessage()
             ));
         }
     }
