@@ -37,6 +37,16 @@ public class CreateViewRunner implements CommandLineRunner {
                             LEFT JOIN COMMENTS C ON C.COMMENTS_ID = I.ITEMS_COMMENTS_ID
                             LEFT JOIN MAIN_CATEGORIES MC ON MC.MAIN_CATEGORIES_ID = I.ITEMS_MAIN_CATEGORIES_ID
                         """);
+
+        createView("main_category_non_hidden",
+                """
+                        SELECT
+                            *
+                        FROM
+                            MAIN_CATEGORIES
+                        WHERE
+                            MAIN_CATEGORIES_IS_HIDDEN = 0
+                        """);
     }
 //
 //    private Boolean viewExists(String viewName) {

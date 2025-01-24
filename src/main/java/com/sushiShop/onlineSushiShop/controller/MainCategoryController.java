@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "api/v1/onlinesushishop/main-category")
+@RequestMapping(path = "api/v1/onlinesushishop/raw/main-category")
 public class MainCategoryController {
     private final MainCategoryService mainCategoryService;
 
@@ -34,8 +34,8 @@ public class MainCategoryController {
         }
     }
 
-    @GetMapping(path="{mainVCategoryId}")
-    public ResponseEntity<MainCategory> getMainCategoryById(@PathVariable("mainVCategoryId") Long mainCategoryId){
+    @GetMapping(path = "{mainCategoryId}")
+    public ResponseEntity<MainCategory> getMainCategoryById(@PathVariable("mainCategoryId") Long mainCategoryId) {
         try {
             MainCategory mainCategoryById = mainCategoryService.getMainCategoryById(mainCategoryId);
             return ResponseEntity.ok(mainCategoryById);

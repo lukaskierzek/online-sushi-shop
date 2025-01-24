@@ -20,6 +20,16 @@ import java.util.Optional;
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
     @Query(value = """
+                SELECT
+                    *
+                FROM
+                    ITEM_NON_HIDDEN
+                WHERE
+                    MAIN_CATEGORIES_NAME = :mainCategoryName
+            """,nativeQuery = true)
+    List<Item> findNonHiddenItemsByCategory(@Param("mainCategoryName") String mainCategoryName);
+
+    @Query(value = """
             SELECT
             	*
             FROM
