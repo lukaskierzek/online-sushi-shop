@@ -11,7 +11,6 @@ import com.sushiShop.onlineSushiShop.model.dto.ItemPostDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -52,8 +51,8 @@ public class ItemDTOService {
 
         AdditionalInformation additionInformation = new AdditionalInformation(
                 IsHidden.YES,
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                null,
+                null
         );
 
         var comment = new Comment(

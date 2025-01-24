@@ -30,7 +30,7 @@ public class ItemControllerIntegrationTest {
 
     @Test
     void getNonHiddenItems_shouldReturnListOfNonHiddenItemsGet() throws Exception {
-        mockMvc.perform(get("http://localhost:8080/api/onlinesushishop/raw/item/non-hidden"))
+        mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/raw/item/non-hidden"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].itemName").value("Item1"))
                 .andExpect(jsonPath("$[1].itemName").value("Item2"))
@@ -44,7 +44,7 @@ public class ItemControllerIntegrationTest {
 
     @Test
     void getAllItems_shouldReturnListOfAllItemsGet() throws Exception {
-        mockMvc.perform(get("http://localhost:8080/api/onlinesushishop/raw/item/all"))
+        mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/raw/item"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].additionalInformation.isHidden").value("0"))
                 .andExpect(jsonPath("$.[4].additionalInformation.isHidden").value("1"))
@@ -53,7 +53,7 @@ public class ItemControllerIntegrationTest {
 
     @Test
     void getItemById_shouldReturnItemById() throws Exception {
-        mockMvc.perform(get("http://localhost:8080/api/onlinesushishop/raw/item/non-hidden/1"))
+        mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/raw/item/non-hidden/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.itemId").value(1))
                 .andExpect(jsonPath("$.additionalInformation.isHidden").value(0))
