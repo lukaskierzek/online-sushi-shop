@@ -1,5 +1,6 @@
 package com.sushiShop.onlineSushiShop;
 
+import com.sushiShop.onlineSushiShop.enums.Category;
 import com.sushiShop.onlineSushiShop.repository.ItemRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +37,8 @@ public class ItemControllerIntegrationTest {
                 .andExpect(jsonPath("$[1].itemName").value("Item2"))
                 .andExpect(jsonPath("$[0].additionalInformation.isHidden").value(0))
                 .andExpect(jsonPath("$[1].additionalInformation.isHidden").value(0))
-                .andExpect(jsonPath("$[0].mainCategory.mainCategoryName").value("Main category 1"))
-                .andExpect(jsonPath("$[1].mainCategory.mainCategoryName").value("Main category 1"))
+                .andExpect(jsonPath("$[0].mainCategory.mainCategoryName").value(Category.NEW_ITEMS.getValue()))
+                .andExpect(jsonPath("$[1].mainCategory.mainCategoryName").value(Category.NEW_ITEMS.getValue()))
                 .andExpect(jsonPath("$[0].comment.commentText").value("Comment text 1"))
                 .andExpect(jsonPath("$[1].comment.commentText").value("Comment text 2"));
     }

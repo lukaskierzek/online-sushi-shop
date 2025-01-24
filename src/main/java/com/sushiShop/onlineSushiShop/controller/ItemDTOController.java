@@ -12,6 +12,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "api/v1/onlinesushishop/item")
@@ -87,9 +88,16 @@ public class ItemDTOController {
     public ResponseEntity<?> postItemDTO(@RequestBody ItemPostDTO itemPostDTO, UriComponentsBuilder uriComponentsBuilder) {
         try {
             Item itemCreated = itemDTOService.postNewItemFromItemPostDTO(itemPostDTO);
-            return ResponseEntity.created(uriComponentsBuilder.path("/{itemId}").buildAndExpand(itemCreated.getItemId()).toUri()).body(itemCreated);
+            return ResponseEntity.created(
+                    uriComponentsBuilder.path("api/v1/onlinesushishop/item/{itemId}")
+                            .buildAndExpand(itemCreated.getItemId())
+                            .toUri()
+            ).body(itemCreated);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating item: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+               "error", "Error creating item " + itemPostDTO.itemName(),
+               "message", e.getMessage()
+            ));
         }
     }
     //endregion
