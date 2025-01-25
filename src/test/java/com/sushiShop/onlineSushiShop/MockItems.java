@@ -42,8 +42,8 @@ public class MockItems {
                 null, "Comment text 3", null, additionalInformationIsHiddenNo2
         );
 
-        MainCategory mainCategoryOne = new MainCategory(null, "Main Category 1", additionalInformationIsHiddenNo1);
-        MainCategory mainCategoryTwo = new MainCategory(null, "Main Category 2", additionalInformationIsHiddenNo1);
+        MainCategory mainCategoryOne = new MainCategory(null, "Main SubCategory 1", additionalInformationIsHiddenNo1);
+        MainCategory mainCategoryTwo = new MainCategory(null, "Main SubCategory 2", additionalInformationIsHiddenNo1);
 
         return List.of(
                 new Item(null, "Rools1", 20, 10, "http", additionalInformationIsHiddenNo1, comment1, mainCategoryOne),

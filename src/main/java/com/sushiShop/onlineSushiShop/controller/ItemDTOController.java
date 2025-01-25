@@ -12,6 +12,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "api/v1/onlinesushishop/item")
@@ -64,6 +65,22 @@ public class ItemDTOController {
         }
     }
 
+    //TODO: Change the if statement if the category name is empty to switch the default category, such as the subcategory “news items”
+    //TODO: Add subcategories
+    @GetMapping(path = "non-hidden/by-category")
+    public ResponseEntity<List<ItemDTO>> getNonHiddenItemsDTOByCategory(@RequestParam(name = "category", required = false) String mainCategoryName) {
+        try {
+            if (!mainCategoryName.isEmpty()) {
+                List<ItemDTO> nonHiddenItemsByCategoryList = itemDTOService.getNonHiddenItemsDTOByCategory(mainCategoryName);
+                return ResponseEntity.ok(nonHiddenItemsByCategoryList);
+            } else {
+                List<ItemDTO> nonHiddenItemsList = itemDTOService.getNonHiddenItemsDTO();
+                return ResponseEntity.ok(nonHiddenItemsList);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+        }
+    }
     //endregion
 
     //region Post
@@ -71,9 +88,16 @@ public class ItemDTOController {
     public ResponseEntity<?> postItemDTO(@RequestBody ItemPostDTO itemPostDTO, UriComponentsBuilder uriComponentsBuilder) {
         try {
             Item itemCreated = itemDTOService.postNewItemFromItemPostDTO(itemPostDTO);
-            return ResponseEntity.created(uriComponentsBuilder.path("/{itemId}").buildAndExpand(itemCreated.getItemId()).toUri()).body(itemCreated);
+            return ResponseEntity.created(
+                    uriComponentsBuilder.path("api/v1/onlinesushishop/item/{itemId}")
+                            .buildAndExpand(itemCreated.getItemId())
+                            .toUri()
+            ).body(itemCreated);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating item: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "error", "Error creating item " + itemPostDTO.itemName(),
+                    "message", e.getMessage()
+            ));
         }
     }
     //endregion

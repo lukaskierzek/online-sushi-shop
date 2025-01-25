@@ -38,5 +38,7 @@ public class ItemService {
         return itemRepository.save(item);
     }
 
-
+    public List<Item> getNonHiddenItemsByCategory(String mainCategoryName) {
+        return itemRepository.findNonHiddenItemsByCategory(mainCategoryName);
+    }
 }

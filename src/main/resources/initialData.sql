@@ -7,7 +7,7 @@ VALUES (nextval('comment_sequence'), 'Comment text 1', '2025-01-22 12:44:00.0000
 
 INSERT INTO main_categories(main_categories_id, main_categories_created_at, main_categories_is_hidden,
                             main_categories_update_at, main_categories_name)
-VALUES (nextval('main_category_sequence'), '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 'Main category 1'),
+VALUES (nextval('main_category_sequence'), '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 'New items'),
        (nextval('main_category_sequence'), '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 'Main category 2'),
        (nextval('main_category_sequence'), '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 'Main category 3'),
        (nextval('main_category_sequence'), '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 'Main category 4'),
