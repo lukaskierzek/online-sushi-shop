@@ -32,8 +32,6 @@ public class MainCategoryService {
     }
 
     public List<MainCategory> getNonHiddenMainCategories() {
-        return getAllMainCategories().stream()
-                .filter(mainCategory -> mainCategory.getAdditionalInformation().getIsHidden() == IsHidden.NO)
-                .collect(Collectors.toList());
+        return mainCategoryRepository.findNonHiddenMainCategories();
     }
 }
