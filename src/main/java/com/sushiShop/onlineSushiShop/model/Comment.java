@@ -2,6 +2,10 @@ package com.sushiShop.onlineSushiShop.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Comments")
@@ -11,10 +15,18 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "comment_seq")
     @SequenceGenerator(name = "comment_seq", sequenceName = "comment_sequence", allocationSize = 1)
     @Column(name = "Comments_Id")
-    private Long CommentId;
+    private Long commentId;
 
     @Column(name = "Comments_text", length = 1024)
-    private String CommentText;
+    private String commentText;
+
+    @CreationTimestamp
+    @Column(name = "comments_created_at", nullable = false, updatable = false)
+    private LocalDateTime commentCreatedAt;
+
+    @UpdateTimestamp
+    @Column(name = "comments_updated_at", nullable = false)
+    private LocalDateTime commentUpdatedAt;
 
     @OneToOne(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference
@@ -22,41 +34,71 @@ public class Comment {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "isHidden", column = @Column(name = "comments_is_hidden")),
-            @AttributeOverride(name = "createdAt", column = @Column(name = "comments_created_at")),
-            @AttributeOverride(name = "updateAt", column = @Column(name = "comments_update_at"))
+            @AttributeOverride(name = "isHidden", column = @Column(name = "comments_is_hidden"))
     })
     private AdditionalInformation additionalInformation;
 
     public Comment() {
     }
 
-    public Comment(String commentText, AdditionalInformation additionalInformation) {
-        this.CommentText = commentText;
+    public Comment(String commentText, LocalDateTime commentCreatedAt, LocalDateTime commentUpdatedAt, AdditionalInformation additionalInformation) {
+        this.commentText = commentText;
+        this.commentCreatedAt = commentCreatedAt;
+        this.commentUpdatedAt = commentUpdatedAt;
         this.additionalInformation = additionalInformation;
     }
 
-    public Comment(Long commentId, String commentText, Item item, AdditionalInformation additionalInformation) {
-        this.CommentId = commentId;
-        this.CommentText = commentText;
+    public Comment(Long commentId, String commentText, LocalDateTime commentCreatedAt, LocalDateTime commentUpdatedAt, Item item, AdditionalInformation additionalInformation) {
+        this.commentId = commentId;
+        this.commentText = commentText;
+        this.commentCreatedAt = commentCreatedAt;
+        this.commentUpdatedAt = commentUpdatedAt;
         this.item = item;
         this.additionalInformation = additionalInformation;
     }
 
+    @Override
+    public String toString() {
+        return "Comment{" +
+                "commentId=" + commentId +
+                ", commentText='" + commentText + '\'' +
+                ", commentCreatedAt=" + commentCreatedAt +
+                ", commentUpdatedAt=" + commentUpdatedAt +
+                ", item=" + item +
+                ", additionalInformation=" + additionalInformation +
+                '}';
+    }
+
     public Long getCommentId() {
-        return CommentId;
+        return commentId;
     }
 
     public void setCommentId(Long commentId) {
-        CommentId = commentId;
+        this.commentId = commentId;
     }
 
     public String getCommentText() {
-        return CommentText;
+        return commentText;
     }
 
     public void setCommentText(String commentText) {
-        CommentText = commentText;
+        this.commentText = commentText;
+    }
+
+    public LocalDateTime getCommentCreatedAt() {
+        return commentCreatedAt;
+    }
+
+    public void setCommentCreatedAt(LocalDateTime commentCreatedAt) {
+        this.commentCreatedAt = commentCreatedAt;
+    }
+
+    public LocalDateTime getCommentUpdatedAt() {
+        return commentUpdatedAt;
+    }
+
+    public void setCommentUpdatedAt(LocalDateTime commentUpdatedAt) {
+        this.commentUpdatedAt = commentUpdatedAt;
     }
 
     public Item getItem() {
@@ -73,15 +115,5 @@ public class Comment {
 
     public void setAdditionalInformation(AdditionalInformation additionalInformation) {
         this.additionalInformation = additionalInformation;
-    }
-
-    @Override
-    public String toString() {
-        return "Comment{" +
-                "CommentId=" + CommentId +
-                ", CommentText='" + CommentText + '\'' +
-                ", item=" + item +
-                ", additionalInformation=" + additionalInformation +
-                '}';
     }
 }

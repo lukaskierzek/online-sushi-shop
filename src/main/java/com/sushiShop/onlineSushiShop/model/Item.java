@@ -3,6 +3,10 @@ package com.sushiShop.onlineSushiShop.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Check;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Items")
@@ -13,25 +17,31 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "item_seq")
     @SequenceGenerator(name = "item_seq", sequenceName = "item_sequence", allocationSize = 1)
     @Column(name = "Items_Id")
-    private Long ItemId;
+    private Long itemId;
 
     @Column(name = "Items_Name", nullable = false)
-    private String ItemName;
+    private String itemName;
 
     @Column(name = "Items_Actual_Price", nullable = false)
-    private Integer ItemActualPrice;
+    private Integer itemActualPrice;
 
     @Column(name = "Items_Old_Price", nullable = false)
-    private Integer ItemOldPrice;
+    private Integer itemOldPrice;
 
     @Column(name = "Items_Image_Url", nullable = false, length = 1024)
-    private String ItemImageUrl;
+    private String itemImageUrl;
+
+    @CreationTimestamp
+    @Column(name = "items_created_at", nullable = false, updatable = false)
+    private LocalDateTime itemCreatedAt;
+
+    @UpdateTimestamp
+    @Column(name = "items_updated_at", nullable = false)
+    private LocalDateTime itemUpdatedAt;
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "isHidden", column = @Column(name = "Items_is_hidden")),
-            @AttributeOverride(name = "createdAt", column = @Column(name = "Items_created_at")),
-            @AttributeOverride(name = "updateAt", column = @Column(name = "Items_update_at"))
+            @AttributeOverride(name = "isHidden", column = @Column(name = "Items_is_hidden"))
     })
     private AdditionalInformation additionalInformation;
 
@@ -48,55 +58,73 @@ public class Item {
     public Item() {
     }
 
-    public Item(Long itemId, String itemName, Integer itemActualPrice, Integer itemOldPrice, String itemImageUrl, AdditionalInformation additionalInformation, Comment comment, MainCategory mainCategory) {
-        this.ItemId = itemId;
-        this.ItemName = itemName;
-        this.ItemActualPrice = itemActualPrice;
-        this.ItemOldPrice = itemOldPrice;
-        this.ItemImageUrl = itemImageUrl;
+    public Item(Long itemId, String itemName, Integer itemActualPrice, Integer itemOldPrice, String itemImageUrl, LocalDateTime itemCreatedAt, LocalDateTime itemUpdatedAt, AdditionalInformation additionalInformation, Comment comment, MainCategory mainCategory) {
+        this.itemId = itemId;
+        this.itemName = itemName;
+        this.itemActualPrice = itemActualPrice;
+        this.itemOldPrice = itemOldPrice;
+        this.itemImageUrl = itemImageUrl;
+        this.itemCreatedAt = itemCreatedAt;
+        this.itemUpdatedAt = itemUpdatedAt;
         this.additionalInformation = additionalInformation;
         this.comment = comment;
         this.mainCategory = mainCategory;
     }
 
     public Long getItemId() {
-        return ItemId;
+        return itemId;
     }
 
     public void setItemId(Long itemId) {
-        this.ItemId = itemId;
+        this.itemId = itemId;
     }
 
     public String getItemName() {
-        return ItemName;
+        return itemName;
     }
 
     public void setItemName(String itemName) {
-        this.ItemName = itemName;
+        this.itemName = itemName;
     }
 
     public Integer getItemActualPrice() {
-        return ItemActualPrice;
+        return itemActualPrice;
     }
 
     public void setItemActualPrice(Integer itemActualPrice) {
-        this.ItemActualPrice = itemActualPrice;
+        this.itemActualPrice = itemActualPrice;
     }
 
     public Integer getItemOldPrice() {
-        return ItemOldPrice;
+        return itemOldPrice;
     }
 
     public void setItemOldPrice(Integer itemOldPrice) {
-        this.ItemOldPrice = itemOldPrice;
+        this.itemOldPrice = itemOldPrice;
     }
 
     public String getItemImageUrl() {
-        return ItemImageUrl;
+        return itemImageUrl;
     }
 
     public void setItemImageUrl(String itemImageUrl) {
-        this.ItemImageUrl = itemImageUrl;
+        this.itemImageUrl = itemImageUrl;
+    }
+
+    public LocalDateTime getItemCreatedAt() {
+        return itemCreatedAt;
+    }
+
+    public void setItemCreatedAt(LocalDateTime itemCreatedAt) {
+        this.itemCreatedAt = itemCreatedAt;
+    }
+
+    public LocalDateTime getItemUpdatedAt() {
+        return itemUpdatedAt;
+    }
+
+    public void setItemUpdatedAt(LocalDateTime itemUpdatedAt) {
+        this.itemUpdatedAt = itemUpdatedAt;
     }
 
     public AdditionalInformation getAdditionalInformation() {
@@ -126,11 +154,13 @@ public class Item {
     @Override
     public String toString() {
         return "Item{" +
-                "ItemId=" + ItemId +
-                ", ItemName='" + ItemName + '\'' +
-                ", ItemActualPrice=" + ItemActualPrice +
-                ", ItemOldPrice=" + ItemOldPrice +
-                ", ItemImageUrl='" + ItemImageUrl + '\'' +
+                "ItemId=" + itemId +
+                ", ItemName='" + itemName + '\'' +
+                ", ItemActualPrice=" + itemActualPrice +
+                ", ItemOldPrice=" + itemOldPrice +
+                ", ItemImageUrl='" + itemImageUrl + '\'' +
+                ", itemCreatedAt=" + itemCreatedAt +
+                ", itemUpdatedAt=" + itemUpdatedAt +
                 ", additionalInformation=" + additionalInformation +
                 ", comment=" + comment +
                 ", mainCategory=" + mainCategory +

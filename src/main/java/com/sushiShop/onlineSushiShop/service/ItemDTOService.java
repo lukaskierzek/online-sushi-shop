@@ -50,14 +50,14 @@ public class ItemDTOService {
         if (itemPostDTO == null) return null;
 
         AdditionalInformation additionInformation = new AdditionalInformation(
-                IsHidden.YES,
-                null,
-                null
+                IsHidden.YES
         );
 
         var comment = new Comment(
                 null,
                 itemPostDTO.itemComment(),
+                null,
+                null,
                 null,
                 additionInformation
         );
@@ -70,6 +70,8 @@ public class ItemDTOService {
                 itemPostDTO.itemActualPrice(),
                 itemPostDTO.itemOldPrice(),
                 itemPostDTO.itemImageUrl(),
+                null,
+                null,
                 additionInformation,
                 comment,
                 mainCategory

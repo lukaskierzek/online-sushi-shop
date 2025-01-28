@@ -16,21 +16,11 @@ public class AdditionalInformation {
     @Column(name = "Items_is_hidden", nullable = false)
     private IsHidden isHidden;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDateTime updateAt;
-
     public AdditionalInformation() {
     }
 
-    public AdditionalInformation(IsHidden isHidden, LocalDateTime createdAt, LocalDateTime updateAt) {
+    public AdditionalInformation(IsHidden isHidden) {
         this.isHidden = isHidden;
-        this.createdAt = createdAt;
-        this.updateAt = updateAt;
     }
 
     public IsHidden getIsHidden() {
@@ -41,28 +31,10 @@ public class AdditionalInformation {
         this.isHidden = isHidden;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdateAt() {
-        return updateAt;
-    }
-
-    public void setUpdateAt(LocalDateTime updateAt) {
-        this.updateAt = updateAt;
-    }
-
     @Override
     public String toString() {
         return "AdditionalInformation{" +
                 "isHidden=" + isHidden +
-                ", createdAt=" + createdAt +
-                ", updateAt=" + updateAt +
                 '}';
     }
 }

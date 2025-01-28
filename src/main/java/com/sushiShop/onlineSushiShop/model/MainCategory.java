@@ -2,29 +2,36 @@ package com.sushiShop.onlineSushiShop.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "main_categories")
 public class MainCategory {
 
-    private static final String COLUMN_NAME = "main_categories_";
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "main_category_seq")
     @SequenceGenerator(name = "main_category_seq", sequenceName = "main_category_sequence", allocationSize = 1)
-    @Column(name = COLUMN_NAME + "id")
+    @Column(name = "main_categories_id")
     private Long mainCategoryId;
 
-    @Column(name = COLUMN_NAME + "name", nullable = false)
+    @Column(name = "main_categories_name", nullable = false)
     private String mainCategoryName;
+
+    @CreationTimestamp
+    @Column(name =  "main_categories_created_at", nullable = false, updatable = false)
+    private LocalDateTime mainCategoryCreatedAt;
+
+    @UpdateTimestamp
+    @Column(name = "main_categories_updated_at", nullable = false)
+    private LocalDateTime mainCategoryUpdatedAt;
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "isHidden", column = @Column(name = COLUMN_NAME + "is_hidden")),
-            @AttributeOverride(name = "createdAt", column = @Column(name = COLUMN_NAME + "created_at")),
-            @AttributeOverride(name = "updateAt", column = @Column(name = COLUMN_NAME + "update_at"))
+            @AttributeOverride(name = "isHidden", column = @Column(name = "main_categories_is_hidden"))
     })
     private AdditionalInformation additionalInformation;
 
@@ -57,6 +64,22 @@ public class MainCategory {
         this.mainCategoryName = mainCategoryName;
     }
 
+    public LocalDateTime getMainCategoryCreatedAt() {
+        return mainCategoryCreatedAt;
+    }
+
+    public void setMainCategoryCreatedAt(LocalDateTime mainCategoryCreatedAt) {
+        this.mainCategoryCreatedAt = mainCategoryCreatedAt;
+    }
+
+    public LocalDateTime getMainCategoryUpdatedAt() {
+        return mainCategoryUpdatedAt;
+    }
+
+    public void setMainCategoryUpdatedAt(LocalDateTime mainCategoryUpdatedAt) {
+        this.mainCategoryUpdatedAt = mainCategoryUpdatedAt;
+    }
+
     public AdditionalInformation getAdditionalInformation() {
         return additionalInformation;
     }
@@ -78,7 +101,10 @@ public class MainCategory {
         return "MainCategory{" +
                 "mainCategoryId=" + mainCategoryId +
                 ", mainCategoryName='" + mainCategoryName + '\'' +
+                ", mainCategoryCreatedAt=" + mainCategoryCreatedAt +
+                ", mainCategoryUpdatedAt=" + mainCategoryUpdatedAt +
                 ", additionalInformation=" + additionalInformation +
+                ", items=" + items +
                 '}';
     }
 }
