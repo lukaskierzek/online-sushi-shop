@@ -7,6 +7,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "Items")
@@ -54,6 +56,14 @@ public class Item {
     @JoinColumn(name = "items_main_categories_id", nullable = false)
     @JsonManagedReference
     private MainCategory mainCategory;
+
+    @ManyToMany
+    @JoinTable(
+            name = "item_subcategory",
+            joinColumns = @JoinColumn(name = "Items_Id"),
+            inverseJoinColumns = @JoinColumn(name = "subcategories_id")
+    )
+    private Set<Subcategory> subcategories = new HashSet<>();
 
     public Item() {
     }
@@ -149,6 +159,14 @@ public class Item {
 
     public void setMainCategory(MainCategory mainCategory) {
         this.mainCategory = mainCategory;
+    }
+
+    public Set<Subcategory> getSubcategories() {
+        return subcategories;
+    }
+
+    public void setSubcategories(Set<Subcategory> subcategories) {
+        this.subcategories = subcategories;
     }
 
     @Override

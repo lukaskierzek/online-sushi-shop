@@ -5,6 +5,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "subcategories")
@@ -32,6 +34,9 @@ public class Subcategory {
             @AttributeOverride(name = "isHidden", column = @Column(name = "subcategories_is_hidden", nullable = false))
     })
     private AdditionalInformation additionalInformation;
+
+    @ManyToMany(mappedBy = "subcategories")
+    private Set<Item> items = new HashSet<>();
 
     public Subcategory() {
     }
@@ -82,6 +87,14 @@ public class Subcategory {
 
     public void setAdditionalInformation(AdditionalInformation additionalInformation) {
         this.additionalInformation = additionalInformation;
+    }
+
+    public Set<Item> getItems() {
+        return items;
+    }
+
+    public void setItems(Set<Item> items) {
+        this.items = items;
     }
 
     @Override
