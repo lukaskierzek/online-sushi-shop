@@ -29,7 +29,7 @@ public class Subcategory {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "isHidden", column = @Column(name = "subcategories_is_hidden"))
+            @AttributeOverride(name = "isHidden", column = @Column(name = "subcategories_is_hidden", nullable = false))
     })
     private AdditionalInformation additionalInformation;
 

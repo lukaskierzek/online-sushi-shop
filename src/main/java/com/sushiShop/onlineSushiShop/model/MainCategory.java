@@ -31,7 +31,7 @@ public class MainCategory {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "isHidden", column = @Column(name = "main_categories_is_hidden"))
+            @AttributeOverride(name = "isHidden", column = @Column(name = "main_categories_is_hidden", nullable = false))
     })
     private AdditionalInformation additionalInformation;
 

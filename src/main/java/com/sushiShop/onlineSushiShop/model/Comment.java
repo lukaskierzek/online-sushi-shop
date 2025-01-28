@@ -34,7 +34,7 @@ public class Comment {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "isHidden", column = @Column(name = "comments_is_hidden"))
+            @AttributeOverride(name = "isHidden", column = @Column(name = "comments_is_hidden", nullable = false))
     })
     private AdditionalInformation additionalInformation;
 

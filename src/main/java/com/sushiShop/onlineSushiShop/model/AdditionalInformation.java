@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 public class AdditionalInformation {
 
     @Enumerated
-    @Column(name = "Items_is_hidden", nullable = false)
     private IsHidden isHidden;
 
     public AdditionalInformation() {

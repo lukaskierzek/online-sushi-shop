@@ -41,7 +41,7 @@ public class Item {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "isHidden", column = @Column(name = "Items_is_hidden"))
+            @AttributeOverride(name = "isHidden", column = @Column(name = "Items_is_hidden", nullable = false))
     })
     private AdditionalInformation additionalInformation;
 
