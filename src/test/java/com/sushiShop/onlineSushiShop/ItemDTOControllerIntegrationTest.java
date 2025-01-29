@@ -25,9 +25,9 @@ public class ItemDTOControllerIntegrationTest {
     void getAllItemDTO_shouldReturnListOfAllItemsDTOGet() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/item"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[0].itemName").value("Item1"))
-                .andExpect(jsonPath("$.[1].itemName").value("Item2"))
-                .andExpect(jsonPath("$.[4].itemName").value("Item4"))
+                .andExpect(jsonPath("$.[0].itemName").value("Maguro Nigiri"))
+                .andExpect(jsonPath("$.[1].itemName").value("California Roll"))
+                .andExpect(jsonPath("$.[4].itemName").value("Dragon Roll"))
                 .andExpect(jsonPath("$.[0].itemIsHidden").value(0))
                 .andExpect(jsonPath("$.[1].itemIsHidden").value(0))
                 .andExpect(jsonPath("$.[4].itemIsHidden").value(1));
@@ -37,8 +37,8 @@ public class ItemDTOControllerIntegrationTest {
     void getNonHiddenItemsDTO_shouldReturnListOfNonHiddenItemsDTOGet() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/item/non-hidden"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[0].itemName").value("Item1"))
-                .andExpect(jsonPath("$.[1].itemName").value("Item2"))
+                .andExpect(jsonPath("$.[0].itemName").value("Maguro Nigiri"))
+                .andExpect(jsonPath("$.[1].itemName").value("California Roll"))
                 .andExpect(jsonPath("$.[0].itemIsHidden").value(0))
                 .andExpect(jsonPath("$.[1].itemIsHidden").value(0));
     }
@@ -49,6 +49,6 @@ public class ItemDTOControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.itemId").value(1))
                 .andExpect(jsonPath("$.itemIsHidden").value(0))
-                .andExpect(jsonPath("$.itemName").value("Item1"));
+                .andExpect(jsonPath("$.itemName").value("Maguro Nigiri"));
     }
 }
