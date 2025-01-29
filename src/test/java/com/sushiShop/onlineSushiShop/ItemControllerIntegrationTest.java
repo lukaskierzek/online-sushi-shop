@@ -1,6 +1,5 @@
 package com.sushiShop.onlineSushiShop;
 
-import com.sushiShop.onlineSushiShop.enums.Subcategory;
 import com.sushiShop.onlineSushiShop.repository.ItemRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
