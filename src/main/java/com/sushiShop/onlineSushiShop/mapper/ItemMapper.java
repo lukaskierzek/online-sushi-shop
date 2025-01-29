@@ -10,19 +10,20 @@ import org.mapstruct.Named;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {SubcategoryMapper.class})
 public interface ItemMapper {
 
     @Mappings({
-            @Mapping(source = "additionalInformation", target = "itemIsHidden", qualifiedByName = "mapIsHidden"),
+            @Mapping(source = "additionalInformation", target = "itemIsHidden", qualifiedByName = "mapItemIsHidden"),
             @Mapping(source = "mainCategory.mainCategoryName", target = "itemMainCategory"),
-            @Mapping(source = "comment.commentText", target = "itemComment")
+            @Mapping(source = "comment.commentText", target = "itemComment"),
+            @Mapping(source = "subcategories", target = "itemSubcategories"),
     })
     ItemDTO itemToItemDTO(Item item);
 
     List<ItemDTO> itemListToItemDTOList(List<Item> items);
 
-    @Named("mapIsHidden")
+    @Named("mapItemIsHidden")
     default Integer mapIsHidden(AdditionalInformation additionalInformation) {
         if (additionalInformation != null && additionalInformation.getIsHidden() != null)
             return additionalInformation.getIsHidden().getValue();

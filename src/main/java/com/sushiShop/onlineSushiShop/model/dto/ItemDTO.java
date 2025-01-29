@@ -1,5 +1,7 @@
 package com.sushiShop.onlineSushiShop.model.dto;
 
+import java.util.List;
+
 public class ItemDTO {
     private Long itemId;
     private String itemName;
@@ -9,7 +11,7 @@ public class ItemDTO {
     private Integer itemIsHidden;
     private String itemComment;
     private String itemMainCategory;
-    //:TODO add subcategories list
+    private List<SubcategoryDTO> itemSubcategories;
 
     public Long getItemId() {
         return itemId;
@@ -73,5 +75,13 @@ public class ItemDTO {
 
     public void setItemMainCategory(String itemMainCategory) {
         this.itemMainCategory = itemMainCategory;
+    }
+
+    public List<SubcategoryDTO> getItemSubcategories() {
+        return itemSubcategories;
+    }
+
+    public void setItemSubcategories(List<SubcategoryDTO> itemSubcategories) {
+        this.itemSubcategories = itemSubcategories;
     }
 }

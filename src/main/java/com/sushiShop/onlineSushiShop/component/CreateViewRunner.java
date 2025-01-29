@@ -14,7 +14,6 @@ public class CreateViewRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         //region item_non_hidden
-        //TODO: Add subcategories list to views
         String view_item_non_hidden_name = "item_non_hidden";
         String view_item_non_hidden_body = """
                 SELECT

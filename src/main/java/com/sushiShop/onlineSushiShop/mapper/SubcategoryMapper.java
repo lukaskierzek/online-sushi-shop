@@ -14,13 +14,13 @@ import java.util.List;
 public interface SubcategoryMapper {
 
     @Mappings({
-            @Mapping(source = "additionalInformation", target = "subcategoryIsHidden", qualifiedByName = "mapIsHidden"),
+            @Mapping(source = "additionalInformation", target = "subcategoryIsHidden", qualifiedByName = "mapSubcategoryIsHidden"),
     })
     SubcategoryDTO subcategoryToSubcategoryDTO(Subcategory subcategory);
 
     List<SubcategoryDTO> subcategoryListToSubcategoryDTOList(List<Subcategory> subcategories);
 
-    @Named("mapIsHidden")
+    @Named("mapSubcategoryIsHidden")
     default Integer mapIsHidden(AdditionalInformation additionalInformation) {
         return additionalInformation != null && additionalInformation.getIsHidden() != null ? additionalInformation.getIsHidden().getValue() : null;
     }
