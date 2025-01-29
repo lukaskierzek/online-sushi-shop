@@ -1,5 +1,6 @@
 package com.sushiShop.onlineSushiShop.controller;
 
+import com.sushiShop.onlineSushiShop.enums.Subcategory;
 import com.sushiShop.onlineSushiShop.model.Item;
 import com.sushiShop.onlineSushiShop.model.dto.ItemDTO;
 import com.sushiShop.onlineSushiShop.model.dto.ItemPostDTO;
@@ -66,17 +67,21 @@ public class ItemDTOController {
     }
 
     //TODO: Change the if statement if the category name is empty to switch the default category, such as the subcategory “news items”
-    //TODO: Add subcategories
     @GetMapping(path = "non-hidden/by-category")
     public ResponseEntity<List<ItemDTO>> getNonHiddenItemsDTOByCategory(@RequestParam(name = "category", required = false) String mainCategoryName) {
         try {
+            List<ItemDTO> itemDTOList;
+
             if (!mainCategoryName.isEmpty()) {
-                List<ItemDTO> nonHiddenItemsByCategoryList = itemDTOService.getNonHiddenItemsDTOByCategory(mainCategoryName);
-                return ResponseEntity.ok(nonHiddenItemsByCategoryList);
-            } else {
-                List<ItemDTO> nonHiddenItemsList = itemDTOService.getNonHiddenItemsDTO();
-                return ResponseEntity.ok(nonHiddenItemsList);
-            }
+                if (mainCategoryName.equals(Subcategory.NEW_ITEM.getValue()))
+                    itemDTOList =  itemDTOService.getNonHiddenItemsByNewItemsCategory();
+                else
+                    itemDTOList = itemDTOService.getNonHiddenItemsDTOByCategory(mainCategoryName);
+            } else
+                itemDTOList = itemDTOService.getNonHiddenItemsDTO();
+
+            return ResponseEntity.ok(itemDTOList);
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
         }

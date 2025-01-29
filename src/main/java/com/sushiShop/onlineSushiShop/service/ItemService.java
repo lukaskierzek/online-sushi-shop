@@ -41,4 +41,8 @@ public class ItemService {
     public List<Item> getNonHiddenItemsByCategory(String mainCategoryName) {
         return itemRepository.findNonHiddenItemsByCategory(mainCategoryName);
     }
+
+    public List<Item> getNonHiddenItemsByNewItemsCategory() {
+        return itemRepository.findNonHiddenItemsByNewItemCategory();
+    }
 }

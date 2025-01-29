@@ -84,4 +84,9 @@ public class ItemDTOService {
         List<Item> nonHiddenItemsByCategory = itemService.getNonHiddenItemsByCategory(mainCategoryName);
         return itemMapper.itemListToItemDTOList(nonHiddenItemsByCategory);
     }
+
+    public List<ItemDTO> getNonHiddenItemsByNewItemsCategory() {
+        List<Item> nonHiddenItemsByNewItemsCategory = itemService.getNonHiddenItemsByNewItemsCategory();
+        return itemMapper.itemListToItemDTOList(nonHiddenItemsByNewItemsCategory);
+    }
 }

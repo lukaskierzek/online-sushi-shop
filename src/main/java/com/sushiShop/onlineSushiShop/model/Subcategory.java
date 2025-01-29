@@ -1,5 +1,6 @@
 package com.sushiShop.onlineSushiShop.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -36,6 +37,7 @@ public class Subcategory {
     private AdditionalInformation additionalInformation;
 
     @ManyToMany(mappedBy = "subcategories")
+    @JsonBackReference
     private Set<Item> items = new HashSet<>();
 
     public Subcategory() {

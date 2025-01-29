@@ -9,6 +9,7 @@ public class ItemDTO {
     private Integer itemIsHidden;
     private String itemComment;
     private String itemMainCategory;
+    //:TODO add subcategories list
 
     public Long getItemId() {
         return itemId;

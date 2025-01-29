@@ -63,6 +63,7 @@ public class Item {
             joinColumns = @JoinColumn(name = "Items_Id"),
             inverseJoinColumns = @JoinColumn(name = "subcategories_id")
     )
+    @JsonManagedReference
     private Set<Subcategory> subcategories = new HashSet<>();
 
     public Item() {
