@@ -28,22 +28,28 @@ public class ItemDTOService {
 
     public List<ItemDTO> getAllItemsDTO() {
         List<Item> itemList = itemService.getAllItems();
-        return itemMapper.itemListToItemDTOList(itemList);
+        List<ItemDTO> itemDTOListNonHiddenSubcategory = getItemsDTONonHiddenSubcategories(itemList);
+        return itemDTOListNonHiddenSubcategory;
     }
 
     public List<ItemDTO> getNonHiddenItemsDTO() {
         List<Item> nonHiddenItemList = itemService.getNonHiddenItems();
-        return itemMapper.itemListToItemDTOList(nonHiddenItemList);
+        List<ItemDTO> nonHiddenItemListNonHiddenSubcategory = getItemsDTONonHiddenSubcategories(nonHiddenItemList);
+        return nonHiddenItemListNonHiddenSubcategory;
     }
 
     public ItemDTO getNonHiddenItemDTOById(Long itemId) {
         Item nonHiddenItem = itemService.getNonHiddenItemById(itemId);
-        return itemMapper.itemToItemDTO(nonHiddenItem);
+        List<Item> nonHiddenItemToList = List.of(nonHiddenItem);
+        ItemDTO nonHiddenItemDTOByIdNonHiddenSubcategory = getItemsDTONonHiddenSubcategories(nonHiddenItemToList).getFirst();
+        return nonHiddenItemDTOByIdNonHiddenSubcategory;
     }
 
     public ItemDTO getItemDTOById(Long itemId) {
         Item item = itemService.getItemById(itemId);
-        return itemMapper.itemToItemDTO(item);
+        List<Item> itemDTOByIdToList = List.of(item);
+        ItemDTO ItemDTOByIdNonHiddenSubcategory = getItemsDTONonHiddenSubcategories(itemDTOByIdToList).getFirst();
+        return ItemDTOByIdNonHiddenSubcategory;
     }
 
     //TODO: Add subcategory adding
@@ -83,12 +89,19 @@ public class ItemDTOService {
 
     public List<ItemDTO> getNonHiddenItemsDTOByCategory(String mainCategoryName) {
         List<Item> nonHiddenItemsByCategory = itemService.getNonHiddenItemsByCategory(mainCategoryName);
-        return itemMapper.itemListToItemDTOList(nonHiddenItemsByCategory);
+        List<ItemDTO> nonHiddenItemsByCategoryNonHiddenSubcategories = getItemsDTONonHiddenSubcategories(nonHiddenItemsByCategory);
+        return nonHiddenItemsByCategoryNonHiddenSubcategories;
     }
 
     public List<ItemDTO> getNonHiddenItemsByNewItemsCategory() {
         List<Item> nonHiddenItemsByNewItemsCategory = itemService.getNonHiddenItemsByNewItemsCategory();
-        List<ItemDTO> nonHiddenItemsByNewItemsCategoryWithSubcategoriesNonHidden  = nonHiddenItemsByNewItemsCategory.stream()
+        List<ItemDTO> nonHiddenItemsByNewItemsCategoryWithSubcategoriesNonHidden = getItemsDTONonHiddenSubcategories(nonHiddenItemsByNewItemsCategory);
+
+        return nonHiddenItemsByNewItemsCategoryWithSubcategoriesNonHidden;
+    }
+
+    private List<ItemDTO> getItemsDTONonHiddenSubcategories(List<Item> items) {
+        return items.stream()
                 .map(item -> {
                     item.setSubcategories(
                             item.getSubcategories().stream()
@@ -99,7 +112,5 @@ public class ItemDTOService {
                     return itemMapper.itemToItemDTO(item);
                 })
                 .toList();
-
-        return nonHiddenItemsByNewItemsCategoryWithSubcategoriesNonHidden;
     }
 }
