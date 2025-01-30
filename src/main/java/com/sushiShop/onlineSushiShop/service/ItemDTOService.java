@@ -2,16 +2,16 @@ package com.sushiShop.onlineSushiShop.service;
 
 import com.sushiShop.onlineSushiShop.enums.IsHidden;
 import com.sushiShop.onlineSushiShop.mapper.ItemMapper;
-import com.sushiShop.onlineSushiShop.model.AdditionalInformation;
-import com.sushiShop.onlineSushiShop.model.Comment;
-import com.sushiShop.onlineSushiShop.model.Item;
-import com.sushiShop.onlineSushiShop.model.MainCategory;
+import com.sushiShop.onlineSushiShop.model.*;
 import com.sushiShop.onlineSushiShop.model.dto.ItemDTO;
 import com.sushiShop.onlineSushiShop.model.dto.ItemPostDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ItemDTOService {
@@ -87,6 +87,18 @@ public class ItemDTOService {
 
     public List<ItemDTO> getNonHiddenItemsByNewItemsCategory() {
         List<Item> nonHiddenItemsByNewItemsCategory = itemService.getNonHiddenItemsByNewItemsCategory();
-        return itemMapper.itemListToItemDTOList(nonHiddenItemsByNewItemsCategory);
+        List<ItemDTO> nonHiddenItemsByNewItemsCategoryWithSubcategoriesNonHidden  = nonHiddenItemsByNewItemsCategory.stream()
+                .map(item -> {
+                    item.setSubcategories(
+                            item.getSubcategories().stream()
+                                    .filter(subcategory -> subcategory.getAdditionalInformation().getIsHidden().getValue() == 0)
+                                    .sorted(Comparator.comparing(Subcategory::getSubcategoryName))
+                                    .collect(Collectors.toCollection(LinkedHashSet::new))
+                    );
+                    return itemMapper.itemToItemDTO(item);
+                })
+                .toList();
+
+        return nonHiddenItemsByNewItemsCategoryWithSubcategoriesNonHidden;
     }
 }
