@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,7 +31,14 @@ public class ItemDTOControllerIntegrationTest {
                 .andExpect(jsonPath("$.[4].itemName").value("Dragon Roll"))
                 .andExpect(jsonPath("$.[0].itemIsHidden").value(0))
                 .andExpect(jsonPath("$.[1].itemIsHidden").value(0))
-                .andExpect(jsonPath("$.[4].itemIsHidden").value(1));
+                .andExpect(jsonPath("$.[4].itemIsHidden").value(1))
+                .andExpect(jsonPath("$.[0].itemMainCategory").value("Nigiri"))
+                .andExpect(jsonPath("$.[1].itemMainCategory").value("Nigiri"))
+                .andExpect(jsonPath("$.[4].itemMainCategory").value("Temaki"))
+                .andExpect(jsonPath("$.[0].itemSubcategories[*].subcategoryName", hasItem("NEW ITEM")))
+                .andExpect(jsonPath("$.[1].itemSubcategories").isEmpty())
+                .andExpect(jsonPath("$.[4].itemSubcategories").isEmpty())
+        ;
     }
 
     @Test
@@ -50,5 +58,17 @@ public class ItemDTOControllerIntegrationTest {
                 .andExpect(jsonPath("$.itemId").value(1))
                 .andExpect(jsonPath("$.itemIsHidden").value(0))
                 .andExpect(jsonPath("$.itemName").value("Maguro Nigiri"));
+    }
+
+    @Test
+    void getItemDOByCategory_shouldReturnNonHiddenItemsDTOByNewItemCategory() throws Exception {
+        mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/item/non-hidden/by-category?category=NEW ITEM"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].itemName").value("Maguro Nigiri"))
+                .andExpect(jsonPath("$.[0].itemComment").value("A piece of rice with vinegar, topped with a slice of raw tuna. It is one of the most popular sushi, often served with wasabi and soy sauce."))
+                .andExpect(jsonPath("$.[0].itemMainCategory").value("Nigiri"))
+                .andExpect(jsonPath("$.[0].itemSubcategories[0].subcategoryName").value("NEW ITEM"))
+                .andExpect(jsonPath("$.[0].itemSubcategories[1].subcategoryName").value("*"));
+
     }
 }
