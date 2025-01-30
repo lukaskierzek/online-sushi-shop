@@ -66,7 +66,6 @@ public class ItemDTOController {
         }
     }
 
-    //TODO: Change the if statement if the category name is empty to switch the default category, such as the subcategory “news items”
     @GetMapping(path = "non-hidden/by-category")
     public ResponseEntity<List<ItemDTO>> getNonHiddenItemsDTOByCategory(@RequestParam(name = "category", required = false) String mainCategoryName) {
         try {
@@ -74,7 +73,7 @@ public class ItemDTOController {
 
             if (!mainCategoryName.isEmpty()) {
                 if (mainCategoryName.equals(Subcategory.NEW_ITEM.getValue()))
-                    itemDTOList =  itemDTOService.getNonHiddenItemsByNewItemsCategory();
+                    itemDTOList = itemDTOService.getNonHiddenItemsByNewItemsCategory();
                 else
                     itemDTOList = itemDTOService.getNonHiddenItemsDTOByCategory(mainCategoryName);
             } else

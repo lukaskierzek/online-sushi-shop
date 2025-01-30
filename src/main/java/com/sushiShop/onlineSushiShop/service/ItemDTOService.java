@@ -46,6 +46,7 @@ public class ItemDTOService {
         return itemMapper.itemToItemDTO(item);
     }
 
+    //TODO: Add subcategory adding
     public Item postNewItemFromItemPostDTO(ItemPostDTO itemPostDTO) {
         if (itemPostDTO == null) return null;
 
