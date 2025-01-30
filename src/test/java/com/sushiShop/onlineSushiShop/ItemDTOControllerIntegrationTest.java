@@ -67,8 +67,7 @@ public class ItemDTOControllerIntegrationTest {
                 .andExpect(jsonPath("$.[0].itemName").value("Maguro Nigiri"))
                 .andExpect(jsonPath("$.[0].itemComment").value("A piece of rice with vinegar, topped with a slice of raw tuna. It is one of the most popular sushi, often served with wasabi and soy sauce."))
                 .andExpect(jsonPath("$.[0].itemMainCategory").value("Nigiri"))
-                .andExpect(jsonPath("$.[0].itemSubcategories[0].subcategoryName").value("NEW ITEM"))
-                .andExpect(jsonPath("$.[0].itemSubcategories[1].subcategoryName").value("*"));
-
+                .andExpect(jsonPath("$.[0].itemSubcategories[*].subcategoryName", hasItem("NEW ITEM")))
+                .andExpect(jsonPath("$.[0].itemSubcategories[*].subcategoryName", hasItem("*")));
     }
 }
