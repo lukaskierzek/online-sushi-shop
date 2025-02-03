@@ -30,7 +30,7 @@ public class Item {
     @Column(name = "Items_Old_Price", nullable = false)
     private Integer itemOldPrice;
 
-    @Column(name = "Items_Image_Url", nullable = false, length = 1024)
+    @Column(name = "Items_Image_Url", nullable = false, columnDefinition = "TEXT")
     private String itemImageUrl;
 
     @CreationTimestamp

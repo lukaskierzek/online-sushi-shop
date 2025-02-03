@@ -20,8 +20,6 @@ public class CreateViewRunner implements CommandLineRunner {
                     *
                 FROM
                     ITEMS I
-                    LEFT JOIN COMMENTS C ON C.COMMENTS_ID = I.ITEMS_COMMENTS_ID
-                    LEFT JOIN MAIN_CATEGORIES MC ON MC.MAIN_CATEGORIES_ID = I.ITEMS_MAIN_CATEGORIES_ID
                 WHERE
                     I.ITEMS_IS_HIDDEN = 0
                 """;
@@ -34,8 +32,6 @@ public class CreateViewRunner implements CommandLineRunner {
                             *
                         FROM
                             ITEMS I
-                            LEFT JOIN COMMENTS C ON C.COMMENTS_ID = I.ITEMS_COMMENTS_ID
-                            LEFT JOIN MAIN_CATEGORIES MC ON MC.MAIN_CATEGORIES_ID = I.ITEMS_MAIN_CATEGORIES_ID
                         """);
 
         createView("main_category_non_hidden",
