@@ -17,7 +17,7 @@ public class Comment {
     @Column(name = "Comments_Id")
     private Long commentId;
 
-    @Column(name = "Comments_text", length = 1024)
+    @Column(name = "Comments_text", columnDefinition = "VARCHAR(1024) DEFAULT 'Lorem ipsum dolor sit amet'")
     private String commentText;
 
     @CreationTimestamp
