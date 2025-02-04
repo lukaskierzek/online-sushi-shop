@@ -18,9 +18,10 @@ public class ItemInitialData {
     @Bean
     CommandLineRunner commandLineRunner(JdbcTemplate jdbcTemplate) {
         return args -> {
-            try (InputStream sqlInitialDataFile = getClass().getClassLoader().getResourceAsStream("initialData.sql")) {
+            String initialFile = "initialData.sql";
+            try (InputStream sqlInitialDataFile = getClass().getClassLoader().getResourceAsStream(initialFile)) {
                 if (sqlInitialDataFile == null)
-                    throw new PostgresSQLNotFoundException("File initialData.sql not found in resources folder");
+                    throw new PostgresSQLNotFoundException("File " + initialFile + " not found in resources folder");
 
                 String sqlInsertIntoQuery = getStringFromSQLFile(sqlInitialDataFile);
 

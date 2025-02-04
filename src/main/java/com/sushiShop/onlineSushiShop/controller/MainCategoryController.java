@@ -1,5 +1,6 @@
 package com.sushiShop.onlineSushiShop.controller;
 
+import com.sushiShop.onlineSushiShop.exception.MainCategoryNotFoundException;
 import com.sushiShop.onlineSushiShop.model.MainCategory;
 import com.sushiShop.onlineSushiShop.service.MainCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +36,14 @@ public class MainCategoryController {
     }
 
     @GetMapping(path = "{mainCategoryId}")
-    public ResponseEntity<MainCategory> getMainCategoryById(@PathVariable("mainCategoryId") Long mainCategoryId) {
+    public ResponseEntity<?> getMainCategoryById(@PathVariable("mainCategoryId") Long mainCategoryId) {
         try {
             MainCategory mainCategoryById = mainCategoryService.getMainCategoryById(mainCategoryId);
             return ResponseEntity.ok(mainCategoryById);
-        } catch (Exception e) {
+        } catch (MainCategoryNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+        catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

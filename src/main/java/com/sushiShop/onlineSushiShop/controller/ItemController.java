@@ -1,5 +1,6 @@
 package com.sushiShop.onlineSushiShop.controller;
 
+import com.sushiShop.onlineSushiShop.exception.ItemNotFoundException;
 import com.sushiShop.onlineSushiShop.model.Item;
 import com.sushiShop.onlineSushiShop.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +38,13 @@ public class ItemController {
     }
 
     @GetMapping(path = "{itemId}")
-    public ResponseEntity<Item> getItemById(@PathVariable("itemId") Long itemId) {
-        try{
+    public ResponseEntity<?> getItemById(@PathVariable("itemId") Long itemId) {
+        try {
             Item itemById = itemService.getItemById(itemId);
             return ResponseEntity.ok(itemById);
-        } catch (Exception e){
+        } catch (ItemNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -57,12 +60,14 @@ public class ItemController {
     }
 
     @GetMapping(path = "non-hidden/{itemId}")
-    public ResponseEntity<Item> getNonHiddenItemById(@PathVariable("itemId") Long itemId) {
+    public ResponseEntity<?> getNonHiddenItemById(@PathVariable("itemId") Long itemId) {
 //        Item nonHiddenItem = itemService.getNonHiddenItemById(itemId);
 //        return new ResponseEntity<>(nonHiddenItem, HttpStatus.OK);
         try {
             Item nonHiddenItem = itemService.getNonHiddenItemById(itemId);
-            return nonHiddenItem != null ? ResponseEntity.ok(nonHiddenItem) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.ok(nonHiddenItem);
+        } catch (ItemNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

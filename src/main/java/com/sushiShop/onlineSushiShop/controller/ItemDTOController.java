@@ -1,6 +1,7 @@
 package com.sushiShop.onlineSushiShop.controller;
 
 import com.sushiShop.onlineSushiShop.enums.Subcategory;
+import com.sushiShop.onlineSushiShop.exception.ItemNotFoundException;
 import com.sushiShop.onlineSushiShop.model.Item;
 import com.sushiShop.onlineSushiShop.model.dto.ItemDTO;
 import com.sushiShop.onlineSushiShop.model.dto.ItemPostDTO;
@@ -47,20 +48,24 @@ public class ItemDTOController {
     }
 
     @GetMapping(path = "non-hidden/{itemId}")
-    public ResponseEntity<ItemDTO> getNonHiddenItemDTOById(@PathVariable("itemId") Long itemId) {
+    public ResponseEntity<?> getNonHiddenItemDTOById(@PathVariable("itemId") Long itemId) {
         try {
             ItemDTO itemDTONonHidden = itemDTOService.getNonHiddenItemDTOById(itemId);
-            return itemDTONonHidden != null ? ResponseEntity.ok(itemDTONonHidden) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.ok(itemDTONonHidden);
+        } catch (ItemNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping(path = "{itemId}")
-    public ResponseEntity<ItemDTO> getItemDTOById(@PathVariable("itemId") Long itemId) {
+    public ResponseEntity<?> getItemDTOById(@PathVariable("itemId") Long itemId) {
         try {
             ItemDTO itemDTO = itemDTOService.getItemDTOById(itemId);
-            return itemDTO != null ? ResponseEntity.ok(itemDTO) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.ok(itemDTO);
+        } catch (ItemNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

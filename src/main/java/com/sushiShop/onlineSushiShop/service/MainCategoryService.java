@@ -21,7 +21,7 @@ public class MainCategoryService {
 
     public MainCategory getMainCategoryById(Long mainCategoryId) {
         return mainCategoryRepository.findMainCategoryById(mainCategoryId)
-                .orElseThrow(() -> new MainCategoryNotFoundException(String.format("Main category by %s was not found", mainCategoryId)));
+                .orElseThrow(() -> new MainCategoryNotFoundException(String.format("Main category with ID %s was not found", mainCategoryId)));
     }
 
     public List<MainCategory> getAllMainCategories() {

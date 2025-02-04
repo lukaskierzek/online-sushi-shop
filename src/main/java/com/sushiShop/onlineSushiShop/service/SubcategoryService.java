@@ -31,6 +31,6 @@ public class SubcategoryService {
 
     public Subcategory getSubcategoryById(Long subcategoryId) {
         return subcategoryRepository.findSubcategoryById(subcategoryId)
-                .orElseThrow(() -> new SubcategoryNotFoundException(String.format("Subcategory by %s was not found", subcategoryId)));
+                .orElseThrow(() -> new SubcategoryNotFoundException(String.format("Subcategory with ID %s was not found", subcategoryId)));
     }
 }
