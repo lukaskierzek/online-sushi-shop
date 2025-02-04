@@ -1,5 +1,7 @@
 package com.sushiShop.onlineSushiShop.component;
 
+import com.sushiShop.onlineSushiShop.exception.PostgresViewBodyNullException;
+import com.sushiShop.onlineSushiShop.exception.PostgresViewNameNullException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -54,9 +56,9 @@ public class CreateViewRunner implements CommandLineRunner {
 //        return jdbcTemplate.queryForObject(queryViewNameExists, Boolean.class);
 //    }
 
-    private void createView(String viewName, String viewBody) throws IllegalStateException {
-        if (viewName == null) throw new IllegalStateException("viewName cannot be null");
-        if (viewBody == null) throw new IllegalStateException("viewBody cannot be null");
+    private void createView(String viewName, String viewBody) {
+        if (viewName == null) throw new PostgresViewNameNullException("viewName cannot be null");
+        if (viewBody == null) throw new PostgresViewBodyNullException("viewBody cannot be null");
 
         String viewQuery = """
                 CREATE OR REPLACE VIEW %s AS

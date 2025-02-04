@@ -1,5 +1,6 @@
 package com.sushiShop.onlineSushiShop.service;
 
+import com.sushiShop.onlineSushiShop.exception.SubcategoryNotFoundException;
 import com.sushiShop.onlineSushiShop.model.Subcategory;
 import com.sushiShop.onlineSushiShop.repository.SubcategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,6 @@ public class SubcategoryService {
 
     public Subcategory getSubcategoryById(Long subcategoryId) {
         return subcategoryRepository.findSubcategoryById(subcategoryId)
-                .orElseThrow(() -> new IllegalStateException(String.format("Subcategory by %s was not found", subcategoryId)));
+                .orElseThrow(() -> new SubcategoryNotFoundException(String.format("Subcategory by %s was not found", subcategoryId)));
     }
 }

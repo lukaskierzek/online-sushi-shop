@@ -1,5 +1,6 @@
 package com.sushiShop.onlineSushiShop.service;
 
+import com.sushiShop.onlineSushiShop.exception.ItemNotFoundException;
 import com.sushiShop.onlineSushiShop.model.Item;
 import com.sushiShop.onlineSushiShop.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +27,12 @@ public class ItemService {
 
     public Item getNonHiddenItemById(Long itemId) {
         return itemRepository.findNonHiddenItem(itemId)
-                .orElseThrow(() -> new IllegalStateException(String.format("Item by %s was not found", itemId)));
+                .orElseThrow(() -> new ItemNotFoundException(String.format("Item by %s was not found", itemId)));
     }
 
     public Item getItemById(Long itemId) {
         return itemRepository.findItemById(itemId)
-                .orElseThrow(() -> new IllegalStateException(String.format("Item by %s was not found", itemId)));
+                .orElseThrow(() -> new ItemNotFoundException(String.format("Item by %s was not found", itemId)));
     }
 
     public Item postItem(Item item) {

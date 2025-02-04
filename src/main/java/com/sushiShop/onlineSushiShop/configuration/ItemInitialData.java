@@ -1,5 +1,6 @@
 package com.sushiShop.onlineSushiShop.configuration;
 
+import com.sushiShop.onlineSushiShop.exception.PostgresSQLNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -19,7 +20,7 @@ public class ItemInitialData {
         return args -> {
             try (InputStream sqlInitialDataFile = getClass().getClassLoader().getResourceAsStream("initialData.sql")) {
                 if (sqlInitialDataFile == null)
-                    throw new IllegalStateException("File initialData.sql not found in resources folder");
+                    throw new PostgresSQLNotFoundException("File initialData.sql not found in resources folder");
 
                 String sqlInsertIntoQuery = getStringFromSQLFile(sqlInitialDataFile);
 
