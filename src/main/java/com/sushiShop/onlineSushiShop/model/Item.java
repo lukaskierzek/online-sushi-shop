@@ -21,7 +21,7 @@ public class Item {
     @Column(name = "Items_Id")
     private Long itemId;
 
-    @Column(name = "Items_Name", nullable = false)
+    @Column(name = "Items_Name", nullable = false, unique = true)
     private String itemName;
 
     @Column(name = "Items_Actual_Price", nullable = false)

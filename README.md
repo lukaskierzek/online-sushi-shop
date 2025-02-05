@@ -20,7 +20,7 @@ Web page where you can buy sushi.
 
 ## Screenshots
 >**Database diagram**
->![SushiShop_database](Images/Database_diagram.png)
+>![SushiShop_database](images/Database_diagram.png)
 
 ## Project Status
 The project is in progress.

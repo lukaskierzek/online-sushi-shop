@@ -19,7 +19,7 @@ public class Subcategory {
     @Column(name = "subcategories_id")
     private Long subcategoryId;
 
-    @Column(name = "subcategories_name")
+    @Column(name = "subcategories_name", unique = true)
     private String subcategoryName;
 
     @CreationTimestamp

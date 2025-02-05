@@ -18,7 +18,7 @@ public class MainCategory {
     @Column(name = "main_categories_id")
     private Long mainCategoryId;
 
-    @Column(name = "main_categories_name", nullable = false)
+    @Column(name = "main_categories_name", nullable = false, unique = true)
     private String mainCategoryName;
 
     @CreationTimestamp
