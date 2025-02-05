@@ -35,11 +35,7 @@ public class SubcategoryController {
 
     @GetMapping(path = "{subcategoryId}")
     public ResponseEntity<Subcategory> getSubcategoryById(@PathVariable("subcategoryId") Long subcategoryId) {
-        try {
-            Subcategory subcategoryById = subcategoryService.getSubcategoryById(subcategoryId);
-            return ResponseEntity.ok(subcategoryById);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        Subcategory subcategoryById = subcategoryService.getSubcategoryById(subcategoryId);
+        return ResponseEntity.ok(subcategoryById);
     }
 }

@@ -44,4 +44,15 @@ public class MainCategoryDTOService {
         List<MainCategory> nonHiddenMainCategories = mainCategoryService.getNonHiddenMainCategories();
         return mainCategoryMapper.mainCategoryListToMainCategoryDTOList(nonHiddenMainCategories);
     }
+
+    public MainCategory putMainCategoryFromMainCategoryPostDTO(Long mainCategoryId, MainCategoryPostDTO mainCategoryPostDTO) {
+        MainCategory mainCategoryById = mainCategoryService.getMainCategoryById(mainCategoryId);
+
+        var additionalInformation = new AdditionalInformation(IsHidden.fromValue(mainCategoryPostDTO.mainCategoryIsHidden()));
+
+        mainCategoryById.setMainCategoryName(mainCategoryPostDTO.mainCategoryName());
+        mainCategoryById.setAdditionalInformation(additionalInformation);
+
+        return mainCategoryService.putMainCategory(mainCategoryById);
+    }
 }

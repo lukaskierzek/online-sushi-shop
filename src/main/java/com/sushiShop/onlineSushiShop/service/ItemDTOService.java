@@ -67,7 +67,6 @@ public class ItemDTOService {
         itemById.setMainCategory(mainCategoryById);
 
         return itemService.putItem(itemById);
-
     }
 
     public ItemDTO getItemDTOById(Long itemId) {

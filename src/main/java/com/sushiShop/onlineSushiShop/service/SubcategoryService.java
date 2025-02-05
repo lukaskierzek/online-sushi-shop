@@ -33,4 +33,8 @@ public class SubcategoryService {
         return subcategoryRepository.findSubcategoryById(subcategoryId)
             .orElseThrow(() -> new SubcategoryNotFoundException(String.format("Subcategory with ID %s was not found", subcategoryId)));
     }
+
+    public Subcategory putSubcategory(Subcategory subcategoryById) {
+        return postSubcategory(subcategoryById);
+    }
 }

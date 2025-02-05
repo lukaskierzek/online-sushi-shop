@@ -44,4 +44,15 @@ public class SubcategoryDTOService {
 
         return subcategoryService.postSubcategory(subcategory);
     }
+
+    public Subcategory putSubcategoryFromSubcategoryPostDTO(Long subcategoryId, SubcategoryPostDTO subcategoryPostDTO) {
+        Subcategory subcategoryById = subcategoryService.getSubcategoryById(subcategoryId);
+
+        AdditionalInformation additionalInformation = new AdditionalInformation(IsHidden.fromValue(subcategoryPostDTO.subcategoryIsHidden()));
+
+        subcategoryById.setSubcategoryName(subcategoryPostDTO.subcategoryName());
+        subcategoryById.setAdditionalInformation(additionalInformation);
+
+        return subcategoryService.putSubcategory(subcategoryById);
+    }
 }

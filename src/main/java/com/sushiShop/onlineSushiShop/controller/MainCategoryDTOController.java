@@ -64,4 +64,12 @@ public class MainCategoryDTOController {
         }
     }
     //endregion
+
+    //region Put
+    @PutMapping(path = "/{mainCategoryId}")
+    public ResponseEntity<?> putMainCategoryDTO(@PathVariable Long mainCategoryId, @RequestBody MainCategoryPostDTO mainCategoryPostDTO) {
+        MainCategory mainCategoryUpdate = mainCategoryDTOService.putMainCategoryFromMainCategoryPostDTO(mainCategoryId, mainCategoryPostDTO);
+        return ResponseEntity.ok(mainCategoryUpdate);
+    }
+    //endregion
 }

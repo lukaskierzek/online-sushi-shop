@@ -33,4 +33,8 @@ public class MainCategoryService {
     public List<MainCategory> getNonHiddenMainCategories() {
         return mainCategoryRepository.findNonHiddenMainCategories();
     }
+
+    public MainCategory putMainCategory(MainCategory mainCategoryById) {
+        return postMainCategory(mainCategoryById);
+    }
 }

@@ -65,4 +65,12 @@ public class SubcategoryDTOController {
 
     }
     //endregion
+
+    //region Put
+    @PutMapping(path = "/{subcategoryId}")
+    public ResponseEntity<?> putSubcategory(@PathVariable Long subcategoryId, @RequestBody SubcategoryPostDTO subcategoryPostDTO) {
+        Subcategory subcategoryUpdate = subcategoryDTOService.putSubcategoryFromSubcategoryPostDTO(subcategoryId, subcategoryPostDTO);
+        return ResponseEntity.ok(subcategoryUpdate);
+    }
+    //endregion
 }

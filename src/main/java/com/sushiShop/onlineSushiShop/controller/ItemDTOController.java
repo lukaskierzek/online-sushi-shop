@@ -1,7 +1,6 @@
 package com.sushiShop.onlineSushiShop.controller;
 
 import com.sushiShop.onlineSushiShop.enums.Subcategory;
-import com.sushiShop.onlineSushiShop.exception.ItemNotFoundException;
 import com.sushiShop.onlineSushiShop.model.Item;
 import com.sushiShop.onlineSushiShop.model.dto.ItemDTO;
 import com.sushiShop.onlineSushiShop.model.dto.ItemPostDTO;
@@ -49,26 +48,14 @@ public class ItemDTOController {
 
     @GetMapping(path = "non-hidden/{itemId}")
     public ResponseEntity<?> getNonHiddenItemDTOById(@PathVariable("itemId") Long itemId) {
-        try {
-            ItemDTO itemDTONonHidden = itemDTOService.getNonHiddenItemDTOById(itemId);
-            return ResponseEntity.ok(itemDTONonHidden);
-        } catch (ItemNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        ItemDTO itemDTONonHidden = itemDTOService.getNonHiddenItemDTOById(itemId);
+        return ResponseEntity.ok(itemDTONonHidden);
     }
 
     @GetMapping(path = "{itemId}")
     public ResponseEntity<?> getItemDTOById(@PathVariable("itemId") Long itemId) {
-        try {
-            ItemDTO itemDTO = itemDTOService.getItemDTOById(itemId);
-            return ResponseEntity.ok(itemDTO);
-        } catch (ItemNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        ItemDTO itemDTO = itemDTOService.getItemDTOById(itemId);
+        return ResponseEntity.ok(itemDTO);
     }
 
     @GetMapping(path = "non-hidden/by-category")
@@ -111,15 +98,11 @@ public class ItemDTOController {
     }
     //endregion
 
+    //region Put
     @PutMapping(path = "/{itemId}")
     public ResponseEntity<?> putItemDTO(@PathVariable Long itemId, @RequestBody ItemPostDTO itemPostDTO) {
-        try {
-            Item itemUpdate = itemDTOService.putItemFromItemPostDTO(itemId, itemPostDTO);
-            return ResponseEntity.ok(itemUpdate);
-        } catch (ItemNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        Item itemUpdate = itemDTOService.putItemFromItemPostDTO(itemId, itemPostDTO);
+        return ResponseEntity.ok(itemUpdate);
     }
+    //endregion
 }
