@@ -32,7 +32,7 @@ public class Subcategory {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "isHidden", column = @Column(name = "subcategories_is_hidden", nullable = false))
+        @AttributeOverride(name = "isHidden", column = @Column(name = "subcategories_is_hidden", nullable = false))
     })
     private AdditionalInformation additionalInformation;
 
@@ -102,11 +102,11 @@ public class Subcategory {
     @Override
     public String toString() {
         return "Subcategory{" +
-                "subcategoryId=" + subcategoryId +
-                ", subcategoryName='" + subcategoryName + '\'' +
-                ", subcategoriesCreatedAt=" + subcategoryCreatedAt +
-                ", subcategoriesUpdatedAt=" + subcategoryUpdatedAt +
-                ", additionalInformation=" + additionalInformation +
-                '}';
+            "subcategoryId=" + subcategoryId +
+            ", subcategoryName='" + subcategoryName + '\'' +
+            ", subcategoriesCreatedAt=" + subcategoryCreatedAt +
+            ", subcategoriesUpdatedAt=" + subcategoryUpdatedAt +
+            ", additionalInformation=" + additionalInformation +
+            '}';
     }
 }

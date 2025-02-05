@@ -14,7 +14,7 @@ import java.util.List;
 public interface SubcategoryMapper {
 
     @Mappings({
-            @Mapping(source = "additionalInformation", target = "subcategoryIsHidden", qualifiedByName = "mapSubcategoryIsHidden"),
+        @Mapping(source = "additionalInformation", target = "subcategoryIsHidden", qualifiedByName = "mapSubcategoryIsHidden"),
     })
     SubcategoryDTO subcategoryToSubcategoryDTO(Subcategory subcategory);
 

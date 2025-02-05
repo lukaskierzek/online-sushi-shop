@@ -34,7 +34,7 @@ public class Comment {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "isHidden", column = @Column(name = "comments_is_hidden", nullable = false))
+        @AttributeOverride(name = "isHidden", column = @Column(name = "comments_is_hidden", nullable = false))
     })
     private AdditionalInformation additionalInformation;
 
@@ -60,13 +60,13 @@ public class Comment {
     @Override
     public String toString() {
         return "Comment{" +
-                "commentId=" + commentId +
-                ", commentText='" + commentText + '\'' +
-                ", commentCreatedAt=" + commentCreatedAt +
-                ", commentUpdatedAt=" + commentUpdatedAt +
-                ", item=" + item +
-                ", additionalInformation=" + additionalInformation +
-                '}';
+            "commentId=" + commentId +
+            ", commentText='" + commentText + '\'' +
+            ", commentCreatedAt=" + commentCreatedAt +
+            ", commentUpdatedAt=" + commentUpdatedAt +
+            ", item=" + item +
+            ", additionalInformation=" + additionalInformation +
+            '}';
     }
 
     public Long getCommentId() {

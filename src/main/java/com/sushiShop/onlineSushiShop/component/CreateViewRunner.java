@@ -18,37 +18,37 @@ public class CreateViewRunner implements CommandLineRunner {
         //region item_non_hidden
         String view_item_non_hidden_name = "item_non_hidden";
         String view_item_non_hidden_body = """
+            SELECT
+                *
+            FROM
+                ITEMS I
+                LEFT JOIN COMMENTS C ON C.COMMENTS_ID = I.ITEMS_COMMENTS_ID
+                LEFT JOIN MAIN_CATEGORIES MC ON MC.MAIN_CATEGORIES_ID = I.ITEMS_MAIN_CATEGORIES_ID
+            WHERE
+                I.ITEMS_IS_HIDDEN = 0
+            """;
+        createView(view_item_non_hidden_name, view_item_non_hidden_body);
+        //endregion
+
+        createView("item_hidden_and_non_hidden",
+            """
                 SELECT
                     *
                 FROM
                     ITEMS I
                     LEFT JOIN COMMENTS C ON C.COMMENTS_ID = I.ITEMS_COMMENTS_ID
                     LEFT JOIN MAIN_CATEGORIES MC ON MC.MAIN_CATEGORIES_ID = I.ITEMS_MAIN_CATEGORIES_ID
-                WHERE
-                    I.ITEMS_IS_HIDDEN = 0
-                """;
-        createView(view_item_non_hidden_name, view_item_non_hidden_body);
-        //endregion
-
-        createView("item_hidden_and_non_hidden",
-                """
-                        SELECT
-                            *
-                        FROM
-                            ITEMS I
-                            LEFT JOIN COMMENTS C ON C.COMMENTS_ID = I.ITEMS_COMMENTS_ID
-                            LEFT JOIN MAIN_CATEGORIES MC ON MC.MAIN_CATEGORIES_ID = I.ITEMS_MAIN_CATEGORIES_ID
-                        """);
+                """);
 
         createView("main_category_non_hidden",
-                """
-                        SELECT
-                            *
-                        FROM
-                            MAIN_CATEGORIES
-                        WHERE
-                            MAIN_CATEGORIES_IS_HIDDEN = 0
-                        """);
+            """
+                SELECT
+                    *
+                FROM
+                    MAIN_CATEGORIES
+                WHERE
+                    MAIN_CATEGORIES_IS_HIDDEN = 0
+                """);
     }
 //
 //    private Boolean viewExists(String viewName) {
@@ -61,9 +61,9 @@ public class CreateViewRunner implements CommandLineRunner {
         if (viewBody == null) throw new PostgresViewBodyNullException("viewBody cannot be null");
 
         String viewQuery = """
-                CREATE OR REPLACE VIEW %s AS
-                %s
-                """.formatted(viewName, viewBody);
+            CREATE OR REPLACE VIEW %s AS
+            %s
+            """.formatted(viewName, viewBody);
 
         jdbcTemplate.execute(viewQuery);
     }

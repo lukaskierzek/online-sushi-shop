@@ -52,14 +52,14 @@ public class SubcategoryDTOController {
         try {
             Subcategory subcategoryCreated = subcategoryDTOService.postSubcategoryFromSubcategoryPostDTO(subcategoryPostDTO);
             return ResponseEntity.created(
-                    uriComponentsBuilder.path("api/v1/onlinesushishop/raw/subcategory/{subcategoryId}")
-                            .buildAndExpand(subcategoryCreated.getSubcategoryId())
-                            .toUri()
+                uriComponentsBuilder.path("api/v1/onlinesushishop/raw/subcategory/{subcategoryId}")
+                    .buildAndExpand(subcategoryCreated.getSubcategoryId())
+                    .toUri()
             ).body(subcategoryCreated);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                    "error", "Error creating item " + subcategoryPostDTO.subcategoryName(),
-                    "message", e.getMessage()
+                "error", "Error creating item " + subcategoryPostDTO.subcategoryName(),
+                "message", e.getMessage()
             ));
         }
 

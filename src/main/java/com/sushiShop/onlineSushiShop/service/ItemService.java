@@ -27,12 +27,12 @@ public class ItemService {
 
     public Item getNonHiddenItemById(Long itemId) {
         return itemRepository.findNonHiddenItem(itemId)
-                .orElseThrow(() -> new ItemNotFoundException(String.format("Item with ID %s was not found", itemId)));
+            .orElseThrow(() -> new ItemNotFoundException(String.format("Item with ID %s was not found", itemId)));
     }
 
     public Item getItemById(Long itemId) {
         return itemRepository.findItemById(itemId)
-                .orElseThrow(() -> new ItemNotFoundException(String.format("Item with ID %s was not found", itemId)));
+            .orElseThrow(() -> new ItemNotFoundException(String.format("Item with ID %s was not found", itemId)));
     }
 
     public Item postItem(Item item) {

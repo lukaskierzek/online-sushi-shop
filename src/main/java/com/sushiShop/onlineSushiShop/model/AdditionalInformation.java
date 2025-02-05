@@ -28,7 +28,7 @@ public class AdditionalInformation {
     @Override
     public String toString() {
         return "AdditionalInformation{" +
-                "isHidden=" + isHidden +
-                '}';
+            "isHidden=" + isHidden +
+            '}';
     }
 }

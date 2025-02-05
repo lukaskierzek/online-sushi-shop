@@ -67,8 +67,8 @@ public class ItemControllerTest {
     @Test
     void getNonHiddenItems_shouldReturnListOfNonHiddenItems() throws Exception {
         List<Item> mockNonHiddenItems = MockItems.getItems().stream()
-                .filter(item -> IsHidden.NO.equals(item.getAdditionalInformation().getIsHidden()))
-                .collect(Collectors.toList());
+            .filter(item -> IsHidden.NO.equals(item.getAdditionalInformation().getIsHidden()))
+            .collect(Collectors.toList());
 
         when(itemService.getNonHiddenItems()).thenReturn(mockNonHiddenItems);
 

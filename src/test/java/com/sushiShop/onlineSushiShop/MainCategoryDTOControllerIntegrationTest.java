@@ -24,10 +24,10 @@ public class MainCategoryDTOControllerIntegrationTest {
     @Test
     void getMainCategoryDTO_shouldReturnListOfNonHiddenMainCategoryDTO() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/main-category/non-hidden"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[0].mainCategoryName").value("Nigiri"))
-                .andExpect(jsonPath("$.[0].mainCategoryIsHidden").value(0))
-                .andExpect(jsonPath("$.[1].mainCategoryName").value("Maki"))
-                .andExpect(jsonPath("$.[1].mainCategoryIsHidden").value(0));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.[0].mainCategoryName").value("Nigiri"))
+            .andExpect(jsonPath("$.[0].mainCategoryIsHidden").value(0))
+            .andExpect(jsonPath("$.[1].mainCategoryName").value("Maki"))
+            .andExpect(jsonPath("$.[1].mainCategoryIsHidden").value(0));
     }
 }

@@ -43,7 +43,7 @@ public class Item {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "isHidden", column = @Column(name = "Items_is_hidden", nullable = false))
+        @AttributeOverride(name = "isHidden", column = @Column(name = "Items_is_hidden", nullable = false))
     })
     private AdditionalInformation additionalInformation;
 
@@ -59,9 +59,9 @@ public class Item {
 
     @ManyToMany
     @JoinTable(
-            name = "item_subcategory",
-            joinColumns = @JoinColumn(name = "Items_Id"),
-            inverseJoinColumns = @JoinColumn(name = "subcategories_id")
+        name = "item_subcategory",
+        joinColumns = @JoinColumn(name = "Items_Id"),
+        inverseJoinColumns = @JoinColumn(name = "subcategories_id")
     )
     @JsonManagedReference
     private Set<Subcategory> subcategories = new HashSet<>();
@@ -173,16 +173,16 @@ public class Item {
     @Override
     public String toString() {
         return "Item{" +
-                "ItemId=" + itemId +
-                ", ItemName='" + itemName + '\'' +
-                ", ItemActualPrice=" + itemActualPrice +
-                ", ItemOldPrice=" + itemOldPrice +
-                ", ItemImageUrl='" + itemImageUrl + '\'' +
-                ", itemCreatedAt=" + itemCreatedAt +
-                ", itemUpdatedAt=" + itemUpdatedAt +
-                ", additionalInformation=" + additionalInformation +
-                ", comment=" + comment +
-                ", mainCategory=" + mainCategory +
-                '}';
+            "ItemId=" + itemId +
+            ", ItemName='" + itemName + '\'' +
+            ", ItemActualPrice=" + itemActualPrice +
+            ", ItemOldPrice=" + itemOldPrice +
+            ", ItemImageUrl='" + itemImageUrl + '\'' +
+            ", itemCreatedAt=" + itemCreatedAt +
+            ", itemUpdatedAt=" + itemUpdatedAt +
+            ", additionalInformation=" + additionalInformation +
+            ", comment=" + comment +
+            ", mainCategory=" + mainCategory +
+            '}';
     }
 }

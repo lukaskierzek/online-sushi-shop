@@ -25,48 +25,48 @@ public class ItemDTOControllerIntegrationTest {
     @Test
     void getAllItemDTO_shouldReturnListOfAllItemsDTOGet() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/item"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[0].itemName").value("Maguro Nigiri"))
-                .andExpect(jsonPath("$.[1].itemName").value("California Roll"))
-                .andExpect(jsonPath("$.[4].itemName").value("Dragon Roll"))
-                .andExpect(jsonPath("$.[0].itemIsHidden").value(0))
-                .andExpect(jsonPath("$.[1].itemIsHidden").value(0))
-                .andExpect(jsonPath("$.[4].itemIsHidden").value(1))
-                .andExpect(jsonPath("$.[0].itemMainCategory").value("Nigiri"))
-                .andExpect(jsonPath("$.[1].itemMainCategory").value("Nigiri"))
-                .andExpect(jsonPath("$.[4].itemMainCategory").value("Temaki"))
-                .andExpect(jsonPath("$.[0].itemSubcategories[*].subcategoryName", hasItem("NEW ITEM")))
-                .andExpect(jsonPath("$.[1].itemSubcategories").isEmpty())
-                .andExpect(jsonPath("$.[4].itemSubcategories").isEmpty())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.[0].itemName").value("Maguro Nigiri"))
+            .andExpect(jsonPath("$.[1].itemName").value("California Roll"))
+            .andExpect(jsonPath("$.[4].itemName").value("Dragon Roll"))
+            .andExpect(jsonPath("$.[0].itemIsHidden").value(0))
+            .andExpect(jsonPath("$.[1].itemIsHidden").value(0))
+            .andExpect(jsonPath("$.[4].itemIsHidden").value(1))
+            .andExpect(jsonPath("$.[0].itemMainCategory").value("Nigiri"))
+            .andExpect(jsonPath("$.[1].itemMainCategory").value("Nigiri"))
+            .andExpect(jsonPath("$.[4].itemMainCategory").value("Temaki"))
+            .andExpect(jsonPath("$.[0].itemSubcategories[*].subcategoryName", hasItem("NEW ITEM")))
+            .andExpect(jsonPath("$.[1].itemSubcategories").isEmpty())
+            .andExpect(jsonPath("$.[4].itemSubcategories").isEmpty())
         ;
     }
 
     @Test
     void getNonHiddenItemsDTO_shouldReturnListOfNonHiddenItemsDTOGet() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/item/non-hidden"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[0].itemName").value("Maguro Nigiri"))
-                .andExpect(jsonPath("$.[1].itemName").value("California Roll"))
-                .andExpect(jsonPath("$.[0].itemIsHidden").value(0))
-                .andExpect(jsonPath("$.[1].itemIsHidden").value(0));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.[0].itemName").value("Maguro Nigiri"))
+            .andExpect(jsonPath("$.[1].itemName").value("California Roll"))
+            .andExpect(jsonPath("$.[0].itemIsHidden").value(0))
+            .andExpect(jsonPath("$.[1].itemIsHidden").value(0));
     }
 
     @Test
     void getItemDTOById_shouldReturnItemDTOById() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/item/non-hidden/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.itemId").value(1))
-                .andExpect(jsonPath("$.itemIsHidden").value(0))
-                .andExpect(jsonPath("$.itemName").value("Maguro Nigiri"));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.itemId").value(1))
+            .andExpect(jsonPath("$.itemIsHidden").value(0))
+            .andExpect(jsonPath("$.itemName").value("Maguro Nigiri"));
     }
 
     @Test
     void getItemDOByCategory_shouldReturnNonHiddenItemsDTOByNewItemCategory() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/item/non-hidden/by-category?category=NEW ITEM"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[0].itemName").value("Maguro Nigiri"))
-                .andExpect(jsonPath("$.[0].itemComment").value("A piece of rice with vinegar, topped with a slice of raw tuna. It is one of the most popular sushi, often served with wasabi and soy sauce."))
-                .andExpect(jsonPath("$.[0].itemMainCategory").value("Nigiri"))
-                .andExpect(jsonPath("$.[0].itemSubcategories[*].subcategoryName", hasItem("NEW ITEM")));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.[0].itemName").value("Maguro Nigiri"))
+            .andExpect(jsonPath("$.[0].itemComment").value("A piece of rice with vinegar, topped with a slice of raw tuna. It is one of the most popular sushi, often served with wasabi and soy sauce."))
+            .andExpect(jsonPath("$.[0].itemMainCategory").value("Nigiri"))
+            .andExpect(jsonPath("$.[0].itemSubcategories[*].subcategoryName", hasItem("NEW ITEM")));
     }
 }

@@ -17,6 +17,6 @@ public class CommentService {
 
     public Comment getCommentById(Long commentId) {
         return commentRepository.findById(commentId)
-                .orElseThrow(() -> new CommentNotFoundException(String.format("Comment with ID %s was not found", commentId)));
+            .orElseThrow(() -> new CommentNotFoundException(String.format("Comment with ID %s was not found", commentId)));
     }
 }

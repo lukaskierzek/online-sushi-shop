@@ -82,31 +82,31 @@ public class ItemDTOService {
         if (itemPostDTO == null) return null;
 
         AdditionalInformation additionInformation = new AdditionalInformation(
-                IsHidden.fromValue(itemPostDTO.itemIsHidden())
+            IsHidden.fromValue(itemPostDTO.itemIsHidden())
         );
 
         var comment = new Comment(
-                null,
-                itemPostDTO.itemComment(),
-                null,
-                null,
-                null,
-                additionInformation
+            null,
+            itemPostDTO.itemComment(),
+            null,
+            null,
+            null,
+            additionInformation
         );
 
         MainCategory mainCategory = mainCategoryService.getMainCategoryById(itemPostDTO.itemMainCategoryId());
 
         Item item = new Item(
-                null,
-                itemPostDTO.itemName(),
-                itemPostDTO.itemActualPrice(),
-                itemPostDTO.itemOldPrice(),
-                itemPostDTO.itemImageUrl(),
-                null,
-                null,
-                additionInformation,
-                comment,
-                mainCategory
+            null,
+            itemPostDTO.itemName(),
+            itemPostDTO.itemActualPrice(),
+            itemPostDTO.itemOldPrice(),
+            itemPostDTO.itemImageUrl(),
+            null,
+            null,
+            additionInformation,
+            comment,
+            mainCategory
         );
 
         return itemService.postItem(item);
@@ -127,16 +127,16 @@ public class ItemDTOService {
 
     private List<ItemDTO> getItemsDTONonHiddenSubcategories(List<Item> items) {
         return items.stream()
-                .map(item -> {
-                    item.setSubcategories(
-                            item.getSubcategories().stream()
-                                    .filter(subcategory -> subcategory.getAdditionalInformation().getIsHidden().getValue() == 0)
-                                    .sorted(Comparator.comparing(Subcategory::getSubcategoryName))
-                                    .collect(Collectors.toCollection(LinkedHashSet::new))
-                    );
-                    return itemMapper.itemToItemDTO(item);
-                })
-                .toList();
+            .map(item -> {
+                item.setSubcategories(
+                    item.getSubcategories().stream()
+                        .filter(subcategory -> subcategory.getAdditionalInformation().getIsHidden().getValue() == 0)
+                        .sorted(Comparator.comparing(Subcategory::getSubcategoryName))
+                        .collect(Collectors.toCollection(LinkedHashSet::new))
+                );
+                return itemMapper.itemToItemDTO(item);
+            })
+            .toList();
     }
 
 

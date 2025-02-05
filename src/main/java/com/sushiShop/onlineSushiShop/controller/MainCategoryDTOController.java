@@ -52,14 +52,14 @@ public class MainCategoryDTOController {
         try {
             MainCategory mainCategoryCreated = mainCategoryDTOService.postNewMainCategoryFromMainCategoryDTO(mainCategoryPostDTO);
             return ResponseEntity.created(
-                    uriComponentsBuilder.path("api/v1/onlinesushishop/raw/main-category/{mainCategoryId}")
-                            .buildAndExpand(mainCategoryCreated.getMainCategoryId())
-                            .toUri()
+                uriComponentsBuilder.path("api/v1/onlinesushishop/raw/main-category/{mainCategoryId}")
+                    .buildAndExpand(mainCategoryCreated.getMainCategoryId())
+                    .toUri()
             ).body(mainCategoryCreated);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                    "error", "Error creating main category " + mainCategoryPostDTO.mainCategoryName(),
-                    "message", e.getMessage()
+                "error", "Error creating main category " + mainCategoryPostDTO.mainCategoryName(),
+                "message", e.getMessage()
             ));
         }
     }

@@ -22,7 +22,7 @@ public class MainCategory {
     private String mainCategoryName;
 
     @CreationTimestamp
-    @Column(name =  "main_categories_created_at", nullable = false, updatable = false)
+    @Column(name = "main_categories_created_at", nullable = false, updatable = false)
     private LocalDateTime mainCategoryCreatedAt;
 
     @UpdateTimestamp
@@ -31,7 +31,7 @@ public class MainCategory {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "isHidden", column = @Column(name = "main_categories_is_hidden", nullable = false))
+        @AttributeOverride(name = "isHidden", column = @Column(name = "main_categories_is_hidden", nullable = false))
     })
     private AdditionalInformation additionalInformation;
 
@@ -99,12 +99,12 @@ public class MainCategory {
     @Override
     public String toString() {
         return "MainCategory{" +
-                "mainCategoryId=" + mainCategoryId +
-                ", mainCategoryName='" + mainCategoryName + '\'' +
-                ", mainCategoryCreatedAt=" + mainCategoryCreatedAt +
-                ", mainCategoryUpdatedAt=" + mainCategoryUpdatedAt +
-                ", additionalInformation=" + additionalInformation +
-                ", items=" + items +
-                '}';
+            "mainCategoryId=" + mainCategoryId +
+            ", mainCategoryName='" + mainCategoryName + '\'' +
+            ", mainCategoryCreatedAt=" + mainCategoryCreatedAt +
+            ", mainCategoryUpdatedAt=" + mainCategoryUpdatedAt +
+            ", additionalInformation=" + additionalInformation +
+            ", items=" + items +
+            '}';
     }
 }

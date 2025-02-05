@@ -98,14 +98,14 @@ public class ItemDTOController {
         try {
             Item itemCreated = itemDTOService.postNewItemFromItemPostDTO(itemPostDTO);
             return ResponseEntity.created(
-                    uriComponentsBuilder.path("api/v1/onlinesushishop/item/{itemId}")
-                            .buildAndExpand(itemCreated.getItemId())
-                            .toUri()
+                uriComponentsBuilder.path("api/v1/onlinesushishop/item/{itemId}")
+                    .buildAndExpand(itemCreated.getItemId())
+                    .toUri()
             ).body(itemCreated);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                    "error", "Error creating item " + itemPostDTO.itemName(),
-                    "message", e.getMessage()
+                "error", "Error creating item " + itemPostDTO.itemName(),
+                "message", e.getMessage()
             ));
         }
     }

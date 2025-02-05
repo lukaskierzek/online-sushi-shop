@@ -13,22 +13,22 @@ import java.util.Optional;
 public interface MainCategoryRepository extends JpaRepository<MainCategory, Long> {
 
     @Query(value = """
-            SELECT
-                *
-            FROM
-                main_categories
-            WHERE
-                main_categories_id = :mainCategoryId
-            """, nativeQuery = true)
+        SELECT
+            *
+        FROM
+            main_categories
+        WHERE
+            main_categories_id = :mainCategoryId
+        """, nativeQuery = true)
     Optional<MainCategory> findMainCategoryById(@Param("mainCategoryId") Long mainCategoryId);
 
     @Query(value = """
-            SELECT
-            	*
-            FROM
-            	MAIN_CATEGORIES
-            WHERE
-            	MAIN_CATEGORIES_IS_HIDDEN = 0
-            """, nativeQuery = true)
+        SELECT
+        	*
+        FROM
+        	MAIN_CATEGORIES
+        WHERE
+        	MAIN_CATEGORIES_IS_HIDDEN = 0
+        """, nativeQuery = true)
     List<MainCategory> findNonHiddenMainCategories();
 }

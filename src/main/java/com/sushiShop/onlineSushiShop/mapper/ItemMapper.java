@@ -14,10 +14,10 @@ import java.util.List;
 public interface ItemMapper {
 
     @Mappings({
-            @Mapping(source = "additionalInformation", target = "itemIsHidden", qualifiedByName = "mapItemIsHidden"),
-            @Mapping(source = "mainCategory.mainCategoryName", target = "itemMainCategory"),
-            @Mapping(source = "comment.commentText", target = "itemComment"),
-            @Mapping(source = "subcategories", target = "itemSubcategories"),
+        @Mapping(source = "additionalInformation", target = "itemIsHidden", qualifiedByName = "mapItemIsHidden"),
+        @Mapping(source = "mainCategory.mainCategoryName", target = "itemMainCategory"),
+        @Mapping(source = "comment.commentText", target = "itemComment"),
+        @Mapping(source = "subcategories", target = "itemSubcategories"),
     })
     ItemDTO itemToItemDTO(Item item);
 
