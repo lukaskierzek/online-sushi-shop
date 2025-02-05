@@ -110,4 +110,16 @@ public class ItemDTOController {
         }
     }
     //endregion
+
+    @PutMapping(path = "/{itemId}")
+    public ResponseEntity<?> putItemDTO(@PathVariable Long itemId, @RequestBody ItemPostDTO itemPostDTO) {
+        try {
+            Item itemUpdate = itemDTOService.putItemFromItemPostDTO(itemId, itemPostDTO);
+            return ResponseEntity.ok(itemUpdate);
+        } catch (ItemNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

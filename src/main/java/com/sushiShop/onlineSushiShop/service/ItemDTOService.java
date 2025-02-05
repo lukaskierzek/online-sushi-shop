@@ -18,12 +18,14 @@ public class ItemDTOService {
     private final ItemMapper itemMapper;
     private final ItemService itemService;
     private final MainCategoryService mainCategoryService;
+    private final CommentService commentService;
 
     @Autowired
-    public ItemDTOService(ItemMapper itemMapper, ItemService itemService, MainCategoryService mainCategoryService) {
+    public ItemDTOService(ItemMapper itemMapper, ItemService itemService, MainCategoryService mainCategoryService, CommentService commentService) {
         this.itemMapper = itemMapper;
         this.itemService = itemService;
         this.mainCategoryService = mainCategoryService;
+        this.commentService = commentService;
     }
 
     public List<ItemDTO> getAllItemsDTO() {
@@ -45,6 +47,29 @@ public class ItemDTOService {
         return nonHiddenItemDTOByIdNonHiddenSubcategory;
     }
 
+    //TODO: Add subcategories
+    public Item putItemFromItemPostDTO(Long itemId, ItemPostDTO itemPostDTO) {
+        Item itemById = itemService.getItemById(itemId);
+
+        Comment commentByItemId = commentService.getCommentById(itemById.getComment().getCommentId());
+        commentByItemId.setCommentText(itemPostDTO.itemComment());
+
+        MainCategory mainCategoryById = mainCategoryService.getMainCategoryById(itemPostDTO.itemMainCategoryId());
+
+        AdditionalInformation additionalInformation = new AdditionalInformation(IsHidden.fromValue(itemPostDTO.itemIsHidden()));
+
+        itemById.setItemName(itemPostDTO.itemName());
+        itemById.setItemActualPrice(itemPostDTO.itemActualPrice());
+        itemById.setItemOldPrice(itemPostDTO.itemOldPrice());
+        itemById.setItemImageUrl(itemPostDTO.itemImageUrl());
+        itemById.setAdditionalInformation(additionalInformation);
+        itemById.setComment(commentByItemId);
+        itemById.setMainCategory(mainCategoryById);
+
+        return itemService.putItem(itemById);
+
+    }
+
     public ItemDTO getItemDTOById(Long itemId) {
         Item item = itemService.getItemById(itemId);
         List<Item> itemDTOByIdToList = List.of(item);
@@ -57,7 +82,7 @@ public class ItemDTOService {
         if (itemPostDTO == null) return null;
 
         AdditionalInformation additionInformation = new AdditionalInformation(
-                IsHidden.YES
+                IsHidden.fromValue(itemPostDTO.itemIsHidden())
         );
 
         var comment = new Comment(
@@ -113,4 +138,6 @@ public class ItemDTOService {
                 })
                 .toList();
     }
+
+
 }

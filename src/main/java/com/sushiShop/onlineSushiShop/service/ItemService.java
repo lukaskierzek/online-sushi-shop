@@ -46,4 +46,8 @@ public class ItemService {
     public List<Item> getNonHiddenItemsByNewItemsCategory() {
         return itemRepository.findNonHiddenItemsByNewItemCategory();
     }
+
+    public Item putItem(Item itemById) {
+        return postItem(itemById);
+    }
 }

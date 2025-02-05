@@ -6,6 +6,7 @@ public record ItemPostDTO(
         Integer itemOldPrice,
         String itemImageUrl,
         String itemComment,
-        Long itemMainCategoryId
+        Long itemMainCategoryId,
+        Integer itemIsHidden
 ) {
 }
