@@ -1,6 +1,5 @@
 package com.sushiShop.onlineSushiShop.service;
 
-import com.sushiShop.onlineSushiShop.enums.IsHidden;
 import com.sushiShop.onlineSushiShop.exception.MainCategoryNotFoundException;
 import com.sushiShop.onlineSushiShop.model.MainCategory;
 import com.sushiShop.onlineSushiShop.repository.MainCategoryRepository;
@@ -8,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class MainCategoryService {
