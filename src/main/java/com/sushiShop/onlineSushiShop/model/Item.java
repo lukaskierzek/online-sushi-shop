@@ -48,12 +48,12 @@ public class Item {
     private AdditionalInformation additionalInformation;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "Items_comments_Id", referencedColumnName = "comments_id")
+    @JoinColumn(name = "Items_comments_Id", referencedColumnName = "comments_id", foreignKey = @ForeignKey(name = "items_items_comments_id_fkey"))
     @JsonManagedReference
     private Comment comment;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "items_main_categories_id", nullable = false)
+    @JoinColumn(name = "items_main_categories_id", nullable = false, foreignKey = @ForeignKey(name = "items_items_main_categories_id_fkey"))
     @JsonManagedReference
     private MainCategory mainCategory;
 
