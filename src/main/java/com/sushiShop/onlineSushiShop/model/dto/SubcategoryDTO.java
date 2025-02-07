@@ -1,8 +1,17 @@
 package com.sushiShop.onlineSushiShop.model.dto;
 
 public class SubcategoryDTO {
+    private Long subcategoryId;
     private String subcategoryName;
     private Integer subcategoryIsHidden;
+
+    public Long getSubcategoryId() {
+        return subcategoryId;
+    }
+
+    public void setSubcategoryId(Long subcategoryId) {
+        this.subcategoryId = subcategoryId;
+    }
 
     public String getSubcategoryName() {
         return subcategoryName;

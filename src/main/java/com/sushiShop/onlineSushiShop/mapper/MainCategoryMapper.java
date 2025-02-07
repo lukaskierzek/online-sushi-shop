@@ -14,7 +14,8 @@ import java.util.List;
 public interface MainCategoryMapper {
 
     @Mappings({
-        @Mapping(source = "additionalInformation", target = "mainCategoryIsHidden", qualifiedByName = "mapIsHidden")
+        @Mapping(source = "additionalInformation", target = "mainCategoryIsHidden", qualifiedByName = "mapIsHidden"),
+        @Mapping(source = "mainCategoryId", target = "mainCategoryId")
     })
     MainCategoryDTO mainCategoryToMainCategoryDTO(MainCategory mainCategory);
 

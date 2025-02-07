@@ -15,6 +15,7 @@ public interface SubcategoryMapper {
 
     @Mappings({
         @Mapping(source = "additionalInformation", target = "subcategoryIsHidden", qualifiedByName = "mapSubcategoryIsHidden"),
+        @Mapping(source = "subcategoryId", target = "subcategoryId")
     })
     SubcategoryDTO subcategoryToSubcategoryDTO(Subcategory subcategory);
 
