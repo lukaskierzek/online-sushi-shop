@@ -8,5 +8,5 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'onlinesushishop-frontend';
+  title = 'onlinesushishop-angular';
 }
