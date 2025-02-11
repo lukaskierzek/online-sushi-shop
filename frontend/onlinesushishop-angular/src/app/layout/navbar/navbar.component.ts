@@ -4,6 +4,7 @@ import {Subscription} from 'rxjs';
 import {NavbarService} from '../services/navbar.service';
 import {GlobalService} from '../../services/global.service';
 import {IMainCategories} from '../models/interface-main-categories';
+import {Subcategory} from '../../enums/subcategory';
 
 @Component({
   selector: 'app-navbar',
@@ -42,4 +43,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
         }
       })
   }
+
+  protected readonly Subcategory = Subcategory;
 }

@@ -2,10 +2,14 @@
 <br>
 <ul>
   <ul>
+    <li>
+      <a [routerLink]="'sushishop/item/'"
+         [queryParams]="{category: Subcategory.NEW_ITEM}">{{Subcategory.NEW_ITEM}}S!</a>
+    </li>
     @for (mc of mainCategories; track mc.mainCategoryId) {
       <li>
         <a [routerLink]="'sushishop/item/'"
-           [queryParams]="{category: mc.mainCategoryName}">{{ mc.mainCategoryName }}</a>
+           [queryParams]="{category: mc.mainCategoryName}">{{ mc.mainCategoryName.toUpperCase() }}</a>
       </li>
     } @empty {
       <p>Coming soon!</p>

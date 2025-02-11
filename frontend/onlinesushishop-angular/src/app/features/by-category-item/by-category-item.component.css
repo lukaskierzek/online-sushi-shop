@@ -41,7 +41,7 @@ p {
 .item-old-price {
   display: block;
   text-align: left;
-  color:grey;
+  color: grey;
   font-size: large;
   text-decoration: line-through;
   padding-top: 0px;
@@ -61,4 +61,36 @@ span {
 a {
   all: unset;
   cursor: pointer;
+}
+
+.item-subcategories {
+  display: block;
+  font-size: smaller;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: left;
+  overflow: hidden;
+  align-items: center;
+}
+
+li {
+  float: left;
+  display: block;
+  padding: 0 5px 0 5px;
+  margin-right: 5px;
+}
+
+.bestseller, .new-item {
+  background-color: lightcoral;
+  border-radius: 5px;
+}
+
+.vege {
+  background-color: lightgreen;
+  border-radius: 5px;
 }

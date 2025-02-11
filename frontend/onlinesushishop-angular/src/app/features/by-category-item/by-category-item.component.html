@@ -3,6 +3,15 @@
   @for (item of itemByCategory; track item.itemId) {
     <div>
       <a [routerLink]="['sushishop/item/', item.itemId]">
+        <ul>
+          @for (subcat of item.itemSubcategories; track subcat.subcategoryId) {
+            @if (subcat.subcategoryName === Subcategory.BESTSELLER) {
+              <li class="item-subcategories bestseller">*</li>
+            } @else {
+              <li class="item-subcategories {{subcat.subcategoryName.toLowerCase()}}">{{ subcat.subcategoryName }}</li>
+            }
+          }
+        </ul>
         <img src="{{item.itemImageUrl}}"
              loading="lazy"
              alt="Photo id {{item.itemName}}"/>
@@ -11,11 +20,11 @@
         <span class="item-description">{{ item.itemComment }}</span>
 
         @if (item.itemActualPrice < item.itemOldPrice) {
-          <span class="item-old-price">{{item.itemOldPrice}} zł</span>
-          <span class="item-new-price">{{item.itemActualPrice}} zł</span>
+          <span class="item-old-price">{{ item.itemOldPrice }} zł</span>
+          <span class="item-new-price">{{ item.itemActualPrice }} zł</span>
         } @else {
           <span class="item-old-price"></span>
-          <span class="item-actual-price">{{item.itemActualPrice}} zł</span>
+          <span class="item-actual-price">{{ item.itemActualPrice }} zł</span>
         }
       </a>
     </div>

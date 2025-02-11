@@ -4,6 +4,7 @@ import {GlobalService} from '../../services/global.service';
 import {IItemByCategory} from '../models/iitem-by-category';
 import {Subscription} from 'rxjs';
 import {ItemService} from '../services/item.service';
+import {Subcategory} from '../../enums/subcategory';
 
 @Component({
   selector: 'app-by-category-item',
@@ -49,4 +50,6 @@ export class ByCategoryItemComponent implements OnInit, OnDestroy {
         })
     }
   }
+
+  protected readonly Subcategory = Subcategory;
 }
