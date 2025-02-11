@@ -1,1 +1,34 @@
 /* You can add global styles to this file, and also import other style files */
+p {
+  color: green;
+}
+
+a:hover {
+  color: blue;
+}
+
+body {
+  background-color: #a89e9e;
+}
+
+tr:nth-child(even) {
+  background: #f2f2f2;
+}
+
+tr:nth-child(odd) {
+  background: #fff;
+}
+
+th, td {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+table {
+  margin: 0 auto;
+}
+
+img {
+  width: 100%;
+  height: 150px;
+}

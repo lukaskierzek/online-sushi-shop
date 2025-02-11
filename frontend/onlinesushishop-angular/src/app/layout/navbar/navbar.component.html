@@ -1,1 +1,11 @@
 <p>navbar works!</p>
+<br>
+<ul>
+  <ul>
+    @for (mc of mainCategories; track mc.mainCategoryId) {
+      <li>
+        <a>{{ mc.mainCategoryName }}</a>
+      </li>
+    }
+  </ul>
+</ul>
