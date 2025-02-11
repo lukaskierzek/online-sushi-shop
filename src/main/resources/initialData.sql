@@ -18,13 +18,13 @@ VALUES (nextval('main_category_sequence'), '2025-01-22 12:44:00.000000', 0, '202
 
 INSERT INTO items(items_id, items_actual_price, items_image_url, items_name, items_old_price, items_created_at,
                   items_is_hidden, items_updated_at, items_comments_id, items_main_categories_id)
-VALUES (nextval('item_sequence'), 10, 'http', 'Maguro Nigiri', 20, '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 1, 1),
-       (nextval('item_sequence'), 10, 'http', 'California Roll', 10, '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 2, 1),
-       (nextval('item_sequence'), 20, 'http', 'Salmon Sashimi', 10, '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 3, 2),
-       (nextval('item_sequence'), 20, 'http', 'Spicy Tuna Temaki', 10, '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 4, 3),
-       (nextval('item_sequence'), 22, 'http', 'Dragon Roll', 33, '2025-01-22 12:44:00.000000', 1, '2025-01-22 12:44:00.000000', 5, 4),
-       (nextval('item_sequence'), 22, 'http', 'Kappa Maki', 33, '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 6, 2),
-       (nextval('item_sequence'), 22, 'http', 'Avocado Maki', 33, '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 7, 2);
+VALUES (nextval('item_sequence'), 10, 'https://img.freepik.com/free-photo/freshness-plate-gourmet-seafood-maki-sushi-avocado-sashimi-generated-by-artificial-intelligence_25030-66337.jpg?w=1380&t=st=1709289227~exp=1709289827~hmac=b87b76aed267433a4760bd9582f1c8b8ca8564915573edeb67ebf356a0b3eb3f', 'Maguro Nigiri', 20, '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 1, 1),
+       (nextval('item_sequence'), 10, 'https://img.freepik.com/free-photo/freshness-plate-gourmet-seafood-maki-sushi-avocado-sashimi-generated-by-artificial-intelligence_25030-66337.jpg?w=1380&t=st=1709289227~exp=1709289827~hmac=b87b76aed267433a4760bd9582f1c8b8ca8564915573edeb67ebf356a0b3eb3f', 'California Roll', 10, '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 2, 1),
+       (nextval('item_sequence'), 20, 'https://img.freepik.com/free-photo/freshness-plate-gourmet-seafood-maki-sushi-avocado-sashimi-generated-by-artificial-intelligence_25030-66337.jpg?w=1380&t=st=1709289227~exp=1709289827~hmac=b87b76aed267433a4760bd9582f1c8b8ca8564915573edeb67ebf356a0b3eb3f', 'Salmon Sashimi', 10, '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 3, 2),
+       (nextval('item_sequence'), 20, 'https://img.freepik.com/free-photo/freshness-plate-gourmet-seafood-maki-sushi-avocado-sashimi-generated-by-artificial-intelligence_25030-66337.jpg?w=1380&t=st=1709289227~exp=1709289827~hmac=b87b76aed267433a4760bd9582f1c8b8ca8564915573edeb67ebf356a0b3eb3f', 'Spicy Tuna Temaki', 10, '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 4, 3),
+       (nextval('item_sequence'), 22, 'https://img.freepik.com/free-photo/freshness-plate-gourmet-seafood-maki-sushi-avocado-sashimi-generated-by-artificial-intelligence_25030-66337.jpg?w=1380&t=st=1709289227~exp=1709289827~hmac=b87b76aed267433a4760bd9582f1c8b8ca8564915573edeb67ebf356a0b3eb3f', 'Dragon Roll', 33, '2025-01-22 12:44:00.000000', 1, '2025-01-22 12:44:00.000000', 5, 4),
+       (nextval('item_sequence'), 22, 'https://img.freepik.com/free-photo/freshness-plate-gourmet-seafood-maki-sushi-avocado-sashimi-generated-by-artificial-intelligence_25030-66337.jpg?w=1380&t=st=1709289227~exp=1709289827~hmac=b87b76aed267433a4760bd9582f1c8b8ca8564915573edeb67ebf356a0b3eb3f', 'Kappa Maki', 33, '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 6, 2),
+       (nextval('item_sequence'), 22, 'https://img.freepik.com/free-photo/freshness-plate-gourmet-seafood-maki-sushi-avocado-sashimi-generated-by-artificial-intelligence_25030-66337.jpg?w=1380&t=st=1709289227~exp=1709289827~hmac=b87b76aed267433a4760bd9582f1c8b8ca8564915573edeb67ebf356a0b3eb3f', 'Avocado Maki', 33, '2025-01-22 12:44:00.000000', 0, '2025-01-22 12:44:00.000000', 7, 2);
 
 insert into subcategories(subcategories_id, subcategories_is_hidden, subcategories_created_at, subcategories_name, subcategories_updated_at)
 VALUES

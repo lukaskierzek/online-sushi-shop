@@ -1,1 +1,25 @@
-<p>by-category-item works!</p>
+<!--<p>Category: {{ this.category }}</p>-->
+<div class="flex-container">
+  @for (item of itemByCategory; track item.itemId) {
+    <div>
+      <a [routerLink]="['sushishop/item/', item.itemId]">
+        <img src="{{item.itemImageUrl}}"
+             loading="lazy"
+             alt="Photo id {{item.itemName}}"/>
+
+        <span class="item-name">{{ item.itemName }}</span>
+        <span class="item-description">{{ item.itemComment }}</span>
+
+        @if (item.itemActualPrice < item.itemOldPrice) {
+          <span class="item-old-price">{{item.itemOldPrice}} zł</span>
+          <span class="item-new-price">{{item.itemActualPrice}} zł</span>
+        } @else {
+          <span class="item-old-price"></span>
+          <span class="item-actual-price">{{item.itemActualPrice}} zł</span>
+        }
+      </a>
+    </div>
+  } @empty {
+    <p>Coming soon!</p>
+  }
+</div>

@@ -1,11 +1,14 @@
-<p>navbar works!</p>
+<h1>Sushi online shop</h1>
 <br>
 <ul>
   <ul>
     @for (mc of mainCategories; track mc.mainCategoryId) {
       <li>
-        <a>{{ mc.mainCategoryName }}</a>
+        <a [routerLink]="'sushishop/item/'"
+           [queryParams]="{category: mc.mainCategoryName}">{{ mc.mainCategoryName }}</a>
       </li>
+    } @empty {
+      <p>Coming soon!</p>
     }
   </ul>
 </ul>
