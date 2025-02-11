@@ -28,7 +28,7 @@ VALUES (nextval('item_sequence'), 10, 'https://img.freepik.com/free-photo/freshn
 
 insert into subcategories(subcategories_id, subcategories_is_hidden, subcategories_created_at, subcategories_name, subcategories_updated_at)
 VALUES
-    (nextval('subcategory_sequence'), 0, '2025-01-22 12:44:00.000000', 'NEW ITEM', '2025-01-22 12:44:00.000000'),
+    (nextval('subcategory_sequence'), 0, '2025-01-22 12:44:00.000000', 'NEW-ITEM', '2025-01-22 12:44:00.000000'),
     (nextval('subcategory_sequence'), 0, '2025-01-22 12:44:00.000000', 'VEGE', '2025-01-22 12:44:00.000000'),
     (nextval('subcategory_sequence'), 1, '2025-01-22 12:44:00.000000', '*', '2025-01-22 12:44:00.000000');
 

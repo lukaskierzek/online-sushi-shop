@@ -78,7 +78,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
         	ITEM_NON_HIDDEN I_N_H
         	LEFT JOIN CTE_ITEMS_WITH_SUBCATEGORIES CTE ON CTE.ITEMS_ID = I_N_H.ITEMS_ID
         WHERE
-        	CTE.ITEMS_SUBCATEGORIES LIKE '%NEW ITEM%'
+        	CTE.ITEMS_SUBCATEGORIES LIKE '%NEW-ITEM%'
         """, nativeQuery = true)
     List<Item> findNonHiddenItemsByNewItemCategory();
 }

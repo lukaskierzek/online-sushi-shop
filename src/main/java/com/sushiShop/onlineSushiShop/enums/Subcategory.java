@@ -3,7 +3,7 @@ package com.sushiShop.onlineSushiShop.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum Subcategory {
-    NEW_ITEM("NEW ITEM"),
+    NEW_ITEM("NEW-ITEM"),
     VEGE("VEGE"),
     BESTSELLER("*");
 
