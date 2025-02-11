@@ -52,7 +52,7 @@ public class Item {
     @JsonManagedReference
     private Comment comment;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "items_main_categories_id", nullable = false, foreignKey = @ForeignKey(name = "items_items_main_categories_id_fkey"))
     @JsonManagedReference
     private MainCategory mainCategory;

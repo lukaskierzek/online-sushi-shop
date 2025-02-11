@@ -35,7 +35,7 @@ public class MainCategory {
     })
     private AdditionalInformation additionalInformation;
 
-    @OneToMany(mappedBy = "mainCategory", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "mainCategory", cascade = CascadeType.DETACH)
     @JsonBackReference
     private List<Item> items;
 
