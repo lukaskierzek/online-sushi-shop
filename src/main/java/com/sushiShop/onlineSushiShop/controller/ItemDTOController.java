@@ -69,7 +69,7 @@ public class ItemDTOController {
                 else
                     itemDTOList = itemDTOService.getNonHiddenItemsDTOByCategory(mainCategoryName);
             } else
-                itemDTOList = itemDTOService.getNonHiddenItemsDTO();
+                itemDTOList = Collections.emptyList();
 
             return ResponseEntity.ok(itemDTOList);
 
