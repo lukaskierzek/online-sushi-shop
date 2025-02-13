@@ -16,7 +16,7 @@
         </ul>
         <img src="{{item.itemImageUrl}}"
              loading="lazy"
-             alt="Photo id {{item.itemName}}"/>
+             alt="Photo of {{item.itemName}}"/>
 
         <span class="item-name">{{ item.itemName }}</span>
         <span class="item-description">{{ item.itemComment }}</span>
@@ -31,6 +31,6 @@
       </a>
     </div>
   } @empty {
-    <p>Coming soon!</p>
+    <p>A new {{ this.category }} is coming soon!</p>
   }
 </div>

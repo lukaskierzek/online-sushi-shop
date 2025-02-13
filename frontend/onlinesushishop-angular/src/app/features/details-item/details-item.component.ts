@@ -2,18 +2,19 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {ItemService} from '../services/item.service';
 import {GlobalService} from '../../services/global.service';
-import {ActivatedRoute, ParamMap} from '@angular/router';
-import {IItemByCategory} from '../models/iitem-by-category';
+import {ActivatedRoute, ParamMap, RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-details-item',
-  imports: [],
+  imports: [
+    RouterLink
+  ],
   templateUrl: './details-item.component.html',
   styleUrl: './details-item.component.css'
 })
 export class DetailsItemComponent implements OnInit, OnDestroy {
   public itemId: any;
-  public itemById: IItemByCategory[] = [];
+  public itemById: any = {};
 
   private getItemByIdSubscription?: Subscription;
 
@@ -28,12 +29,32 @@ export class DetailsItemComponent implements OnInit, OnDestroy {
     this.route.paramMap
       .subscribe((params: ParamMap) => {
         this.itemId = params.get('id');
-        console.log("Item id: " + this.itemId);
+        this.globalService.logGetMessage("Item id", this.itemId);
         this.getItemById(this.itemId);
       })
   }
 
   private getItemById(itemId: any) {
-    //TODO: add getItemById
+    if (itemId === undefined) {
+      this.globalService.routerToDefaultPage();
+    } else {
+      this.getItemByIdSubscription = this.itemService.getItemById(itemId)
+        .subscribe({
+          next: (data: any) => {
+            this.itemById = data;
+            this.globalService.logGetMessage(`Data from get item by Id '${this.itemId}'`, this.itemById);
+
+            if (Object.keys(this.itemById).length === 0) {
+              this.globalService.routerToDefaultPage();
+            }
+          },
+          error: (err: any) => {
+            console.error(err);
+            this.globalService.routerToDefaultPage();
+          }
+        });
+    }
+
+
   }
 }

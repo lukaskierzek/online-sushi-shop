@@ -41,7 +41,7 @@ export class ByCategoryItemComponent implements OnInit, OnDestroy {
 
   private getItemByCategory(category: any): void {
     if (category === undefined) {
-      this.router.navigate(['/sushishop/item/'], { queryParams: { category: this.Subcategory.NEW_ITEM } });
+      this.globalService.routerToDefaultPage();
     } else {
       this.getItemByCategorySubscription = this.itemService.getItemByCategory(category)
         .subscribe({
@@ -49,16 +49,17 @@ export class ByCategoryItemComponent implements OnInit, OnDestroy {
             this.itemByCategory = data;
             this.globalService.logGetMessage(`Data from get item by category '${this.category}'`, this.itemByCategory);
 
-            if (this.itemByCategory.length === 0){
-              this.router.navigate(['/sushishop/item/'], { queryParams: { category: this.Subcategory.NEW_ITEM } });
-            }
+            // if (this.itemByCategory.length === 0) {
+            //   this.globalService.routerToDefaultPage();
+            // }
           },
           error: (err: any) => {
-            console.log(err);
+            console.error(err);
           }
         })
     }
   }
+
 
   protected readonly Subcategory = Subcategory;
 }

@@ -1,0 +1,26 @@
+.flex-container {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  /*background-color: aquamarine;*/
+  justify-content: center;
+}
+
+.flex-container > div {
+  background-color: #545454;
+  margin-top: 10px;
+  padding: 10px;
+}
+
+.flex-container > div:nth-child(2) {
+  width: 250px;
+}
+
+span {
+  padding-bottom: 10px;
+}
+
+img {
+  height: 250px;
+  width: 100%;
+}

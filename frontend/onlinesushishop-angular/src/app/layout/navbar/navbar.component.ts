@@ -19,7 +19,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   private getMainCategoriesSubscription?: Subscription;
 
-  constructor(private navbarService: NavbarService, private globalService: GlobalService, private router: Router ) {}
+  constructor(private navbarService: NavbarService, private globalService: GlobalService, private router: Router) {
+  }
 
   ngOnDestroy(): void {
     if (this.getMainCategoriesSubscription) {
@@ -39,10 +40,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
           this.globalService.logGetMessage("Main categories", data);
 
           // Navigate to default page
-          this.router.navigate(['/sushishop/item/'], { queryParams: { category: this.Subcategory.NEW_ITEM } });
+          //this.globalService.routerToDefaultPage();
         },
         error: (err) => {
-          console.log("Error fetching main categories: ", err);
+          console.error("Error fetching main categories: ", err);
         }
       })
   }

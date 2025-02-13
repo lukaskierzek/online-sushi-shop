@@ -1,1 +1,26 @@
-<p>Item id: {{itemId}}</p>
+<!--<h2>{{ itemById?.itemName }}</h2>-->
+<div class="flex-container">
+  <div>
+    <img src="{{itemById?.itemImageUrl}}"
+         alt="Photo of {{itemById?.itemImageUrl}}"
+         loading="lazy">
+  </div>
+  <div>
+    <span class="item-name">{{ itemById?.itemName }}</span>
+    <hr>
+    <span class="item-description">{{ itemById?.itemComment }}</span>
+    @if (itemById?.itemActualPrice < itemById?.itemOldPrice) {
+      <span class="item-old-price">{{ itemById?.itemOldPrice }} zł</span>
+      <span class="item-new-price">{{ itemById?.itemActualPrice }} zł</span>
+    } @else {
+      <span class="item-old-price"></span>
+      <span class="item-actual-price">{{ itemById?.itemActualPrice }} zł</span>
+    }
+  </div>
+  <div>
+    <a [routerLink]="['/sushishop/item/', itemById?.itemId]">
+      <button>edit</button>
+    </a>
+  </div>
+</div>
+
