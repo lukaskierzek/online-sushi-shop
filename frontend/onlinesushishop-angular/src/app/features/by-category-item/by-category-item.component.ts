@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, RouterLink} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {GlobalService} from '../../services/global.service';
 import {IItemByCategory} from '../models/iitem-by-category';
 import {Subscription} from 'rxjs';
@@ -20,29 +20,38 @@ export class ByCategoryItemComponent implements OnInit, OnDestroy {
 
   private getItemByCategorySubscription?: Subscription;
 
-  constructor(private route: ActivatedRoute, private globalService: GlobalService, private itemService: ItemService) {}
+  constructor(private activatedRoute: ActivatedRoute,
+              private globalService: GlobalService,
+              private itemService: ItemService,
+              private router: Router,) {
+  }
 
   ngOnDestroy(): void {
-        this.getItemByCategorySubscription?.unsubscribe();
-    }
+    this.getItemByCategorySubscription?.unsubscribe();
+  }
 
   ngOnInit(): void {
-        this.route.queryParams
-          .subscribe((params) => {
-          this.category = params['category'];
-          this.globalService.logGetMessage("Category", this.category);
-          this.getItemByCategory(this.category);
-        })
-    }
+    this.activatedRoute.queryParams
+      .subscribe((params) => {
+        this.category = params['category'];
+        this.globalService.logGetMessage("Category", this.category);
+        this.getItemByCategory(this.category)
+      })
+  }
 
   private getItemByCategory(category: any): void {
     if (category === undefined) {
+      this.router.navigate(['/sushishop/item/'], { queryParams: { category: this.Subcategory.NEW_ITEM } });
     } else {
       this.getItemByCategorySubscription = this.itemService.getItemByCategory(category)
         .subscribe({
           next: (data: any) => {
             this.itemByCategory = data;
             this.globalService.logGetMessage(`Data from get item by category '${this.category}'`, this.itemByCategory);
+
+            if (this.itemByCategory.length === 0){
+              this.router.navigate(['/sushishop/item/'], { queryParams: { category: this.Subcategory.NEW_ITEM } });
+            }
           },
           error: (err: any) => {
             console.log(err);

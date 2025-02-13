@@ -1,10 +1,10 @@
 <h1>Sushi online shop</h1>
-<br>
-<ul>
+<nav>
+  <br>
   <ul>
     <li>
       <a [routerLink]="'sushishop/item/'"
-         [queryParams]="{category: Subcategory.NEW_ITEM}">{{Subcategory.NEW_ITEM.replace("-", " ")}}!</a>
+         [queryParams]="{category: Subcategory.NEW_ITEM}">{{ Subcategory.NEW_ITEM.replace("-", " ") }}!</a>
     </li>
     @for (mc of mainCategories; track mc.mainCategoryId) {
       <li>
@@ -15,4 +15,4 @@
       <p>Coming soon!</p>
     }
   </ul>
-</ul>
+</nav>

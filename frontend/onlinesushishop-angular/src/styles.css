@@ -1,6 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
+:root{
+  --padding-th-td: 1rem;
+  --border-radius-subcategories: 5px;
+  --item-font-size-new-actual-price: xx-large;
+}
+
 p {
   color: green;
+  font-size: xx-large;
 }
 
 a:hover {
@@ -20,8 +27,8 @@ tr:nth-child(odd) {
 }
 
 th, td {
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding-left: var(--padding-th-td);
+  padding-right: var(--padding-th-td);
 }
 
 table {
@@ -31,4 +38,56 @@ table {
 img {
   width: 100%;
   height: 150px;
+}
+
+.item-subcategories {
+  display: block;
+  font-size: smaller;
+}
+
+.item-subcategories.bestseller, .item-subcategories.new-item {
+  background-color: lightcoral;
+  border-radius: var(--border-radius-subcategories);
+}
+
+.item-subcategories.vege {
+  background-color: lightgreen;
+  border-radius: var(--border-radius-subcategories);
+}
+
+.item-name {
+  display: block;
+  color: #f2f2f2;
+  font-size: xx-large;
+  text-align: left;
+}
+
+.item-description {
+  display: block;
+  text-align: left;
+  font-size: large;
+  color: #fff;
+}
+
+.item-actual-price {
+  display: block;
+  text-align: left;
+  color: white;
+  font-size: var(--item-font-size-new-actual-price);
+}
+
+.item-old-price {
+  display: block;
+  text-align: left;
+  color: grey;
+  font-size: large;
+  text-decoration: line-through;
+  padding-top: 0px;
+}
+
+.item-new-price {
+  display: block;
+  text-align: left;
+  color: red;
+  font-size: var(--item-font-size-new-actual-price);
 }

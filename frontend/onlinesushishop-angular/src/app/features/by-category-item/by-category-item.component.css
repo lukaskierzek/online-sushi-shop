@@ -12,48 +12,6 @@
   padding: 10px;
 }
 
-p {
-  color: azure;
-  text-align: center;
-}
-
-.item-name {
-  display: block;
-  color: #f2f2f2;
-  font-size: xx-large;
-  text-align: left;
-}
-
-.item-description {
-  display: block;
-  text-align: left;
-  font-size: large;
-  color: #fff;
-}
-
-.item-actual-price {
-  display: block;
-  text-align: left;
-  color: white;
-  font-size: xx-large;
-}
-
-.item-old-price {
-  display: block;
-  text-align: left;
-  color: grey;
-  font-size: large;
-  text-decoration: line-through;
-  padding-top: 0px;
-}
-
-.item-new-price {
-  display: block;
-  text-align: left;
-  color: red;
-  font-size: xx-large;
-}
-
 span {
   padding-bottom: 10px;
 }
@@ -61,11 +19,6 @@ span {
 a {
   all: unset;
   cursor: pointer;
-}
-
-.item-subcategories {
-  display: block;
-  font-size: smaller;
 }
 
 ul {
@@ -85,12 +38,4 @@ li {
   margin-right: 5px;
 }
 
-.bestseller, .new-item {
-  background-color: lightcoral;
-  border-radius: 5px;
-}
 
-.vege {
-  background-color: lightgreen;
-  border-radius: 5px;
-}

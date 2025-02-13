@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {RouterLink} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {NavbarService} from '../services/navbar.service';
 import {GlobalService} from '../../services/global.service';
@@ -19,7 +19,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   private getMainCategoriesSubscription?: Subscription;
 
-  constructor(private navbarService: NavbarService, private globalService: GlobalService ) {}
+  constructor(private navbarService: NavbarService, private globalService: GlobalService, private router: Router ) {}
 
   ngOnDestroy(): void {
     if (this.getMainCategoriesSubscription) {
@@ -37,6 +37,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
         next: (data: any) => {
           this.mainCategories = data;
           this.globalService.logGetMessage("Main categories", data);
+
+          // Navigate to default page
+          this.router.navigate(['/sushishop/item/'], { queryParams: { category: this.Subcategory.NEW_ITEM } });
         },
         error: (err) => {
           console.log("Error fetching main categories: ", err);

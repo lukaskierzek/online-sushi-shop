@@ -2,13 +2,15 @@
 <div class="flex-container">
   @for (item of itemByCategory; track item.itemId) {
     <div>
-      <a [routerLink]="['sushishop/item/', item.itemId]">
+      <a [routerLink]="['/sushishop/item/', item.itemId]">
         <ul>
           @for (subcat of item.itemSubcategories; track subcat.subcategoryId) {
             @if (subcat.subcategoryName === Subcategory.BESTSELLER) {
               <li class="item-subcategories bestseller">*</li>
             } @else {
-              <li class="item-subcategories {{subcat.subcategoryName.toLowerCase()}}">{{ subcat.subcategoryName }}</li>
+              <li class="item-subcategories {{subcat.subcategoryName.toLowerCase()}}">
+                {{ subcat.subcategoryName.replace("-", " ") }}
+              </li>
             }
           }
         </ul>
