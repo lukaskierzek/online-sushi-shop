@@ -16,8 +16,7 @@ import java.util.Set;
 public class Item {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "item_seq")
-    @SequenceGenerator(name = "item_seq", sequenceName = "item_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Items_Id")
     private Long itemId;
 
@@ -173,16 +172,17 @@ public class Item {
     @Override
     public String toString() {
         return "Item{" +
-            "ItemId=" + itemId +
-            ", ItemName='" + itemName + '\'' +
-            ", ItemActualPrice=" + itemActualPrice +
-            ", ItemOldPrice=" + itemOldPrice +
-            ", ItemImageUrl='" + itemImageUrl + '\'' +
+            "itemId=" + itemId +
+            ", itemName='" + itemName + '\'' +
+            ", itemActualPrice=" + itemActualPrice +
+            ", itemOldPrice=" + itemOldPrice +
+            ", itemImageUrl='" + itemImageUrl + '\'' +
             ", itemCreatedAt=" + itemCreatedAt +
             ", itemUpdatedAt=" + itemUpdatedAt +
             ", additionalInformation=" + additionalInformation +
             ", comment=" + comment +
             ", mainCategory=" + mainCategory +
+            ", subcategories=" + subcategories +
             '}';
     }
 }

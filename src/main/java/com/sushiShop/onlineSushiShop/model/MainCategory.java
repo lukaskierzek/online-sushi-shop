@@ -13,8 +13,7 @@ import java.util.List;
 public class MainCategory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "main_category_seq")
-    @SequenceGenerator(name = "main_category_seq", sequenceName = "main_category_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "main_categories_id")
     private Long mainCategoryId;
 

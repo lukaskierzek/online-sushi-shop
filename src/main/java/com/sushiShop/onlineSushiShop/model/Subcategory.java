@@ -14,8 +14,7 @@ import java.util.Set;
 public class Subcategory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "subcategory_seq")
-    @SequenceGenerator(name = "subcategory_seq", sequenceName = "subcategory_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "subcategories_id")
     private Long subcategoryId;
 
@@ -104,9 +103,10 @@ public class Subcategory {
         return "Subcategory{" +
             "subcategoryId=" + subcategoryId +
             ", subcategoryName='" + subcategoryName + '\'' +
-            ", subcategoriesCreatedAt=" + subcategoryCreatedAt +
-            ", subcategoriesUpdatedAt=" + subcategoryUpdatedAt +
+            ", subcategoryCreatedAt=" + subcategoryCreatedAt +
+            ", subcategoryUpdatedAt=" + subcategoryUpdatedAt +
             ", additionalInformation=" + additionalInformation +
+            ", items=" + items +
             '}';
     }
 }
