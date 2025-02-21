@@ -35,7 +35,7 @@ public class ItemDTOControllerIntegrationTest {
             .andExpect(jsonPath("$.[0].itemMainCategory").value("Nigiri"))
             .andExpect(jsonPath("$.[1].itemMainCategory").value("Nigiri"))
             .andExpect(jsonPath("$.[4].itemMainCategory").value("Temaki"))
-            .andExpect(jsonPath("$.[0].itemSubcategories[*].subcategoryName", hasItem("NEW ITEM")))
+            .andExpect(jsonPath("$.[0].itemSubcategories[*].subcategoryName", hasItem("NEW-ITEM")))
             .andExpect(jsonPath("$.[1].itemSubcategories").isEmpty())
             .andExpect(jsonPath("$.[4].itemSubcategories").isEmpty())
         ;
@@ -62,11 +62,11 @@ public class ItemDTOControllerIntegrationTest {
 
     @Test
     void getItemDOByCategory_shouldReturnNonHiddenItemsDTOByNewItemCategory() throws Exception {
-        mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/item/non-hidden/by-category?category=NEW ITEM"))
+        mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/item/non-hidden/by-category?category=NEW-ITEM"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.[0].itemName").value("Maguro Nigiri"))
             .andExpect(jsonPath("$.[0].itemComment").value("A piece of rice with vinegar, topped with a slice of raw tuna. It is one of the most popular sushi, often served with wasabi and soy sauce."))
             .andExpect(jsonPath("$.[0].itemMainCategory").value("Nigiri"))
-            .andExpect(jsonPath("$.[0].itemSubcategories[*].subcategoryName", hasItem("NEW ITEM")));
+            .andExpect(jsonPath("$.[0].itemSubcategories[*].subcategoryName", hasItem("NEW-ITEM")));
     }
 }

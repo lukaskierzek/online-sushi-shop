@@ -25,7 +25,7 @@ public class SubcategoryDTOControllerIntegrationTest {
     void getAllSubcategoriesDTO_shouldReturnListOfNonHiddenSucategoriesDTO() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/subcategory/non-hidden"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.[0].subcategoryName").value("NEW ITEM"))
+            .andExpect(jsonPath("$.[0].subcategoryName").value("NEW-ITEM"))
             .andExpect(jsonPath("$.[1].subcategoryName").value("VEGE"))
             .andExpect(jsonPath("$.[0].subcategoryIsHidden").value(0))
             .andExpect(jsonPath("$.[1].subcategoryIsHidden").value(0))

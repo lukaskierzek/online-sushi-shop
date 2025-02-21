@@ -103,7 +103,7 @@ export class EditItemComponent implements OnInit, OnDestroy {
 
           controls.clear();
 
-          this.subcategories.forEach((sub:any) => {
+          this.subcategories.forEach((sub: any) => {
             if (this.itemById.itemSubcategories.find((value: any) => value.subcategoryName === sub.subcategoryName))
               controls.push(this.patchSubcategories(sub.subcategoryId, true, sub.subcategoryName))
             else
@@ -120,8 +120,29 @@ export class EditItemComponent implements OnInit, OnDestroy {
 
   submitEditItem() {
     //TODO: Add update logic
-    const a: any = this.editItemForm.value;
-    a.
+    const editItemFormValue: any = this.editItemForm.value;
+    const editItemFormValueArray = Array.isArray(editItemFormValue) ? editItemFormValue : [editItemFormValue];
+
+    editItemFormValueArray.forEach((item: any) => {
+      item.subcategories = item.subcategories
+        .filter((sub: any) => sub.isChecked !== false)
+        .map((sub: any) => {
+          delete sub.isChecked;
+          return sub;
+        });
+    });
+
+    // editItemFormValueArray.forEach((item: any) => {
+    //   item.subcategories = item.subcategories.filter((sub: any) => {
+    //     return sub.isChecked !== false
+    //   })
+    //   item.subcategories.forEach((sub: any) => {
+    //     delete sub.isChecked;
+    //   })
+    // })
+
+
     console.log("Update click!")
+    console.log(editItemFormValue)
   }
 }
