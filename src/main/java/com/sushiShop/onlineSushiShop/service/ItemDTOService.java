@@ -48,6 +48,7 @@ public class ItemDTOService {
     }
 
     //TODO: Add subcategories
+    //TODO: Add logic for subcategories from frontend.
     public Item putItemFromItemPostDTO(Long itemId, ItemPostDTO itemPostDTO) {
         Item itemById = itemService.getItemById(itemId);
 

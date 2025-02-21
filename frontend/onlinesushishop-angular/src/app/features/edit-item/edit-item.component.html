@@ -1,1 +1,87 @@
-<p>edit-item works!</p>
+<!--<p>edit-item works!</p>-->
+<pre>
+  <span style="color: white;background-color: blue;">{{ editItemForm.value | json }}</span>
+</pre>
+<div class="flex-container">
+  <div>
+    <form [formGroup]="editItemForm" (submit)="submitEditItem()">
+      <fieldset>
+        <legend>Edit {{ itemById?.itemName }}</legend>
+
+        <table>
+          <tr>
+            <td><label for="item-name">Name</label></td>
+            <td><input type="text" formControlName="name" id="item-name"></td>
+          </tr>
+
+          <tr>
+            <td><label for="actual-price">Actual price in PLN</label></td>
+            <td><input type="number" formControlName="actualPrice" id="actual-price" min="0"></td>
+          </tr>
+
+          <tr>
+            <td><label for="old-price">Old price in PLN</label></td>
+            <td><input type="number" formControlName="oldPrice" id="old-price" min="0"></td>
+          </tr>
+
+          <tr>
+            <td><label for="imageURL">Image URL</label></td>
+            <td><textarea formControlName="imageURL" id="imageURL" rows="5" cols="30"></textarea></td>
+          </tr>
+
+          <tr>
+            <td><label for="description">Description</label></td>
+            <td><textarea id="description" formControlName="description" rows="10" cols="30"></textarea></td>
+          </tr>
+
+          <tr>
+            <td colspan="2">Category:</td>
+          </tr>
+
+          @for (mc of mainCategories; track $index) {
+            <tr>
+              <td colspan="2">
+                <label for="{{$index}}"><input id="{{$index}}"
+                                               type="radio"
+                                               formControlName="mainCategory"
+                                               value="{{mc.mainCategoryName}}">
+                  {{ mc.mainCategoryName }}</label>
+
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="2">No categories!</td>
+            </tr>
+          }
+
+          <tr>
+            <td colspan="2">
+              <div formArrayName="subcategories">
+                @for (sub of getSubcategoriesFormArray.controls; track $index) {
+                  <div formGroupName="{{$index}}">
+                    <label for="subcategory-is-checked"></label>
+                    <input type="checkbox" formControlName="isChecked" id="subcategory-is-checked">
+                    |
+                    <input formControlName="name" readonly>
+                  </div>
+                }
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td><label for="is-hidden">Hide?</label></td>
+            <td><input type="checkbox" formControlName="isHidden" id="is-hidden"></td>
+          </tr>
+
+          <tr>
+            <td colspan="2">
+              <button type="submit">Update!</button>
+            </td>
+          </tr>
+        </table>
+      </fieldset>
+    </form>
+  </div>
+</div>

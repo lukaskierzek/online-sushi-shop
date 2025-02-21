@@ -3,6 +3,7 @@ import {NavbarComponent} from './layout/navbar/navbar.component';
 import {AppComponent} from './app.component';
 import {ByCategoryItemComponent} from './features/by-category-item/by-category-item.component';
 import {DetailsItemComponent} from './features/details-item/details-item.component';
+import {EditItemComponent} from './features/edit-item/edit-item.component';
 
 export const routes: Routes = [
   {
@@ -16,5 +17,9 @@ export const routes: Routes = [
   {
     path: 'sushishop/item/:id',
     component: DetailsItemComponent,
+  },
+  {
+    path: 'sushishop/item/:id/edit',
+    component: EditItemComponent
   }
 ];
