@@ -37,4 +37,8 @@ public class SubcategoryService {
     public Subcategory putSubcategory(Subcategory subcategoryById) {
         return postSubcategory(subcategoryById);
     }
+
+    public List<Subcategory> getSubcategoriesByIds(List<Long> subcategoryIds) {
+        return subcategoryRepository.findAllById(subcategoryIds);
+    }
 }

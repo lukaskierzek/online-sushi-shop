@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ItemService} from '../services/item.service';
 import {ActivatedRoute, ParamMap} from '@angular/router';
 import {NavbarService} from '../../layout/services/navbar.service';
-import {Form, FormArray, FormBuilder, ReactiveFormsModule} from '@angular/forms';
+import {FormArray, FormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {forkJoin, Subscription} from 'rxjs';
 import {GlobalService} from '../../services/global.service';
 import {JsonPipe} from '@angular/common';
@@ -26,6 +26,7 @@ export class EditItemComponent implements OnInit, OnDestroy {
   private getItemSubscription?: Subscription;
   private getMainCategoriesSubscription?: Subscription;
   private getSubcategoriesSubscription?: Subscription;
+  private putItemSubscription?: Subscription;
 
   editItemForm: any;
 
@@ -42,6 +43,7 @@ export class EditItemComponent implements OnInit, OnDestroy {
     this.getItemSubscription?.unsubscribe();
     this.getMainCategoriesSubscription?.unsubscribe();
     this.getSubcategoriesSubscription?.unsubscribe();
+    this.putItemSubscription?.unsubscribe();
   }
 
   ngOnInit(): void {
@@ -73,9 +75,9 @@ export class EditItemComponent implements OnInit, OnDestroy {
 
   patchSubcategories(id: number, check: boolean, name: string) {
     return this.fb.group({
-      id: [id],
+      subcategoryId: [id],
       isChecked: [check],
-      name: [name]
+      subcategoryName: [name]
     })
   }
 
@@ -119,30 +121,51 @@ export class EditItemComponent implements OnInit, OnDestroy {
   }
 
   submitEditItem() {
-    //TODO: Add update logic
-    const editItemFormValue: any = this.editItemForm.value;
-    const editItemFormValueArray = Array.isArray(editItemFormValue) ? editItemFormValue : [editItemFormValue];
+    let askConfirmUpdate: boolean = confirm("Update item?")
 
-    editItemFormValueArray.forEach((item: any) => {
-      item.subcategories = item.subcategories
-        .filter((sub: any) => sub.isChecked !== false)
-        .map((sub: any) => {
-          delete sub.isChecked;
-          return sub;
-        });
-    });
+    if (askConfirmUpdate) {
+      const editItemFormValue: any = this.editItemForm.value;
+      const editItemFormValueArray = Array.isArray(editItemFormValue) ? editItemFormValue : [editItemFormValue];
 
-    // editItemFormValueArray.forEach((item: any) => {
-    //   item.subcategories = item.subcategories.filter((sub: any) => {
-    //     return sub.isChecked !== false
-    //   })
-    //   item.subcategories.forEach((sub: any) => {
-    //     delete sub.isChecked;
-    //   })
-    // })
+      editItemFormValueArray.forEach((item: any) => {
+        // item.subcategories = item.subcategories
+        //   .filter((sub: any) => sub.isChecked !== false)
+        //   .map((sub: any) => {
+        //     delete sub.isChecked;
+        //     sub.subcategoryIsHidden = 0;
+        //     return sub;
+        //   });
 
+        item.subcategories = item.subcategories
+          .filter((sub: any) => sub.isChecked)
+          .map((sub: any) => sub.subcategoryId)
 
-    console.log("Update click!")
-    console.log(editItemFormValue)
+        item.isHidden = Number(item.isHidden);
+
+        item.mainCategory = this.mainCategories
+          .filter((category: any) => category.mainCategoryName === item.mainCategory)
+          .map((category: any) => category.mainCategoryId)[0]
+      });
+
+      // console.log("Update click!");
+      // // console.log(editItemFormValue)
+      // console.log(editItemFormValueArray[0])
+      //
+      // const subcategories = this.editItemForm.get('subcategories')?.value;
+      // console.log("subcategories:", subcategories, "typ:", typeof subcategories);
+      //
+      // console.log("Wysyłane dane:", JSON.stringify(editItemFormValueArray));
+
+      this.putItemSubscription = this.itemService.putItem(editItemFormValueArray[0])
+        .subscribe({
+          next: (): void => {
+            alert(`Updated! The page will reload!`)
+            window.location.reload();
+          },
+          error: err => {
+            console.error(err)
+          }
+        })
+    }
   }
 }

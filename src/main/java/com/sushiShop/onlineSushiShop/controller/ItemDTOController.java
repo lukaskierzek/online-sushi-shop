@@ -105,4 +105,9 @@ public class ItemDTOController {
         return ResponseEntity.ok(itemUpdate);
     }
     //endregion
+
+    @GetMapping(path = "Hello!")
+    public ResponseEntity<String> helloWord() {
+        return ResponseEntity.ok("I'm happy that you are reading my GitHub!");
+    }
 }

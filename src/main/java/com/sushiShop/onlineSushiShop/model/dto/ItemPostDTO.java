@@ -1,5 +1,7 @@
 package com.sushiShop.onlineSushiShop.model.dto;
 
+import java.util.List;
+
 public record ItemPostDTO(
     String itemName,
     Integer itemActualPrice,
@@ -7,6 +9,8 @@ public record ItemPostDTO(
     String itemImageUrl,
     String itemComment,
     Long itemMainCategoryId,
-    Integer itemIsHidden
+    Integer itemIsHidden,
+    List<Long> itemSubcategoriesId
 ) {
+
 }

@@ -1,7 +1,4 @@
 <!--<p>edit-item works!</p>-->
-<pre>
-  <span style="color: white;background-color: blue;">{{ editItemForm.value | json }}</span>
-</pre>
 <div class="flex-container">
   <div>
     <form [formGroup]="editItemForm" (submit)="submitEditItem()">
@@ -63,7 +60,7 @@
                     <label for="subcategory-is-checked"></label>
                     <input type="checkbox" formControlName="isChecked" id="subcategory-is-checked">
                     |
-                    <input formControlName="name" readonly>
+                    <input formControlName="subcategoryName" readonly>
                   </div>
                 }
               </div>
@@ -85,3 +82,7 @@
     </form>
   </div>
 </div>
+
+<pre>
+  <span style="color: white;background-color: blue;">{{ editItemForm.value | json }}</span>
+</pre>

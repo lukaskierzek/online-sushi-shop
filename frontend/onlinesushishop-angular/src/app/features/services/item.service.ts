@@ -23,4 +23,18 @@ export class ItemService {
   getSubcategories() {
     return this.http.get<any>('http://localhost:8080/api/v1/onlinesushishop/subcategory/non-hidden');
   }
+
+  putItem(itemFormArray: any): Observable<void> {
+    return this.http.put<void>(`http://localhost:8080/api/v1/onlinesushishop/item/${itemFormArray.id}`,
+      {
+        "itemName": itemFormArray.name,
+        "itemActualPrice": itemFormArray.actualPrice,
+        "itemOldPrice": itemFormArray.oldPrice,
+        "itemImageUrl": itemFormArray.imageURL,
+        "itemComment": itemFormArray.description,
+        "itemMainCategoryId": itemFormArray.mainCategory,
+        "itemIsHidden": itemFormArray.isHidden,
+        "itemSubcategoriesId": itemFormArray.subcategories
+      })
+  }
 }

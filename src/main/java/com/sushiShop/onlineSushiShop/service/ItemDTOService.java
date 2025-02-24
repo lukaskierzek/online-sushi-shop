@@ -8,9 +8,7 @@ import com.sushiShop.onlineSushiShop.model.dto.ItemPostDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,13 +17,15 @@ public class ItemDTOService {
     private final ItemService itemService;
     private final MainCategoryService mainCategoryService;
     private final CommentService commentService;
+    private final SubcategoryService subcategoryService;
 
     @Autowired
-    public ItemDTOService(ItemMapper itemMapper, ItemService itemService, MainCategoryService mainCategoryService, CommentService commentService) {
+    public ItemDTOService(ItemMapper itemMapper, ItemService itemService, MainCategoryService mainCategoryService, CommentService commentService, SubcategoryService subcategoryService) {
         this.itemMapper = itemMapper;
         this.itemService = itemService;
         this.mainCategoryService = mainCategoryService;
         this.commentService = commentService;
+        this.subcategoryService = subcategoryService;
     }
 
     public List<ItemDTO> getAllItemsDTO() {
@@ -48,7 +48,6 @@ public class ItemDTOService {
     }
 
     //TODO: Add subcategories
-    //TODO: Add logic for subcategories from frontend.
     public Item putItemFromItemPostDTO(Long itemId, ItemPostDTO itemPostDTO) {
         Item itemById = itemService.getItemById(itemId);
 
@@ -59,6 +58,9 @@ public class ItemDTOService {
 
         AdditionalInformation additionalInformation = new AdditionalInformation(IsHidden.fromValue(itemPostDTO.itemIsHidden()));
 
+        List<Subcategory> subcategoriesByIds = subcategoryService.getSubcategoriesByIds(itemPostDTO.itemSubcategoriesId());
+        Set<Subcategory> subcategoriesSet = subcategoriesByIds.stream().collect(Collectors.toSet());
+
         itemById.setItemName(itemPostDTO.itemName());
         itemById.setItemActualPrice(itemPostDTO.itemActualPrice());
         itemById.setItemOldPrice(itemPostDTO.itemOldPrice());
@@ -66,6 +68,7 @@ public class ItemDTOService {
         itemById.setAdditionalInformation(additionalInformation);
         itemById.setComment(commentByItemId);
         itemById.setMainCategory(mainCategoryById);
+        itemById.setSubcategories(subcategoriesSet);
 
         return itemService.putItem(itemById);
     }
@@ -96,6 +99,9 @@ public class ItemDTOService {
 
         MainCategory mainCategory = mainCategoryService.getMainCategoryById(itemPostDTO.itemMainCategoryId());
 
+        List<Subcategory> subcategoriesByIds = subcategoryService.getSubcategoriesByIds(itemPostDTO.itemSubcategoriesId());
+        Set<Subcategory> subcategoriesSet = subcategoriesByIds.stream().collect(Collectors.toSet());
+
         Item item = new Item(
             null,
             itemPostDTO.itemName(),
@@ -108,6 +114,8 @@ public class ItemDTOService {
             comment,
             mainCategory
         );
+
+        item.setSubcategories(subcategoriesSet);
 
         return itemService.postItem(item);
     }
