@@ -37,4 +37,8 @@ export class ItemService {
         "itemSubcategoriesId": itemFormArray.subcategories
       })
   }
+
+  getItemsOnSaleService(): Observable<IItemByCategory> {
+    return this.http.get<IItemByCategory>('http://localhost:8080/api/v1/onlinesushishop/item/non-hidden/sale');
+  }
 }

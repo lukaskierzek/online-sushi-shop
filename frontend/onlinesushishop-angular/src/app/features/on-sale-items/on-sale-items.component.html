@@ -1,1 +1,35 @@
-<p>on-sale-items works!</p>
+<div class="flex-container">
+  @for (item of itemOnSale; track item.itemId) {
+    <div>
+      <a [routerLink]="['/sushishop/item/', item.itemId]">
+        <ul>
+          @for (subcat of item.itemSubcategories; track subcat.subcategoryId) {
+            @if (subcat.subcategoryName === Subcategory.BESTSELLER) {
+              <li class="item-subcategories bestseller">*</li>
+            } @else {
+              <li class="item-subcategories {{subcat.subcategoryName.toLowerCase()}}">
+                {{ subcat.subcategoryName.replace("-", " ") }}
+              </li>
+            }
+          }
+        </ul>
+        <img src="{{item.itemImageUrl}}"
+             loading="lazy"
+             alt="Photo of {{item.itemName}}"/>
+
+        <span class="item-name">{{ item.itemName }}</span>
+        <span class="item-description">{{ item.itemComment }}</span>
+
+        @if (item.itemActualPrice < item.itemOldPrice) {
+          <span class="item-old-price">{{ item.itemOldPrice }} zł</span>
+          <span class="item-new-price">{{ item.itemActualPrice }} zł</span>
+        } @else {
+          <span class="item-old-price"></span>
+          <span class="item-actual-price">{{ item.itemActualPrice }} zł</span>
+        }
+      </a>
+    </div>
+  } @empty {
+    <p>A new sale is coming soon!</p>
+  }
+</div>

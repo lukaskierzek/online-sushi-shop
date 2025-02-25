@@ -6,7 +6,9 @@
       <a [routerLink]="'sushishop/item/'"
          [queryParams]="{category: Subcategory.NEW_ITEM}">{{ Subcategory.NEW_ITEM.replace("-", " ") }}!</a>
     </li>
-<!--    TODO: Add promotion category-->
+    <li>
+      <a [routerLink]="'sushishop/item/sale'">SALE!</a>
+    </li>
     @for (mc of mainCategories; track mc.mainCategoryId) {
       <li>
         <a [routerLink]="'sushishop/item/'"

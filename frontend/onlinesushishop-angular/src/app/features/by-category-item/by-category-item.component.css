@@ -10,6 +10,8 @@
   margin: 10px;
   width: 250px;
   padding: 10px;
+  /*flex-basis: calc(33.33% - 20px);*/
+  /*box-sizing: border-box;*/
 }
 
 span {
