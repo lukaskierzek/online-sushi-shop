@@ -148,4 +148,10 @@ public class ItemDTOService {
     }
 
 
+    public List<ItemDTO> getItemsDTONonHiddenOnSale() {
+        List<Item> nonHiddenItemsOnSale = itemService.getItemsNonHiddenOnSale();
+        List<ItemDTO> nonHiddenItemsOnSaleWithSubcategoriesNonHidden = getItemsDTONonHiddenSubcategories(nonHiddenItemsOnSale);
+
+        return nonHiddenItemsOnSaleWithSubcategoriesNonHidden;
+    }
 }

@@ -81,4 +81,12 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
         	CTE.ITEMS_SUBCATEGORIES LIKE '%NEW-ITEM%'
         """, nativeQuery = true)
     List<Item> findNonHiddenItemsByNewItemCategory();
+
+    @Query(value = """
+            SELECT
+                *
+            FROM
+                item_non_hidden_on_sale
+        """, nativeQuery = true)
+    List<Item> findNonHiddenItemsOnSale();
 }

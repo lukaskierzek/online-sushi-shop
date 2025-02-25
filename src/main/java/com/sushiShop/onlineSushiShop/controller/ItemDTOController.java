@@ -77,6 +77,16 @@ public class ItemDTOController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
         }
     }
+
+    @GetMapping(path = "non-hidden/sale")
+    public ResponseEntity<List<ItemDTO>> getItemsOnSale() {
+        try {
+            var itemsOnSale = itemDTOService.getItemsDTONonHiddenOnSale();
+            return ResponseEntity.ok(itemsOnSale);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+        }
+    }
     //endregion
 
     //region Post

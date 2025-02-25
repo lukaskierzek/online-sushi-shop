@@ -49,6 +49,16 @@ public class CreateViewRunner implements CommandLineRunner {
                 WHERE
                     MAIN_CATEGORIES_IS_HIDDEN = 0
                 """);
+
+        createView("item_non_hidden_on_sale",
+            """
+                SELECT
+                    *
+                FROM
+                    item_non_hidden
+                WHERE
+                    items_actual_price < items_old_price
+                """);
     }
 //
 //    private Boolean viewExists(String viewName) {

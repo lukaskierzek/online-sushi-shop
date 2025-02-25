@@ -50,4 +50,8 @@ public class ItemService {
     public Item putItem(Item itemById) {
         return postItem(itemById);
     }
+
+    public List<Item> getItemsNonHiddenOnSale() {
+        return itemRepository.findNonHiddenItemsOnSale();
+    }
 }
