@@ -14,7 +14,7 @@ services:
             - POSTGRES_PASSWORD=Strong!Pass1@#
         healthcheck:
             test: [ "CMD", "pg_isready", "-U", "onlinesushishop" ]
-            interval: 2s
+            interval: 10s
             retries: 5
 
     pgadmin:
@@ -49,12 +49,18 @@ services:
             - SPRING_DATASOURCE_USERNAME=onlinesushishop
             - SPRING_DATASOURCE_PASSWORD=Strong!Pass1@#
 
+    frontend-angular:
+        build:
+            context: ./frontend/onlinesushishop-angular
+            dockerfile: Dockerfile
+        ports:
+            - "4200:4200"
+        networks:
+            - sushi-shop-network
+
 networks:
     sushi-shop-network:
         driver: bridge
-    default:
-        name: sushi-shop-network
-        external: true
 
 volumes:
     postgres:

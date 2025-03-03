@@ -3,3 +3,4 @@ frontend
 .gitattributes
 Dockerfile
 .idea
+*.env
