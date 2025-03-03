@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+    sushi-shop:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "8080:8080"
+
+networks:
+    sushi-shop-network:
+        driver: bridge
