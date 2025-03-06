@@ -7,6 +7,7 @@ Web demonstrates my skill with the [technologies I use](#technologies-used).On t
 * [Screenshots](#screenshots)
 * [Project Status](#project-status)
 * [Setup](#setup)
+* [Running](#running)
 * [Licene](#licence)
 
 ## Technologies Used
@@ -15,6 +16,7 @@ Web demonstrates my skill with the [technologies I use](#technologies-used).On t
 - Hibernate
 - PostgreSQL
 - Angular
+- Docker
 
 ## Features
 - Get items by category
@@ -29,7 +31,26 @@ Web demonstrates my skill with the [technologies I use](#technologies-used).On t
 The project is in progress.
 
 ## Setup
-_In progress. Dokcer wil be added._
+- You have to install [docker](https://docs.docker.com/engine/install/) and/or [git](https://git-scm.com/downloads).
+- Download the project, for example, using the git command:
+```git
+git clone https://github.com/lukaskierzek/online-sushi-shop.git
+```
+- Open the command line in the directory where the **docker-compose.yml** file is located and run the command:
+```docker
+docker compose up -build
+```
+
+## Running
+- Link to the backend page:
+>http://localhost:8080/swagger-ui/index.html
+
+- Link to the website page:
+>http://localhost:4200/sushishop/item?category=NEW-ITEM
+
+- Link to the PgAdmin:
+>http://localhost:5050/
+
 
 ## Licence
 > [Full content of the licence](LICENSE).
