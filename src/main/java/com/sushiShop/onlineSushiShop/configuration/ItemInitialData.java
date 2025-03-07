@@ -11,29 +11,45 @@ import org.springframework.util.StreamUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.function.Function;
 
 @Component
 public class ItemInitialData {
+    Function<InputStream, String> getStringFromSQLFile = (sqlInitialDataFile) -> {
+        try {
+            return StreamUtils.copyToString(sqlInitialDataFile, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed copy to string function. %s".formatted(e.getMessage()));
+        }
+    };
 
     @Bean
     CommandLineRunner commandLineRunner(JdbcTemplate jdbcTemplate) {
         return args -> {
-            String initialFile = "initialData.sql";
-            try (InputStream sqlInitialDataFile = getClass().getClassLoader().getResourceAsStream(initialFile)) {
-                if (sqlInitialDataFile == null)
-                    throw new PostgresSQLNotFoundException("File " + initialFile + " not found in resources folder");
+            var sqlFiles = new ArrayList<String>();
+            sqlFiles.add("initialData.sql");
 
-                String sqlInsertIntoQuery = getStringFromSQLFile(sqlInitialDataFile);
-
-                jdbcTemplate.execute(sqlInsertIntoQuery);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to execute SQL script: %s".formatted(e.getMessage()));
-            }
+            for (var file : sqlFiles)
+                saveSQLFilesToDabatase(jdbcTemplate, file);
         };
     }
 
-    @NotNull
-    private static String getStringFromSQLFile(InputStream sqlInitialDataFile) throws IOException {
-        return StreamUtils.copyToString(sqlInitialDataFile, StandardCharsets.UTF_8);
+    private void saveSQLFilesToDabatase(JdbcTemplate jdbcTemplate, String initialFile) {
+        try (InputStream sqlInitialDataFile = getClass().getClassLoader().getResourceAsStream(initialFile)) {
+            if (sqlInitialDataFile == null)
+                throw new PostgresSQLNotFoundException("File %s not found in resources folder".formatted(initialFile));
+
+            String sqlInsertIntoQuery = getStringFromSQLFile.apply(sqlInitialDataFile);
+
+            jdbcTemplate.execute(sqlInsertIntoQuery);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to execute SQL script: %s".formatted(e.getMessage()));
+        }
     }
+
+//    @NotNull
+//    private static String getStringFromSQLFile(InputStream sqlInitialDataFile) throws IOException {
+//        return StreamUtils.copyToString(sqlInitialDataFile, StandardCharsets.UTF_8);
+//    }
 }
