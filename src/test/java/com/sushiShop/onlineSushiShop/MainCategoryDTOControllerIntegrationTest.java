@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,6 +25,7 @@ public class MainCategoryDTOControllerIntegrationTest {
     @Test
     void getMainCategoryDTO_shouldReturnListOfNonHiddenMainCategoryDTO() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/main-category/non-hidden"))
+            .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.[0].mainCategoryName").value("Nigiri"))
             .andExpect(jsonPath("$.[0].mainCategoryIsHidden").value(0))

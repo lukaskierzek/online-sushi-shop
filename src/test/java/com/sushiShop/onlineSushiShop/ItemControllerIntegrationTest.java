@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -31,6 +32,7 @@ public class ItemControllerIntegrationTest {
     @Test
     void getNonHiddenItems_shouldReturnListOfNonHiddenItemsGet() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/raw/item/non-hidden"))
+            .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].itemName").value("Maguro Nigiri"))
             .andExpect(jsonPath("$[1].itemName").value("California Roll"))
@@ -45,6 +47,7 @@ public class ItemControllerIntegrationTest {
     @Test
     void getAllItems_shouldReturnListOfAllItemsGet() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/raw/item"))
+            .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.[0].additionalInformation.isHidden").value("0"))
             .andExpect(jsonPath("$.[4].additionalInformation.isHidden").value("1"))
@@ -54,6 +57,7 @@ public class ItemControllerIntegrationTest {
     @Test
     void getItemById_shouldReturnItemById() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/raw/item/non-hidden/1"))
+            .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.itemId").value(1))
             .andExpect(jsonPath("$.additionalInformation.isHidden").value(0))

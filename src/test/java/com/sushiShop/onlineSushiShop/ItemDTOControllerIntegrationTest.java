@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,6 +26,7 @@ public class ItemDTOControllerIntegrationTest {
     @Test
     void getAllItemDTO_shouldReturnListOfAllItemsDTOGet() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/item"))
+            .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.[0].itemName").value("Maguro Nigiri"))
             .andExpect(jsonPath("$.[1].itemName").value("California Roll"))
