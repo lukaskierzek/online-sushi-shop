@@ -2,7 +2,6 @@ package com.sushiShop.onlineSushiShop.configuration;
 
 import com.sushiShop.onlineSushiShop.enums.Database;
 import com.sushiShop.onlineSushiShop.exception.PostgresSQLNotFoundException;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -16,9 +15,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -35,7 +32,7 @@ public class ItemInitialData {
         }
     };
 
-    Supplier<String> printCurrentDatabase = () ->{
+    Supplier<String> printCurrentDatabase = () -> {
         try (Connection connection = dataSource.getConnection()) {
             String currDb = connection.getCatalog();
             return currDb;
@@ -43,7 +40,6 @@ public class ItemInitialData {
             throw new RuntimeException(e);
         }
     };
-
 
 
     @Bean
@@ -62,10 +58,10 @@ public class ItemInitialData {
         };
     }
 
-    private void saveSQLFilesToDabatase(JdbcTemplate jdbcTemplate, String initialFile) {
-        try (InputStream sqlInitialDataFile = getClass().getClassLoader().getResourceAsStream(initialFile)) {
+    private void saveSQLFilesToDabatase(JdbcTemplate jdbcTemplate, String sqlInitialFile) {
+        try (InputStream sqlInitialDataFile = getClass().getClassLoader().getResourceAsStream(sqlInitialFile)) {
             if (sqlInitialDataFile == null)
-                throw new PostgresSQLNotFoundException("File %s not found in resources folder".formatted(initialFile));
+                throw new PostgresSQLNotFoundException("File %s not found in resources folder".formatted(sqlInitialFile));
 
             String sqlInsertIntoQuery = getStringFromSQLFile.apply(sqlInitialDataFile);
 
