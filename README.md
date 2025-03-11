@@ -1,58 +1,79 @@
-# Suhi Shop Web Page
-Web demonstrates my skill with the [technologies I use](#technologies-used).On this webpage, on the frontend side, you can browse items by categories and edit particular items. On the backend side, you can edit and post items, categories, and subcategories.
+# Sushi Shop Web Page
+This project showcases my expertise in building web applications using **Java, Spring Boot, PostgreSQL, and Angular**. The frontend allows users to browse and edit sushi items, while the backend manages item, category, and subcategory data.
 
-## Table of contents
-* [Technologies Used](#technologies-used)
-* [Features](#features)
-* [Screenshots](#screenshots)
-* [Project Status](#project-status)
-* [Setup](#setup)
-* [Running](#running)
-* [Licene](#licence)
+## Table of Contents
+- [Technologies Used](#technologies-used)
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Project Status](#project-status)
+- [Setup](#setup)
+- [Running the Project](#running-the-project)
+- [License](#license)
+
+---
 
 ## Technologies Used
-- Java
-- Spring Boot
-- Hibernate
-- PostgreSQL
-- Angular
-- Docker
+This project utilizes the following technologies:
+- **[Java](https://www.java.com/)** – Backend logic
+- **[Spring Boot](https://spring.io/projects/spring-boot)** – REST API and backend services
+- **[Hibernate](https://hibernate.org/)** – ORM for database management
+- **[PostgreSQL](https://www.postgresql.org/)** – Database
+- **[Angular](https://angular.io/)** – Frontend framework
+- **[Docker](https://www.docker.com/)** – Containerization
+
+---
 
 ## Features
-- Get items by category
-- Get item by subcategory
-- Editing a specified item
+- Retrieve items by category  
+- Retrieve items by subcategory  
+- Edit specific items (admin feature)
+
+---
 
 ## Screenshots
-**Database diagram:**
->![SushiShop_database](images/Database_diagram.png)
+### **Database Diagram:**
+![SushiShop_database](images/Database_diagram.png)
+
+---
 
 ## Project Status
-The project is in progress.
+**In Progress** – More features will be added soon.
+
+---
 
 ## Setup
-- You have to install [docker](https://docs.docker.com/engine/install/) and/or [git](https://git-scm.com/downloads).
-- Download the project, for example, using the git command:
-```git
-git clone https://github.com/lukaskierzek/online-sushi-shop.git
-```
-- Open the command line in the directory where the **docker-compose.yml** file is located and run the command:
-```docker
-docker compose up -build
-```
+To set up the project, follow these steps:
 
-## Running
-- Link to the backend page:
->http://localhost:8080/swagger-ui/index.html
+1. Install the necessary dependencies:
+    - [Docker](https://docs.docker.com/engine/install/)
+    - [Git](https://git-scm.com/downloads)
 
-- Link to the website page:
->http://localhost:4200/sushishop/item?category=NEW-ITEM
+2. Clone the repository:
+   ```bash
+   git clone https://github.com/lukaskierzek/online-sushi-shop.git
+   cd online-sushi-shop
+   ```
 
-- Link to the PgAdmin:
->http://localhost:5050/
+3. Build and run the application using Docker:
+   ```bash
+   docker compose up --build
+   ```
 
+---
 
-## Licence
-> [Full content of the licence](LICENSE).
+## Running the Project
+- **Backend API (Swagger UI):**  
+  [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
-MIT
+- **Frontend Webpage:**  
+  [http://localhost:4200/sushishop/item?category=NEW-ITEM](http://localhost:4200/sushishop/item?category=NEW-ITEM)
+
+- **PgAdmin (Database UI):**  
+  [http://localhost:5050/](http://localhost:5050/)
+
+---
+
+## License
+This project is licensed under the **MIT License**.  
+For full details, see [LICENSE](LICENSE).
+
