@@ -17,7 +17,7 @@ export class ItemService {
   }
 
   getItemById(itemId: any): Observable<IItemById> {
-    return this.http.get<IItemById>(`http://localhost:8080/api/v1/onlinesushishop/item/non-hidden/${itemId}`);
+    return this.http.get<IItemById>(`http://localhost:8080/api/v1/onlinesushishop/item/${itemId}`);
   }
 
   getSubcategories() {
@@ -40,5 +40,9 @@ export class ItemService {
 
   getItemsOnSaleService(): Observable<IItemByCategory> {
     return this.http.get<IItemByCategory>('http://localhost:8080/api/v1/onlinesushishop/item/non-hidden/sale');
+  }
+
+  getAllItem(): Observable<any> {
+    return this.http.get<any>('http://localhost:8080/api/v1/onlinesushishop/item');
   }
 }

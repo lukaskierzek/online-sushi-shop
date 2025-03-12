@@ -3,6 +3,7 @@ import {ByCategoryItemComponent} from './features/by-category-item/by-category-i
 import {DetailsItemComponent} from './features/details-item/details-item.component';
 import {EditItemComponent} from './features/edit-item/edit-item.component';
 import {OnSaleItemsComponent} from './features/on-sale-items/on-sale-items.component';
+import {AdminPageComponent} from './features/admin-page/admin-page.component';
 
 export const routes: Routes = [
   {
@@ -10,12 +11,16 @@ export const routes: Routes = [
     component: ByCategoryItemComponent,
   },
   {
+    path: 'sushishop/admin-page',
+    component: AdminPageComponent,
+  },
+  {
     path: 'sushishop/item',
     component: ByCategoryItemComponent,
   },
   {
     path: 'sushishop/item/sale',
-    component: OnSaleItemsComponent
+    component: OnSaleItemsComponent,
   },
   {
     path: 'sushishop/item/:id',
@@ -23,6 +28,6 @@ export const routes: Routes = [
   },
   {
     path: 'sushishop/item/:id/edit',
-    component: EditItemComponent
+    component: EditItemComponent,
   }
 ];

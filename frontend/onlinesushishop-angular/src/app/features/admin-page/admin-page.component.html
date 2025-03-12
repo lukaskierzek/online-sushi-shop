@@ -1,1 +1,73 @@
-<p>admin-page works!</p>
+<!--<p>admin-page works!</p>-->
+
+<table>
+  <caption>All items</caption>
+  <thead>
+  <tr>
+    <th>Id</th>
+    <th>Name</th>
+    <th>Actual price</th>
+    <th>Old price</th>
+    <th>Name</th>
+    <th>Img URL</th>
+    <th>Description</th>
+    <th>Is hidden</th>
+    <th>Subcategories</th>
+    <th>Actions</th>
+  </tr>
+  </thead>
+  <tbody>
+    @for (item of allItem; track item.itemId) {
+      <tr>
+        <td>
+          {{ item.itemId }}
+        </td>
+        <td>
+          {{ item.itemName }}
+        </td>
+        <td>
+          {{ item.itemActualPrice }}
+        </td>
+        <td>
+          {{ item.itemOldPrice }}
+        </td>
+        <td>
+          {{ item.itemMainCategory }}
+        </td>
+        <td>
+          <img src="{{ item.itemImageUrl }}"
+               loading="lazy"
+               alt="Photo of {{item.itemName}}"/>
+        </td>
+        <td class="item-description-width">
+          {{ item.itemComment }}
+        </td>
+        <td>
+          @if (item.itemIsHidden === 0) {
+            no
+          } @else {
+            YES
+          }
+          <!--          {{ item.itemIsHidden }}-->
+        </td>
+        <td>
+          @for (subCat of item.itemSubcategories; track subCat.subcategoryId) {
+            @if (subCat.subcategoryName === Subcategory.BESTSELLER) {
+              <li class="item-subcategories bestseller">*</li>
+            } @else {
+              <li class="item-subcategories {{subCat.subcategoryName.toLowerCase()}}">
+                {{ subCat.subcategoryName.replace("-", " ") }}
+              </li>
+            }
+          }
+        </td>
+        <td>
+          <a [routerLink]="['/sushishop/item/', item.itemId, 'edit']">
+            <button>edit</button>
+          </a>
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+
