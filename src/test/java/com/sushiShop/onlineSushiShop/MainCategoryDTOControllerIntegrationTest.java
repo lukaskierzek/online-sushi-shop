@@ -34,6 +34,20 @@ public class MainCategoryDTOControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Test
+    void getMainCategoryDTOById_shouldReturnNonHiddenMainCategoryDTO() throws Exception {
+        long mainCategoryId = 1L;
+
+        mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/item/non-hidden/" + mainCategoryId))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.itemName").value("Maguro Nigiri"))
+            .andExpect(jsonPath("$.itemActualPrice").value(10))
+            .andExpect(jsonPath("$.itemOldPrice").value(20))
+            .andExpect(jsonPath("$.itemSubcategories[0].subcategoryIsHidden").value(0))
+        ;
+    }
+
+    @Test
     void getMainCategoryDTO_shouldReturnListOfNonHiddenMainCategoryDTO() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/v1/onlinesushishop/main-category/non-hidden"))
             .andDo(print())
@@ -55,6 +69,7 @@ public class MainCategoryDTOControllerIntegrationTest {
         mockMvc.perform(post("/api/v1/onlinesushishop/main-category")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newMainCategoryDTO)))
+            .andDo(print())
             .andExpect(status().isCreated())
             .andExpect(header().exists(HttpHeaders.LOCATION))
             .andExpect(header().string(HttpHeaders.LOCATION, containsString("/api/v1/onlinesushishop/raw/main-category/")))
