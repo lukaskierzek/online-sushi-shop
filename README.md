@@ -51,10 +51,14 @@ To set up the project, follow these steps:
 2. Clone the repository:
    ```bash
    git clone https://github.com/lukaskierzek/online-sushi-shop.git
+   ```
+   
+3. Change directory to online-sushi-shop:
+   ```bash
    cd online-sushi-shop
    ```
 
-3. Build and run the application using Docker:
+4. Build and run the application using Docker:
    ```bash
    docker compose up --build
    ```
