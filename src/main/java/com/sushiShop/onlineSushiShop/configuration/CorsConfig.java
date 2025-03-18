@@ -15,7 +15,13 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:4200"));
+
+        // http://localhost:4200 - angular
+        // http://localhost:5173 - react
+        corsConfiguration.setAllowedOrigins(List.of(
+            "http://localhost:4200",
+            "http://localhost:5173"
+            ));
         corsConfiguration.setAllowedHeaders(List.of(
             "Origin",
             "Access-Control-Allow-Origin",
