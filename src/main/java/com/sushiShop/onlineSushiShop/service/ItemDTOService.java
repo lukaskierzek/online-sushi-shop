@@ -133,6 +133,11 @@ public class ItemDTOService {
         return nonHiddenItemsByNewItemsCategoryWithSubcategoriesNonHidden;
     }
 
+    /**
+     * Get the list of item and return item with non hidden subcategories sorted by name.
+     * @param items the list of Item
+     * @return the non hidden subcategories sorted by name
+     */
     private List<ItemDTO> getItemsDTONonHiddenSubcategories(List<Item> items) {
         return items.stream()
             .map(item -> {
