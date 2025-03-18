@@ -1,8 +1,10 @@
+import {Typography} from "@mui/material";
+
 export default function Header() {
     return (
         <>
             <header>
-                <p>Welcome header!</p>
+                <Typography variant="h3">Online sushi shop</Typography>
             </header>
         </>
     );
