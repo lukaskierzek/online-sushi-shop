@@ -2,6 +2,7 @@ import {useEffect, useState} from "react";
 import {getMainCategories} from "../../services/Api.tsx";
 import {Button, Stack} from "@mui/material";
 import {Subcategory} from "../../enums/subcategory.tsx";
+import {NavLink} from "react-router";
 
 interface MainCategory {
     mainCategoryId: number,
@@ -49,13 +50,11 @@ export default function Navbar() {
                 }}
             >
                 <Button>
-                    <a href="#">{Subcategory.NEW_ITEM.replace("-", " ")}!</a>
+                    <NavLink to={`/menu/category/${Subcategory.NEW_ITEM}`}>{Subcategory.NEW_ITEM.replace("-", " ")}!</NavLink>
                 </Button>
                 {mainCategories.map((mc) => (
                     <Button>
-                        <a href="#">
-                            {mc.mainCategoryName}
-                        </a>
+                        <NavLink to={`/menu/category/${mc.mainCategoryName}`}>{mc.mainCategoryName}</NavLink>
                     </Button>
                 ))}
             </Stack>
