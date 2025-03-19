@@ -41,3 +41,10 @@ VALUES (1, 1),
        (7, 1),
        (7, 2),
        (7, 3);
+
+
+INSERT INTO users(user_active, user_role, user_created_at, user_updated_at, user_email, user_name, user_password)
+values
+    (true, 'ADMIN', '2025-03-18 21:23:15.443545', '2025-03-18 21:23:15.443545', 'janek@example.com', 'janek', 'janek123'),
+    (true, 'USER', '2025-03-18 21:23:15.443545', '2025-03-18 21:23:15.443545', 'maciek@example.com', 'maciek', 'maciek123'),
+    (false, 'USER', '2025-03-18 21:23:15.443545', '2025-03-18 21:23:15.443545', 'andrzej@example.com', 'andrzej', 'andrzej123');
