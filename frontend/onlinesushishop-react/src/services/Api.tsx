@@ -14,3 +14,14 @@ export const getMainCategories = async () => {
         return [];
     }
 }
+
+export const getAllItems = async () => {
+    try {
+        const responseGetAllItems = await axios.get(`${API_URL}/item`);
+        logGetMessage("All items", responseGetAllItems.data);
+        return responseGetAllItems.data
+    } catch (error) {
+        console.error(`Error during fetch all items: ${error}`);
+        return [];
+    }
+}

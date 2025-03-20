@@ -7,6 +7,7 @@ import {BrowserRouter, Navigate, Route, Routes} from "react-router";
 import ByCategoryItem from "./pages/ByCategoryItem.tsx";
 import {Subcategory} from "./enums/subcategory.tsx";
 import NotFoundPage from "./pages/NotFoundPage.tsx";
+import Admin from "./pages/Admin.tsx";
 
 
 function App() {
@@ -14,24 +15,33 @@ function App() {
 
     return (
         <>
-            <Container maxWidth="lg">
+            <Container maxWidth={false}>
                 <BrowserRouter>
-                    <Box>
-                        <Header/>
-                    </Box>
-                    <Box>
-                        <Navbar/>
-                    </Box>
-                    <Box>
-                        <Routes>
-                            <Route path="/" element={<Navigate to={defaultPageLink} replace />} />
-                            <Route path="/menu/category/:categoryName" element={<ByCategoryItem/>}/>
-                            <Route path="*" element={<NotFoundPage />} />
-                        </Routes>
-                    </Box>
-                    <Box>
-                        <Footer/>
-                    </Box>
+                    <header>
+                        <Box>
+                            <Header/>
+                        </Box>
+                    </header>
+                    <nav>
+                        <Box>
+                            <Navbar/>
+                        </Box>
+                    </nav>
+                    <main>
+                        <Box className="main-box-margin">
+                            <Routes>
+                                <Route path="/" element={<Navigate to={defaultPageLink} replace/>}/>
+                                <Route path="/admin" element={<Admin/>}/>
+                                <Route path="/menu/category/:categoryName" element={<ByCategoryItem/>}/>
+                                <Route path="*" element={<NotFoundPage/>}/>
+                            </Routes>
+                        </Box>
+                    </main>
+                    <footer>
+                        <Box>
+                            <Footer/>
+                        </Box>
+                    </footer>
                 </BrowserRouter>
             </Container>
         </>

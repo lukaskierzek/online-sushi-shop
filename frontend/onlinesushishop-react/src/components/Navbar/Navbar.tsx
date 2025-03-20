@@ -3,12 +3,8 @@ import {getMainCategories} from "../../services/Api.tsx";
 import {Button, Stack} from "@mui/material";
 import {Subcategory} from "../../enums/subcategory.tsx";
 import {NavLink} from "react-router";
+import MainCategory from "../../interfaces/MainCategory.tsx";
 
-interface MainCategory {
-    mainCategoryId: number,
-    mainCategoryIsHidden: number,
-    mainCategoryName: string
-}
 
 export default function Navbar() {
     const [mainCategories, setMainCategories] = useState<MainCategory[]>([]);
@@ -50,7 +46,11 @@ export default function Navbar() {
                 }}
             >
                 <Button>
-                    <NavLink to={`/menu/category/${Subcategory.NEW_ITEM}`}>{Subcategory.NEW_ITEM.replace("-", " ")}!</NavLink>
+                    <NavLink to={'/admin'}>Admin page</NavLink>
+                </Button>
+                <Button>
+                    <NavLink
+                        to={`/menu/category/${Subcategory.NEW_ITEM}`}>{Subcategory.NEW_ITEM.replace("-", " ")}!</NavLink>
                 </Button>
                 {mainCategories.map((mc) => (
                     <Button>
@@ -62,9 +62,8 @@ export default function Navbar() {
     };
 
     return (
-        <nav>
-            {/*<p>Navbar!</p>*/}
+        <>
             {renderContent()}
-        </nav>
+        </>
     );
 };
