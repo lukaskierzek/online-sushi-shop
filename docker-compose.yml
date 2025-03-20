@@ -1,6 +1,7 @@
 services:
     postgres:
         image: postgres:17.4
+        container_name: postgres_sushi-shop
         restart: always
         ports:
             - "5432:5432"
@@ -19,6 +20,7 @@ services:
 
     pgadmin:
         image: dpage/pgadmin4
+        container_name: pgadmin_sushi-shop
         restart: always
         ports:
             - "5050:80"
@@ -37,6 +39,7 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
+        container_name: sushi-shop-app
         ports:
             - "8080:8080"
         networks:
@@ -53,6 +56,7 @@ services:
         build:
             context: ./frontend/onlinesushishop-angular
             dockerfile: Dockerfile
+        container_name: angular_sushi-shop
         ports:
             - "4200:4200"
         networks:
