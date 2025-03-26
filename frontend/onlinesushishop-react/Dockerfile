@@ -1,6 +1,6 @@
 FROM node:23-alpine
 
-WORKDIR /angular_app
+WORKDIR /react_app
 
 COPY package*.json ./
 
@@ -8,6 +8,6 @@ RUN npm install
 
 COPY . .
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]
 
-EXPOSE 4200
+EXPOSE 5173
