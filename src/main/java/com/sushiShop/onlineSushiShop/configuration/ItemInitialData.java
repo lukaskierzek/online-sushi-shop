@@ -1,11 +1,15 @@
 package com.sushiShop.onlineSushiShop.configuration;
 
 import com.sushiShop.onlineSushiShop.enums.Database;
+import com.sushiShop.onlineSushiShop.enums.Role;
 import com.sushiShop.onlineSushiShop.exception.PostgresSQLNotFoundException;
+import com.sushiShop.onlineSushiShop.model.User;
+import com.sushiShop.onlineSushiShop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
@@ -21,8 +25,16 @@ import java.util.function.Supplier;
 
 @Component
 public class ItemInitialData {
-    @Autowired
     private DataSource dataSource;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public ItemInitialData(DataSource dataSource, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.dataSource = dataSource;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     Function<InputStream, String> getStringFromSQLFile = (sqlInitialDataFile) -> {
         try {
@@ -41,7 +53,6 @@ public class ItemInitialData {
         }
     };
 
-
     @Bean
     CommandLineRunner commandLineRunner(JdbcTemplate jdbcTemplate) {
         return args -> {
@@ -55,7 +66,28 @@ public class ItemInitialData {
                 saveSQLFilesToDabatase(jdbcTemplate, sqlFiles.get("SqlFileInitialDataForTests"));
             else
                 saveSQLFilesToDabatase(jdbcTemplate, sqlFiles.get("SqlFileInitialData"));
+
+            createAdminUser();
         };
+    }
+
+    private void createAdminUser() {
+        String adminName = "admin";
+        String adminPassword = "admin123";
+
+        if (userRepository.findByUserName(adminName).isEmpty()) {
+            User user = new User(
+                null,
+                "admin",
+                "admin@admin.com",
+                passwordEncoder.encode(adminPassword),
+                Role.ADMIN,
+                true,
+                null,
+                null
+            );
+            userRepository.save(user);
+        }
     }
 
     private void saveSQLFilesToDabatase(JdbcTemplate jdbcTemplate, String sqlInitialFile) {
@@ -76,3 +108,5 @@ public class ItemInitialData {
 //        return StreamUtils.copyToString(sqlInitialDataFile, StandardCharsets.UTF_8);
 //    }
 }
+
+//TODO: Check later

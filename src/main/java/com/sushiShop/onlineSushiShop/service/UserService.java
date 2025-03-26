@@ -9,10 +9,9 @@ import java.util.List;
 
 @Service
 public class UserService {
-
-    @Autowired
     private final UserRepository userRepository;
 
+    @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -22,3 +21,5 @@ public class UserService {
         return allUser;
     }
 }
+
+//TODO: Check later
