@@ -33,11 +33,6 @@ export default function Navbar() {
         if (mainCategories.length === 0) return <p>There is no categories!</p>;
 
         return (
-            // <ul>
-            //     {mainCategories.map((category) => (
-            //         <li key={category.mainCategoryId}>{category.mainCategoryName}</li>
-            //     ))}
-            // </ul>
             <Stack
                 direction="row"
                 sx={{
@@ -51,6 +46,9 @@ export default function Navbar() {
                 <Button>
                     <NavLink
                         to={`/menu/category/${Subcategory.NEW_ITEM}`}>{Subcategory.NEW_ITEM.replace("-", " ")}!</NavLink>
+                </Button>
+                <Button>
+                    <NavLink to={`/menu/item/sale`}>SALE!</NavLink>
                 </Button>
                 {mainCategories.map((mc) => (
                     <Button>

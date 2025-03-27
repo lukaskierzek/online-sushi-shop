@@ -1,9 +1,9 @@
 #root {
-    /*max-width: 1280px;*/
     margin: 0 auto;
     padding: 2rem;
     text-align: center;
     --border-radius-subcategories: 5px;
+    --item-font-size-new-actual-price: xx-large;
 }
 
 .logo {
@@ -79,4 +79,37 @@ li {
 
 .main-box-margin {
     margin: 20px 0 20px 0;
+}
+
+.ul-subcategories {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: left;
+    overflow: hidden;
+    align-items: center;
+}
+
+.li-subcategories {
+    float: left;
+    display: block;
+    padding: 0 5px 0 5px;
+    margin-right: 5px;
+}
+
+.item-actual-price {
+    display: block;
+    text-align: left;
+    color: red;
+    font-size: var(--item-font-size-new-actual-price);
+}
+
+.item-old-price {
+    display: block;
+    text-align: left;
+    color: whitesmoke;
+    font-size: large;
+    text-decoration: line-through;
+    padding-top: 0px;
 }

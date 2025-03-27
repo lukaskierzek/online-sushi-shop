@@ -13,7 +13,7 @@ export const getMainCategories = async () => {
         console.error('Error during fetch main categories: ', error);
         return [];
     }
-}
+};
 
 export const getAllItems = async () => {
     try {
@@ -22,6 +22,28 @@ export const getAllItems = async () => {
         return responseGetAllItems.data
     } catch (error) {
         console.error(`Error during fetch all items: ${error}`);
+        return [];
+    }
+};
+
+export const getItemsByCategory = async (category: string | undefined) => {
+    try {
+        const responseGetItemsByCategory = await axios.get(`${API_URL}/item/non-hidden/by-category?category=${category}`);
+        logGetMessage("Items by category", responseGetItemsByCategory.data);
+        return responseGetItemsByCategory.data;
+    } catch (error) {
+        console.error(`Error during fetch items by category: ${error}`);
+        return [];
+    }
+}
+
+export const getItemsOnSale = async () => {
+    try {
+        const responseGetItemsOnSale = await axios.get(`${API_URL}/item/non-hidden/sale`);
+        logGetMessage("All items on sale", responseGetItemsOnSale.data);
+        return responseGetItemsOnSale.data;
+    } catch (error) {
+        console.error(`Error during fetch all items on sale: ${error}`);
         return [];
     }
 }
