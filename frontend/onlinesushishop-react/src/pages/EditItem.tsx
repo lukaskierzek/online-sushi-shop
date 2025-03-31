@@ -102,11 +102,10 @@ export default function EditItem() {
     }, [param.itemId]);
 
     const handleSubmit = async (e) => {
-        let askConfirmUpdate: boolean = confirm("Update item?")
+        e.preventDefault();
+        const askConfirmUpdate: boolean = confirm("Update item?")
 
         if (askConfirmUpdate) {
-            e.preventDefault();
-
             const formSateToPut = {...formState};
 
             formSateToPut.subcategories = formSateToPut.subcategories
@@ -130,8 +129,6 @@ export default function EditItem() {
             console.log(`Form submitted: `)
             console.log(formSateToPut)
         }
-
-
     }
 
     const handleInputChange = (e, index = null) => {
