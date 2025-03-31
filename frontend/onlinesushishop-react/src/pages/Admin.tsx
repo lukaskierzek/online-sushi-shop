@@ -1,8 +1,19 @@
 import {useEffect, useState} from "react";
 import {getAllItems} from "../services/Api.tsx";
 import Item from "../interfaces/Item.tsx";
-import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
+import {
+    Button,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography
+} from "@mui/material";
 import {Subcategory} from "../enums/subcategory.tsx";
+import {NavLink} from "react-router";
 
 export default function Admin() {
     const [allItem, setAllItem] = useState<Item[]>([])
@@ -76,7 +87,11 @@ export default function Admin() {
                                     ))}
                                 </TableCell>
                                 <TableCell align="center">
-                                    LINK TO ACTIONS
+                                    <Button>
+                                        <NavLink to={`/menu/item/${row.itemId}/edit`}>
+                                            <Typography color="info">EDIT</Typography>
+                                        </NavLink>
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}

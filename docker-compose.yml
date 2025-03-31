@@ -52,13 +52,13 @@ services:
             - SPRING_DATASOURCE_USERNAME=onlinesushishop
             - SPRING_DATASOURCE_PASSWORD=Strong!Pass1@#
 
-    frontend-angular:
+    frontend-react:
         build:
-            context: ./frontend/onlinesushishop-angular
+            context: ./frontend/onlinesushishop-react
             dockerfile: Dockerfile
-        container_name: angular_sushi-shop
+        container_name: react_sushi-shop
         ports:
-            - "4200:4200"
+            - "5173:5173"
         networks:
             - sushi-shop-network
 

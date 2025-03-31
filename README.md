@@ -1,5 +1,5 @@
 # Sushi Shop Web Page
-This project showcases my expertise in building web applications using **Java, Spring Boot, PostgreSQL, and Angular**. The frontend allows users to browse and edit sushi items, while the backend manages item, category, and subcategory data.
+This project showcases my expertise in building web applications using **Java, Spring Boot, PostgreSQL and React**. The frontend allows users to browse and edit sushi items, while the backend manages item, category, and subcategory data.
 
 ## Table of Contents
 - [Technologies Used](#technologies-used)
@@ -18,7 +18,8 @@ This project utilizes the following technologies:
 - **[Spring Boot](https://spring.io/projects/spring-boot)** – REST API and backend services
 - **[Hibernate](https://hibernate.org/)** – ORM for database management
 - **[PostgreSQL](https://www.postgresql.org/)** – Database
-- **[Angular](https://angular.io/)** – Frontend framework
+- **[React](https://react.dev/)** – Frontend framework
+- **[Material UI](https://mui.com/material-ui/)** – React component library
 - **[Docker](https://www.docker.com/)** – Containerization
 
 ---
@@ -27,6 +28,7 @@ This project utilizes the following technologies:
 - Retrieve items by category  
 - Retrieve items by subcategory  
 - Edit specific items (admin feature)
+- List of all items (admin feature)
 
 ---
 
@@ -67,10 +69,14 @@ To set up the project, follow these steps:
 
 ## Running the Project
 - **Backend API (Swagger UI):**  
-  [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+  [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)<br/>
+  **Username**: admin <br/>
+  **Password**: admin123
+
 
 - **Frontend Webpage:**  
-  [http://localhost:4200/sushishop/item?category=NEW-ITEM](http://localhost:4200/sushishop/item?category=NEW-ITEM)
+  [http://localhost:5137/sushishop/item?category=NEW-ITEM](http://localhost:4200/sushishop/item?category=NEW-ITEM)
+
 
 - **PgAdmin (Database UI):**  
   [http://localhost:5050/](http://localhost:5050/)

@@ -96,6 +96,7 @@ li {
     display: block;
     padding: 0 5px 0 5px;
     margin-right: 5px;
+    color: black;
 }
 
 .item-actual-price {

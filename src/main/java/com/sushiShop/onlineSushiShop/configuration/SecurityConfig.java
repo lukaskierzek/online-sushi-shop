@@ -1,5 +1,6 @@
 package com.sushiShop.onlineSushiShop.configuration;
 
+import com.sushiShop.onlineSushiShop.component.JwtFilter;
 import com.sushiShop.onlineSushiShop.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -11,15 +12,18 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
+    private final JwtFilter jwtFilter;
 
     @Autowired
-    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService, JwtFilter jwtFilter) {
         this.userDetailsService = userDetailsService;
+        this.jwtFilter = jwtFilter;
     }
 
     @Bean
@@ -32,11 +36,7 @@ public class SecurityConfig {
         http.cors(Customizer.withDefaults())
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(
-//                    "/admin",
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**"
-                    ).authenticated()
+                    .requestMatchers("/swagger-ui/**").authenticated()
 //                .requestMatchers("/api/v1/onlinesushishop/**").permitAll()//TODO: check patterns for adminpage in angular
                     .anyRequest().permitAll()
             )
@@ -45,7 +45,7 @@ public class SecurityConfig {
 //            .sessionManagement(session ->
 //                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 //            )
-//            .addFilterBefore(jwt)
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
         ;
 
         return http.build();

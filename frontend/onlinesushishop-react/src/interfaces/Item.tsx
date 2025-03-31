@@ -5,9 +5,9 @@ export default interface Item {
     itemComment: string,
     itemId: number,
     itemImageUrl: string,
-    itemIsHidden: number
+    itemIsHidden: number,
     itemMainCategory: string,
-    itemName: string
+    itemName: string,
     itemOldPrice: number,
     itemSubcategories: Subcategory[]
 }

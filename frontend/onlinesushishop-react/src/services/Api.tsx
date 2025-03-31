@@ -35,7 +35,18 @@ export const getItemsByCategory = async (category: string | undefined) => {
         console.error(`Error during fetch items by category: ${error}`);
         return [];
     }
-}
+};
+
+export const getItemById = async (id: number | undefined) => {
+    try {
+        const responseGetItemById = await axios.get(`${API_URL}/item/${id}`);
+        logGetMessage("Item by Id", responseGetItemById.data);
+        return responseGetItemById.data;
+    } catch (error) {
+        console.error(`Error during fetch itemById: ${error}`);
+        return [];
+    }
+};
 
 export const getItemsOnSale = async () => {
     try {
@@ -46,4 +57,45 @@ export const getItemsOnSale = async () => {
         console.error(`Error during fetch all items on sale: ${error}`);
         return [];
     }
-}
+};
+
+export const getItem = async (itemId: string | undefined) => {
+    try {
+        const reponseGetItem = await axios.get(`${API_URL}/item/${itemId}`);
+        logGetMessage("Item by id", reponseGetItem.data);
+        return reponseGetItem.data;
+    } catch (error) {
+        console.error(`Error during fetch item: ${error}`);
+        return [];
+    }
+};
+
+export const getSubcategories = async () => {
+    try {
+        const responseGetSubcategories = await axios.get(`${API_URL}/subcategory/non-hidden`);
+        logGetMessage("All subcategories", responseGetSubcategories.data);
+        return responseGetSubcategories.data;
+    } catch (error) {
+        console.error(`Error during fetch subcategories: ${error}`);
+        return [];
+    }
+};
+
+export const putItem = async (itemFromForm: any) => {
+    try {
+        const responsePutItemFromForm = axios.put(`${API_URL}/item/${itemFromForm.itemId}`, {
+            "itemName": itemFromForm.name,
+            "itemActualPrice": itemFromForm.actualPrice,
+            "itemOldPrice": itemFromForm.oldPrice,
+            "itemImageUrl": itemFromForm.imageURL,
+            "itemComment": itemFromForm.description,
+            "itemMainCategoryId": itemFromForm.mainCategory,
+            "itemIsHidden": itemFromForm.isHidden,
+            "itemSubcategoriesId": itemFromForm.subcategories
+        })
+        return responsePutItemFromForm;
+    } catch (error) {
+        console.error(`Error during put item: ${error}`);
+        return [];
+    }
+};

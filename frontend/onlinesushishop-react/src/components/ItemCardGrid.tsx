@@ -1,8 +1,7 @@
 import Item from "../interfaces/Item.tsx";
 import {Card, CardActionArea, CardActions, CardContent, CardMedia, Grid, Typography} from "@mui/material";
 import {Link} from "react-router";
-import Subcategory from "../interfaces/Subcategory.tsx";
-import {Subcategory as subcategoryEnum} from "../enums/subcategory.tsx";
+import renderPriceAndSubcategory from "./ItemPriceAndSubcategories.tsx";
 
 
 const ItemCardGrid: React.FC<{ items: Item[] }> = ({items}) => {
@@ -14,12 +13,16 @@ const ItemCardGrid: React.FC<{ items: Item[] }> = ({items}) => {
             alignItems: "center",
         }}>
             {items.map((item: Item, index: number) => (
-                <Grid item xs={12} sm={6} md={4} key={index}>
+                <Grid size={{
+                    xs: 12,
+                    sm: 6,
+                    md: 4
+                }} key={index}>
 
                     <Card sx={{minWidth: 150, minHeight: 410, backgroundColor: "#a9a9a9"}}>
                         <CardActionArea
                             component={Link}
-                            to={`/menu/${item.itemName}`}
+                            to={`/menu/item/${item.itemId}`}
                         >
                             <CardMedia
                                 component="img"
@@ -37,24 +40,7 @@ const ItemCardGrid: React.FC<{ items: Item[] }> = ({items}) => {
                             </CardContent>
                         </CardActionArea>
                         <CardActions>
-                            <Typography variant="subtitle1" component="span">
-                                {item.itemActualPrice < item.itemOldPrice ? (
-                                    <>
-                                        <span className={'item-old-price'}>{item.itemOldPrice} zł</span>
-                                        <span className={'item-actual-price'}>{item.itemActualPrice} zł</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <span className={'item-old-price'}></span>
-                                        <span className={'item-actual-price'}>{item.itemActualPrice} zł</span>
-                                    </>
-                                )}
-                            </Typography>
-                            <ul className={'ul-subcategories'}>
-                                {item.itemSubcategories.map((sub: Subcategory) => (
-                                    <li className={`li-subcategories item-subcategories ${sub.subcategoryName === subcategoryEnum.BESTSELLER ? 'bestseller' : sub.subcategoryName.toLowerCase()}`}>{sub.subcategoryName}</li>
-                                ))}
-                            </ul>
+                            {renderPriceAndSubcategory(item)}
                         </CardActions>
                     </Card>
                 </Grid>

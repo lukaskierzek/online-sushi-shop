@@ -33,13 +33,28 @@ public class JwtUtil {
         return jwts;
     }
 
-    public Claims parseToken(String token) {
+    private Claims parseToken(String token) {
         JwtParser parser = Jwts.parser()
             .verifyWith(getSignKey())
             .build();
 
         Claims claimJws = parser.parseSignedClaims(token).getPayload();
         return claimJws;
+    }
+
+    public String extractUsername(String token) {
+        String subject = parseToken(token).getSubject();
+        return subject;
+    }
+
+    public boolean isExpiredToken(String token) {
+        boolean tokenExpired = parseToken(token).getExpiration().before(new Date());
+        return tokenExpired;
+    }
+
+    public boolean validateToken(String token) {
+        boolean tokenValidate = extractUsername(token) != null && !isExpiredToken(token);
+        return tokenValidate;
     }
 }
 
