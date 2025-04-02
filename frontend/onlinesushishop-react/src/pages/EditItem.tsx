@@ -9,7 +9,8 @@ import {
     Box,
     Button,
     Checkbox,
-    FormControlLabel, FormGroup,
+    FormControlLabel,
+    FormGroup,
     FormLabel,
     Radio,
     RadioGroup,
@@ -106,28 +107,28 @@ export default function EditItem() {
         const askConfirmUpdate: boolean = confirm("Update item?")
 
         if (askConfirmUpdate) {
-            const formSateToPut = {...formState};
+            const formStateToPut = {...formState};
 
-            formSateToPut.subcategories = formSateToPut.subcategories
+            formStateToPut.subcategories = formStateToPut.subcategories
                 .filter((sub) => sub.isChecked)
                 .map((sub) => sub.subcategoryId)
             ;
 
-            formSateToPut.mainCategory = mainCategory
-                .filter((maincat) => maincat.mainCategoryName === formSateToPut.mainCategory)
+            formStateToPut.mainCategory = mainCategory
+                .filter((maincat) => maincat.mainCategoryName === formStateToPut.mainCategory)
                 .map((maincat) => maincat.mainCategoryId)[0]
             ;
 
             try {
-                const responsePostFormSate = await putItem(formSateToPut);
-                console.log(responsePostFormSate.data);
+                const responsePostFormSate = await putItem(formStateToPut);
+                console.info(responsePostFormSate);
                 alert("Item successfully updated!");
             } catch (error) {
-                console.error((error as Error).message);
+                console.error("Error:", (error as any).response?.data || (error as Error).message);
             }
 
-            console.log(`Form submitted: `)
-            console.log(formSateToPut)
+            console.info(`Form submitted: `)
+            console.table(formStateToPut)
         }
     }
 
@@ -165,7 +166,7 @@ export default function EditItem() {
 
         return (
             <>
-                <Typography variant="h4" >Edit item</Typography>
+                <Typography variant="h4">Edit item</Typography>
                 <form onSubmit={handleSubmit} style={{backgroundColor: "white"}}>
                     <TextField
                         label="Name"

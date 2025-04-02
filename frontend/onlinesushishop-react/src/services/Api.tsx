@@ -2,9 +2,9 @@ import axios from "axios";
 import logGetMessage from "./logGetMessage.tsx";
 
 const API_URL: string = 'http://localhost:8080/api/v1/onlinesushishop';
+const API_URL_AUTH: string = 'http://localhost:8080/api/v1/onlinesushishop/auth';
 
 export const getMainCategories = async () => {
-    // console.log("getMainCategories called");
     try {
         const response = await axios.get(`${API_URL}/main-category/non-hidden`);
         logGetMessage("Main categories", response.data);
@@ -81,9 +81,9 @@ export const getSubcategories = async () => {
     }
 };
 
-export const putItem = async (itemFromForm: any) => {
+export const putItem = async (itemFromForm) => {
     try {
-        const responsePutItemFromForm = axios.put(`${API_URL}/item/${itemFromForm.itemId}`, {
+        const responsePutItemFromForm = await axios.put(`${API_URL}/item/${itemFromForm.itemId}`, {
             "itemName": itemFromForm.name,
             "itemActualPrice": itemFromForm.actualPrice,
             "itemOldPrice": itemFromForm.oldPrice,
@@ -96,6 +96,24 @@ export const putItem = async (itemFromForm: any) => {
         return responsePutItemFromForm;
     } catch (error) {
         console.error(`Error during put item: ${error}`);
-        return [];
+        throw error;
     }
 };
+
+export const login = async (username: string, password: string) => {
+    try {
+        const responseLogin = await axios.post(`${API_URL_AUTH}/login`, null, {
+            params: {username, password}
+        });
+
+        return responseLogin;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            if (error.response?.status === 401) {
+                throw new Error(error.response?.data || "Wrong username or password!");
+            }
+            throw new Error("An unexpected error occurred.");
+        }
+
+    }
+}

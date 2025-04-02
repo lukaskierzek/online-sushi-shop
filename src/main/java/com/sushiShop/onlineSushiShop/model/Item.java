@@ -23,6 +23,7 @@ public class Item {
     @Column(name = "Items_Name", nullable = false, unique = true)
     private String itemName;
 
+    //TODO: Change price to grosze e.g. 23PLN is 2300 groszy
     @Column(name = "Items_Actual_Price", nullable = false)
     private Integer itemActualPrice;
 

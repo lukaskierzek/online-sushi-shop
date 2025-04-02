@@ -26,7 +26,8 @@ This project utilizes the following technologies:
 
 ## Features
 - Retrieve items by category  
-- Retrieve items by subcategory  
+- Retrieve items by subcategory
+- Sign in and sign out
 - Edit specific items (admin feature)
 - List of all items (admin feature)
 
@@ -75,7 +76,9 @@ To set up the project, follow these steps:
 
 
 - **Frontend Webpage:**  
-  [http://localhost:5137/sushishop/item?category=NEW-ITEM](http://localhost:4200/sushishop/item?category=NEW-ITEM)
+  [http://localhost:5137/sushishop/item?category=NEW-ITEM](http://localhost:4200/sushishop/item?category=NEW-ITEM)<br/>
+  **Username**: admin <br/>
+  **Password**: admin123
 
 
 - **PgAdmin (Database UI):**  

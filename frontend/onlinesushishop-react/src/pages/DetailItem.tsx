@@ -4,6 +4,7 @@ import Item from "../interfaces/Item.tsx";
 import {getItem} from "../services/Api.tsx";
 import {Button, CardMedia, Grid, Typography} from "@mui/material";
 import renderPriceAndSubcategory from "../components/ItemPriceAndSubcategories.tsx";
+import {useAuth} from "../context/AuthContext.tsx";
 
 export default function DetailItem() {
     const [itemDetails, setItemDetails] = useState<Item>({
@@ -19,6 +20,7 @@ export default function DetailItem() {
     });
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const {isAuthenticated} = useAuth();
 
     const {itemId} = useParams();
 
@@ -75,15 +77,17 @@ export default function DetailItem() {
                         </Typography>
                         {renderPriceAndSubcategory(itemDetails)}
 
-                        <Button>
-                            <NavLink to={`/menu/item/${itemDetails.itemId}/edit`}>
-                                <Typography color="info">EDIT</Typography>
-                            </NavLink>
-                        </Button>
+                        {isAuthenticated && (
+                            <Button>
+                                <NavLink to={`/menu/item/${itemDetails.itemId}/edit`}>
+                                    <Typography color="info">EDIT</Typography>
+                                </NavLink>
+                            </Button>)}
                     </Grid>
                 </Grid>
             </>
-        );
+        )
+            ;
     }
 
     return (

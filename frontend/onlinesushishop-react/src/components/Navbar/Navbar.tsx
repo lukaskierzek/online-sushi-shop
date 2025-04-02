@@ -4,12 +4,14 @@ import {Button, Stack} from "@mui/material";
 import {Subcategory} from "../../enums/subcategory.tsx";
 import {NavLink} from "react-router";
 import MainCategory from "../../interfaces/MainCategory.tsx";
+import {useAuth} from "../../context/AuthContext.tsx";
 
 
 export default function Navbar() {
     const [mainCategories, setMainCategories] = useState<MainCategory[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const {isAuthenticated, logout} = useAuth();
 
     useEffect(() => {
         const fetchMainCategoriesData = async () => {
@@ -27,6 +29,11 @@ export default function Navbar() {
         fetchMainCategoriesData();
     }, []);
 
+    // const handleLogout = () => {
+    //     localStorage.removeItem("token");
+    //     window.location.reload();
+    // }
+
     const renderContent = () => {
         if (loading) return <p>Loading categories...</p>;
         if (error) return <p>Error: {error}</p>;
@@ -40,9 +47,28 @@ export default function Navbar() {
                     justifyContent: "center",
                 }}
             >
-                <Button>
-                    <NavLink to={'/admin'}>Admin page</NavLink>
-                </Button>
+                {/*<Button>*/}
+                {/*    <NavLink to={'/login'}>Sign in</NavLink>*/}
+                {/*</Button>*/}
+                {/*{token && (<Button>*/}
+                {/*    <NavLink to={'/admin'}>Admin page</NavLink>*/}
+                {/*</Button>)}*/}
+
+                {!isAuthenticated ? (
+                    <Button>
+                        <NavLink to='/login'>Sign in</NavLink>
+                    </Button>
+                ) : (
+                    <>
+                        <Button onClick={logout}>
+                            Sign out
+                        </Button>
+                        <Button>
+                            <NavLink to="/admin">Admin page</NavLink>
+                        </Button>
+                    </>
+                )}
+
                 <Button>
                     <NavLink
                         to={`/menu/category/${Subcategory.NEW_ITEM}`}>{Subcategory.NEW_ITEM.replace("-", " ")}!</NavLink>

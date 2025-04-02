@@ -1,11 +1,17 @@
 package com.sushiShop.onlineSushiShop.model.dto;
 
+import jakarta.validation.constraints.Min;
+
 import java.util.List;
 
 public class ItemDTO {
     private Long itemId;
     private String itemName;
+
+    //TODO: Add more validation
+    @Min(1)
     private Integer itemActualPrice;
+    @Min(1)
     private Integer itemOldPrice;
     private String itemImageUrl;
     private Integer itemIsHidden;
