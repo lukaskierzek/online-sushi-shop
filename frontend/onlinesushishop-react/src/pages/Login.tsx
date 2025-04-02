@@ -1,21 +1,20 @@
 import {useState} from "react";
-import {useNavigate} from "react-router";
 import {login as loginPost} from "../services/Api.tsx";
-import {Box, Button, TextField, Typography} from "@mui/material";
+import {Box, Button, CircularProgress, TextField, Typography} from "@mui/material";
 import {useAuth} from "../context/AuthContext.tsx";
 
 const Login = () => {
     const [email, setEmail] = useState<string>("")
     const [password, setPassword] = useState<string>("")
     const [error, setError] = useState<string>("")
-    const navigate = useNavigate();
+    const [loading, setLoading] = useState<boolean>(false);
 
     const {login} = useAuth()
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-
         setError("");
+        setLoading(true);
 
         try {
             const responseLogin = await loginPost(email, password);
@@ -27,7 +26,10 @@ const Login = () => {
             }
         } catch (e) {
             setError(e.message)
+        } finally {
+            setLoading(false);
         }
+
     }
 
     return (
@@ -54,6 +56,7 @@ const Login = () => {
                 sx={{
                     marginTop: 2,
                 }}
+                disabled={loading}
             />
             <TextField
                 type="password"
@@ -63,6 +66,7 @@ const Login = () => {
                 placeholder="Enter your password"
                 variant="outlined"
                 required
+                disabled={loading}
             />
 
             {error &&
@@ -71,14 +75,19 @@ const Login = () => {
                 </Typography>
             }
 
-            <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                sx={{alignSelf: "center"}}
-            >
-                Sign in
-            </Button>
+            {loading ? (
+                <CircularProgress sx={{alignSelf: "center"}}/> // Wyświetlenie wskaźnika ładowania
+            ) : (
+                <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    sx={{alignSelf: "center"}}
+                >
+                    Sign in
+                </Button>
+            )}
+
         </Box>
     );
 }
