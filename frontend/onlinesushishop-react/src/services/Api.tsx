@@ -102,8 +102,9 @@ export const putItem = async (itemFromForm) => {
 
 export const login = async (username: string, password: string) => {
     try {
-        const responseLogin = await axios.post(`${API_URL_AUTH}/login`, null, {
-            params: {username, password}
+        const responseLogin = await axios.post(`${API_URL_AUTH}/login`, {
+            username: username,
+            password: password
         });
 
         return responseLogin;
