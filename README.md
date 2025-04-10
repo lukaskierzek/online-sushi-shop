@@ -21,6 +21,9 @@ This project utilizes the following technologies:
 - **[React](https://react.dev/)** – Frontend framework
 - **[Material UI](https://mui.com/material-ui/)** – React component library
 - **[Docker](https://www.docker.com/)** – Containerization
+- **[JUnit](https://junit.org/)** – Unit testing framework
+- **[Mockito](https://site.mockito.org/)** – Mocking framework for testing dependencies
+
 
 ---
 
