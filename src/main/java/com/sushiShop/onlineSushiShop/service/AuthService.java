@@ -3,6 +3,7 @@ package com.sushiShop.onlineSushiShop.service;
 import com.sushiShop.onlineSushiShop.component.JwtUtil;
 import com.sushiShop.onlineSushiShop.enums.Role;
 import com.sushiShop.onlineSushiShop.model.User;
+import com.sushiShop.onlineSushiShop.model.UserBuilder;
 import com.sushiShop.onlineSushiShop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,15 +41,16 @@ public class AuthService {
         if (userRepository.findByUserName(username).isPresent())
             throw new RuntimeException("User already exists");
 
-        User newUser = new User(
-            null,
-            username,
-            email,
-            passwordEncoder.encode(password),
-            userRole,
-            true,
-            null,
-            null);
+        User newUser = new UserBuilder()
+            .setUserId(null)
+            .setUserName(username)
+            .setUserEmail(email)
+            .setUserPassword(passwordEncoder.encode(password))
+            .setUserRole(userRole)
+            .setUserIsActive(true)
+            .setUserCreatedAt(null)
+            .setUserUpdatedAt(null)
+            .createUser();
 
         userRepository.save(newUser);
     }

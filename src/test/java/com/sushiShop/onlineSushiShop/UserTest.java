@@ -26,26 +26,30 @@ public class UserTest {
     void getAllUser_shouldReturnAllUser() {
         List<User> allUsers = userService.getAllUser();
 
-        assertEquals(4, allUsers.size());
+        assertEquals(5, allUsers.size());
 
         assertEquals(true, allUsers.get(0).getUserIsActive());
         assertEquals(true, allUsers.get(1).getUserIsActive());
         assertEquals(false, allUsers.get(2).getUserIsActive());
         assertEquals(true, allUsers.get(3).getUserIsActive());
+        assertEquals(true, allUsers.get(4).getUserIsActive());
 
         assertEquals("ADMIN", allUsers.get(0).getUserRole().toString());
         assertEquals("USER", allUsers.get(1).getUserRole().toString());
         assertEquals("USER", allUsers.get(2).getUserRole().toString());
         assertEquals("ADMIN", allUsers.get(3).getUserRole().toString());
+        assertEquals("USER", allUsers.get(4).getUserRole().toString());
 
         assertEquals("janek@example.com", allUsers.get(0).getUserEmail());
         assertEquals("maciek@example.com", allUsers.get(1).getUserEmail());
         assertEquals("andrzej@example.com", allUsers.get(2).getUserEmail());
         assertEquals("admin@admin.com", allUsers.get(3).getUserEmail());
+        assertEquals("user@user.com", allUsers.get(4).getUserEmail());
 
         assertEquals("janek", allUsers.get(0).getUserName());
         assertEquals("maciek", allUsers.get(1).getUserName());
         assertEquals("andrzej", allUsers.get(2).getUserName());
         assertEquals("admin", allUsers.get(3).getUserName());
+        assertEquals("user", allUsers.get(4).getUserName());
     }
 }

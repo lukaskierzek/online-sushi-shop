@@ -4,6 +4,7 @@ import com.sushiShop.onlineSushiShop.enums.Database;
 import com.sushiShop.onlineSushiShop.enums.Role;
 import com.sushiShop.onlineSushiShop.exception.PostgresSQLNotFoundException;
 import com.sushiShop.onlineSushiShop.model.User;
+import com.sushiShop.onlineSushiShop.model.UserBuilder;
 import com.sushiShop.onlineSushiShop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -68,6 +69,7 @@ public class ItemInitialData {
                 saveSQLFilesToDabatase(jdbcTemplate, sqlFiles.get("SqlFileInitialData"));
 
             createAdminUser();
+            createUserUser();
         };
     }
 
@@ -76,16 +78,24 @@ public class ItemInitialData {
         String adminPassword = "admin123";
 
         if (userRepository.findByUserName(adminName).isEmpty()) {
-            User user = new User(
-                null,
-                "admin",
-                "admin@admin.com",
-                passwordEncoder.encode(adminPassword),
-                Role.ADMIN,
-                true,
-                null,
-                null
-            );
+            User user = new UserBuilder()
+                .setUserName("admin")
+                .setUserEmail("admin@admin.com")
+                .setUserPassword(passwordEncoder.encode(adminPassword))
+                .setUserRole(Role.ADMIN).setUserIsActive(true)
+                .createUser();
+            userRepository.save(user);
+        }
+    }
+
+    private void createUserUser() {
+        if (userRepository.findByUserName("user").isEmpty()) {
+            User user = new UserBuilder()
+                .setUserName("user")
+                .setUserEmail("user@user.com")
+                .setUserPassword(passwordEncoder.encode("user123"))
+                .setUserRole(Role.USER).setUserIsActive(true)
+                .createUser();
             userRepository.save(user);
         }
     }
