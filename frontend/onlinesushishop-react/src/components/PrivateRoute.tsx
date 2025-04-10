@@ -1,9 +1,13 @@
 import {Navigate, Outlet} from "react-router";
+import {useAuth} from "../context/AuthContext.tsx";
 
-const PrivateRoute = () => {
-    const token = localStorage.getItem("token");
+const PrivateRoute = ({requiredRole}: { requiredRole: string }) => {
+    const {isAuthenticated, role} = useAuth();
 
-    return token ? <Outlet/> : <Navigate to="/login" replace/>;
+    if (!isAuthenticated) return <Navigate to="/login" replace/>;
+    if (requiredRole && role !== requiredRole) return <Navigate to="/unauthorized" replace/>;
+
+    return <Outlet/>
 };
 
 export default PrivateRoute;

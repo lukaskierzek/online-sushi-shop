@@ -5,6 +5,7 @@ import {getItem} from "../services/Api.tsx";
 import {Button, CardMedia, Grid, Typography} from "@mui/material";
 import renderPriceAndSubcategory from "../components/ItemPriceAndSubcategories.tsx";
 import {useAuth} from "../context/AuthContext.tsx";
+import {Role} from "../enums/role.tsx";
 
 export default function DetailItem() {
     const [itemDetails, setItemDetails] = useState<Item>({
@@ -20,7 +21,7 @@ export default function DetailItem() {
     });
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const {isAuthenticated} = useAuth();
+    const {isAuthenticated, role} = useAuth();
 
     const {itemId} = useParams();
 
@@ -77,7 +78,7 @@ export default function DetailItem() {
                         </Typography>
                         {renderPriceAndSubcategory(itemDetails)}
 
-                        {isAuthenticated && (
+                        {isAuthenticated && role === Role.ADMIN && (
                             <Button>
                                 <NavLink to={`/menu/item/${itemDetails.itemId}/edit`}>
                                     <Typography color="info">EDIT</Typography>

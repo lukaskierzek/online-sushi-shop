@@ -5,13 +5,14 @@ import {Subcategory} from "../../enums/subcategory.tsx";
 import {NavLink} from "react-router";
 import MainCategory from "../../interfaces/MainCategory.tsx";
 import {useAuth} from "../../context/AuthContext.tsx";
+import {Role} from "../../enums/role.tsx";
 
 
 export default function Navbar() {
     const [mainCategories, setMainCategories] = useState<MainCategory[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const {isAuthenticated, logout} = useAuth();
+    const {isAuthenticated, logout, role} = useAuth();
 
     useEffect(() => {
         const fetchMainCategoriesData = async () => {
@@ -47,12 +48,6 @@ export default function Navbar() {
                     justifyContent: "center",
                 }}
             >
-                {/*<Button>*/}
-                {/*    <NavLink to={'/login'}>Sign in</NavLink>*/}
-                {/*</Button>*/}
-                {/*{token && (<Button>*/}
-                {/*    <NavLink to={'/admin'}>Admin page</NavLink>*/}
-                {/*</Button>)}*/}
 
                 {!isAuthenticated ? (
                     <Button>
@@ -63,9 +58,9 @@ export default function Navbar() {
                         <Button onClick={logout}>
                             Sign out
                         </Button>
-                        <Button>
+                        {role === Role.ADMIN && (<Button>
                             <NavLink to="/admin">Admin page</NavLink>
-                        </Button>
+                        </Button>)}
                     </>
                 )}
 
