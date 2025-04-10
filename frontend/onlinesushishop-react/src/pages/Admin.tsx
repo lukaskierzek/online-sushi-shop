@@ -92,6 +92,11 @@ export default function Admin() {
                                             <Typography color="info">EDIT</Typography>
                                         </NavLink>
                                     </Button>
+                                    <Button>
+                                        <NavLink to={'/menu/item/add'}>
+                                            <Typography color="info">ADD NEW ITEM</Typography>
+                                        </NavLink>
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}

@@ -1,9 +1,7 @@
-import {useParams} from "react-router";
 import {useEffect, useState} from "react";
-import Item from "../interfaces/Item.tsx";
 import MainCategory from "../interfaces/MainCategory.tsx";
 import Subcategory from "../interfaces/Subcategory.tsx";
-import {getItemById, getMainCategories, getSubcategories, putItem} from "../services/Api.tsx";
+import {getMainCategories, getSubcategories, postItem} from "../services/Api.tsx";
 import axios from "axios";
 import {
     Box,
@@ -18,20 +16,7 @@ import {
     Typography
 } from "@mui/material";
 
-export default function EditItem() {
-    const param = useParams();
-    // const [item, setItem] = useState<Item[]>([]);
-    const [itemById, setItemById] = useState<Item>({
-        itemActualPrice: 0,
-        itemComment: "",
-        itemId: 0,
-        itemImageUrl: "",
-        itemIsHidden: 0,
-        itemMainCategory: "",
-        itemName: "",
-        itemOldPrice: 0,
-        itemSubcategories: []
-    })
+const AddItem = () => {
     const [mainCategory, setMainCategory] = useState<MainCategory[]>([])
     const [subcategory, setSubcategory] = useState<Subcategory[]>([])
     const [loading, setLoading] = useState<boolean>(true);
@@ -60,75 +45,60 @@ export default function EditItem() {
             return responseFetchSubcategories;
         }
 
-        const fetchItemById = async () => {
-            const responseFetchItemById = await getItemById((Number(param.itemId)));
-            return responseFetchItemById;
-        }
-
-        axios.all([fetchMainCategories(), fetchSubcategories(), fetchItemById()])
-            .then(axios.spread((dataMainCategories, dataSubcategories, dataItemById) => {
+        axios.all([fetchMainCategories(), fetchSubcategories()])
+            .then(axios.spread((dataMainCategories, dataSubcategories) => {
                 console.log(`dataMainCategories:`);
                 console.log(dataMainCategories);
                 setMainCategory(dataMainCategories);
                 console.log(`dataSubcategories:`);
                 console.log(dataSubcategories);
                 setSubcategory(dataSubcategories);
-                console.log(`dataItemById:`);
-                console.log(dataItemById);
-                setItemById(dataItemById);
+
                 setLoading(false);
 
-                setFormState({
-                    itemId: dataItemById.itemId,
-                    name: dataItemById.itemName,
-                    actualPrice: dataItemById.itemActualPrice,
-                    oldPrice: dataItemById.itemOldPrice,
-                    description: dataItemById.itemComment,
-                    imageURL: dataItemById.itemImageUrl,
-                    mainCategory: dataItemById.itemMainCategory,
-                    isHidden: dataItemById.itemIsHidden,
-                    subcategories: dataSubcategories.map((subcat: Subcategory) => ({
+                setFormState((prevState) => ({
+                    ...prevState,
+                    subcategories: dataSubcategories.map((subcat) => ({
                         subcategoryId: subcat.subcategoryId,
                         subcategoryName: subcat.subcategoryName,
-                        isChecked: dataItemById.itemSubcategories.some((itemSubcat: Subcategory) =>
-                            itemSubcat.subcategoryName === subcat.subcategoryName
-                        ),
-                    })),
-                })
+                        isChecked: false
+                    }))
+                }));
+
             }))
             .catch((error) => {
                 console.error(`Error during fetch ${error}`);
                 setError((error as Error).message);
             });
-    }, [param.itemId]);
+    }, [])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const askConfirmUpdate: boolean = confirm("Update item?")
+        const askConfirmAdd: boolean = confirm("Create item?")
 
-        if (askConfirmUpdate) {
-            const formStateToPut = {...formState};
+        if (askConfirmAdd) {
+            const formStateToPost = {...formState}
 
-            formStateToPut.subcategories = formStateToPut.subcategories
+            formStateToPost.subcategories = formStateToPost.subcategories
                 .filter((sub) => sub.isChecked)
                 .map((sub) => sub.subcategoryId)
             ;
 
-            formStateToPut.mainCategory = mainCategory
-                .filter((maincat) => maincat.mainCategoryName === formStateToPut.mainCategory)
+            formStateToPost.mainCategory = mainCategory
+                .filter((maincat) => maincat.mainCategoryName === formStateToPost.mainCategory)
                 .map((maincat) => maincat.mainCategoryId)[0]
             ;
 
             try {
-                const responsePutFormSate = await putItem(formStateToPut);
-                console.info(responsePutFormSate);
-                alert("Item successfully updated!");
+                const responsePostFormState = await postItem(formStateToPost);
+                console.info(responsePostFormState);
+                alert("Item succesfully added!");
             } catch (error) {
                 console.error("Error:", (error as any).response?.data || (error as Error).message);
             }
 
             console.info(`Form submitted: `);
-            console.table(formStateToPut);
+            console.table(formStateToPost);
         }
     }
 
@@ -136,7 +106,7 @@ export default function EditItem() {
         const {name, value, checked, type} = e.target;
 
         setFormState((prevState) => {
-            const updatedState = {...prevState};
+            const updatedState = {...prevState}
 
             if (type === "checkbox") {
                 if (name === "isHidden") {
@@ -154,19 +124,16 @@ export default function EditItem() {
             }
 
             return updatedState;
-        })
-
-
+        });
     }
 
-    const renderEditItemPage = () => {
+    const renderAddItemPage = () => {
         if (loading) return <p>Loading components...</p>;
         if (error) return <p>Error {error}</p>;
-        if (itemById.itemId === undefined) return <p>There is no item by id {param.itemId}</p>;
 
         return (
             <>
-                <Typography variant="h4">Edit item</Typography>
+                <Typography variant="h4">Add item</Typography>
                 <form onSubmit={handleSubmit} style={{backgroundColor: "white"}}>
                     <TextField
                         label="Name"
@@ -231,6 +198,7 @@ export default function EditItem() {
                         variant="outlined"
                         rows={4}
                     />
+
                     <FormLabel component="legend" sx={{marginTop: 2, textAlign: "left"}}>
                         Choose a main category:
                     </FormLabel>
@@ -298,9 +266,8 @@ export default function EditItem() {
                         ))}
                     </FormGroup>
 
-
                     <Button type="submit" variant="contained" color="primary">
-                        Update
+                        Add item
                     </Button>
                 </form>
                 <Box
@@ -309,12 +276,13 @@ export default function EditItem() {
                 </Box>
             </>
         );
-
-    };
+    }
 
     return (
         <>
-            {renderEditItemPage()}
+            {renderAddItemPage()}
         </>
     );
 };
+
+export default AddItem;

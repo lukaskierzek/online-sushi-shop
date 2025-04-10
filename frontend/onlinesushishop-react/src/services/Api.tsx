@@ -100,6 +100,25 @@ export const putItem = async (itemFromForm) => {
     }
 };
 
+export const postItem = async (itemFromForm) => {
+    try {
+        const responsePostItemFromForm = await axios.post(`${API_URL}/item`, {
+            "itemName": itemFromForm.name,
+            "itemActualPrice": itemFromForm.actualPrice,
+            "itemOldPrice": itemFromForm.oldPrice,
+            "itemImageUrl": itemFromForm.imageURL,
+            "itemComment": itemFromForm.description,
+            "itemMainCategoryId": itemFromForm.mainCategory,
+            "itemIsHidden": itemFromForm.isHidden,
+            "itemSubcategoriesId": itemFromForm.subcategories
+        })
+        return responsePostItemFromForm;
+    } catch (error) {
+        console.error(`Error during post item: ${error}`);
+        throw error;
+    }
+}
+
 export const login = async (username: string, password: string) => {
     try {
         const responseLogin = await axios.post(`${API_URL_AUTH}/login`, {

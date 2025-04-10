@@ -10,6 +10,7 @@ import PrivateRoute from "../PrivateRoute.tsx";
 import Login from "../../pages/Login.tsx";
 import {Role} from "../../enums/role.tsx";
 import UnauthorizedPage from "../../pages/UnauthorizedPage.tsx";
+import AddItem from "../../pages/AddItem.tsx";
 
 export default function Main() {
     const defaultPageLink: string = `/menu/category/${Subcategory.NEW_ITEM}`;
@@ -23,6 +24,7 @@ export default function Main() {
             <Route element={<PrivateRoute requiredRole={Role.ADMIN}/>}>
                 <Route path="/admin" element={<Admin/>}/>
                 <Route path="/menu/item/:itemId/edit" element={<EditItem/>}/>
+                <Route path="/menu/item/add" element={<AddItem/>}/>
             </Route>
 
             <Route path="/menu/item/sale" element={<OnSaleItem/>}/>
