@@ -82,7 +82,8 @@ public class ItemInitialData {
                 .setUserName("admin")
                 .setUserEmail("admin@admin.com")
                 .setUserPassword(passwordEncoder.encode(adminPassword))
-                .setUserRole(Role.ADMIN).setUserIsActive(true)
+                .setUserRole(Role.ADMIN)
+                .setUserIsActive(true)
                 .createUser();
             userRepository.save(user);
         }
@@ -94,7 +95,8 @@ public class ItemInitialData {
                 .setUserName("user")
                 .setUserEmail("user@user.com")
                 .setUserPassword(passwordEncoder.encode("user123"))
-                .setUserRole(Role.USER).setUserIsActive(true)
+                .setUserRole(Role.USER)
+                .setUserIsActive(true)
                 .createUser();
             userRepository.save(user);
         }
