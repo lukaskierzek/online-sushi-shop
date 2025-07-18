@@ -11,5 +11,3 @@ public class OnlineSushiShopApplication {
     }
 
 }
-
-//TODO: Check later
