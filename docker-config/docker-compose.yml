@@ -1,0 +1,71 @@
+services:
+    postgres:
+        image: postgres:17.4
+        container_name: postgres_sushi-shop
+        restart: always
+        ports:
+            - "5432:5432"
+        networks:
+            - sushi-shop-network
+        volumes:
+            - postgres:/var/lib/postgresql/data
+        environment:
+            - POSTGRES_DB=onlinesushishop
+            - POSTGRES_USER=onlinesushishop
+            - POSTGRES_PASSWORD=Strong!Pass1@#
+        healthcheck:
+            test: [ "CMD", "pg_isready", "-U", "onlinesushishop" ]
+            interval: 10s
+            retries: 5
+
+    pgadmin:
+        image: dpage/pgadmin4
+        container_name: pgadmin_sushi-shop
+        restart: always
+        ports:
+            - "5050:80"
+        networks:
+            - sushi-shop-network
+        environment:
+            - PGADMIN_DEFAULT_EMAIL=oss@oss.com
+            - PGADMIN_DEFAULT_PASSWORD=zaq1@WSX
+        volumes:
+            - pgadmin:/var/lib/pgadmin
+        depends_on:
+            postgres:
+                condition: service_healthy
+
+    sushi-shop:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: sushi-shop-app
+        ports:
+            - "8080:8080"
+        networks:
+            - sushi-shop-network
+        depends_on:
+            postgres:
+                condition: service_healthy
+        environment:
+            - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/onlinesushishop
+            - SPRING_DATASOURCE_USERNAME=onlinesushishop
+            - SPRING_DATASOURCE_PASSWORD=Strong!Pass1@#
+
+    frontend-react:
+        build:
+            context: ./frontend/onlinesushishop-react
+            dockerfile: Dockerfile
+        container_name: react_sushi-shop
+        ports:
+            - "5173:5173"
+        networks:
+            - sushi-shop-network
+
+networks:
+    sushi-shop-network:
+        driver: bridge
+
+volumes:
+    postgres:
+    pgadmin:
