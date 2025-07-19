@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:oss_db
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
