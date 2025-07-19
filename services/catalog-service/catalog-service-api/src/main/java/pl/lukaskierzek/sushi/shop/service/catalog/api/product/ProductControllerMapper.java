@@ -2,6 +2,7 @@ package pl.lukaskierzek.sushi.shop.service.catalog.api.product;
 
 import org.mapstruct.Mapper;
 import pl.lukaskierzek.sushi.shop.service.catalog.domain.product.CreateProductCommand;
+import pl.lukaskierzek.sushi.shop.service.catalog.domain.product.Product;
 
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
@@ -9,4 +10,6 @@ import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 interface ProductControllerMapper {
 
     CreateProductCommand toCreateProductCommand(ProductRequest request);
+
+    ProductDetailsResponse toProductDetailsResponse(Product product);
 }

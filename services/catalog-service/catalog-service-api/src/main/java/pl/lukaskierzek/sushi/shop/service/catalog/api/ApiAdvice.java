@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import pl.lukaskierzek.sushi.shop.service.catalog.domain.product.ProductDetailsNotFoundException;
 
 import java.util.List;
 
@@ -13,12 +14,17 @@ class ApiAdvice {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<ValidationErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
         List<ValidationError> errors = ex.getBindingResult()
-            .getFieldErrors()
-            .stream()
-            .map(fieldError -> new ValidationError(fieldError.getField(), fieldError.getDefaultMessage()))
-            .toList();
+                .getFieldErrors()
+                .stream()
+                .map(fieldError -> new ValidationError(fieldError.getField(), fieldError.getDefaultMessage()))
+                .toList();
 
         return ResponseEntity.badRequest().body(new ValidationErrorResponse(errors));
+    }
+
+    @ExceptionHandler(ProductDetailsNotFoundException.class)
+    ResponseEntity<Void> handleProductDetailsNotFoundException(ProductDetailsNotFoundException ex) {
+        return ResponseEntity.notFound().build();
     }
 
     record ValidationError(String field, String message) {

@@ -8,9 +8,19 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository repository;
 
     @Override
-    public void saveProduct(CreateProductCommand command) {
+    public String saveProduct(CreateProductCommand command) {
         //validation (f.e: product with name already exists)
+        var product = Product.builder()
+                .name(command.name())
+                .description(command.description())
+                .build();
 
-        repository.saveProduct(new Product(null, command.name(), command.description()));
+        return repository.saveProduct(product);
+    }
+
+    @Override
+    public Product getProductById(GetProductDetailsQuery query) {
+        return repository.getProductById(query.id())
+                .orElseThrow(ProductDetailsNotFoundException::new);
     }
 }

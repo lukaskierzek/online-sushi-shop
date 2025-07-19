@@ -3,6 +3,7 @@ package pl.lukaskierzek.sushi.shop.service.catalog.api.product;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import pl.lukaskierzek.sushi.shop.service.catalog.domain.product.GetProductDetailsQuery;
 import pl.lukaskierzek.sushi.shop.service.catalog.domain.product.ProductService;
 
 import static org.springframework.http.HttpStatus.CREATED;
@@ -17,8 +18,15 @@ class ProductController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    void post(@Valid @RequestBody ProductRequest request) {
+    ProductIdResponse post(@Valid @RequestBody ProductRequest request) {
         var product = mapper.toCreateProductCommand(request);
-        service.saveProduct(product);
+        return new ProductIdResponse(service.saveProduct(product));
+    }
+
+    @GetMapping("/{id}")
+    ProductDetailsResponse get(@PathVariable String id) {
+        var query = new GetProductDetailsQuery(id);
+        var product = service.getProductById(query);
+        return mapper.toProductDetailsResponse(product);
     }
 }

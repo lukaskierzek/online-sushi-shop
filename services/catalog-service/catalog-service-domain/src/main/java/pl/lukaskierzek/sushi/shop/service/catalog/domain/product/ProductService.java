@@ -2,5 +2,7 @@ package pl.lukaskierzek.sushi.shop.service.catalog.domain.product;
 
 public interface ProductService {
 
-    void saveProduct(CreateProductCommand command);
+    String saveProduct(CreateProductCommand command);
+
+    Product getProductById(GetProductDetailsQuery query);
 }
