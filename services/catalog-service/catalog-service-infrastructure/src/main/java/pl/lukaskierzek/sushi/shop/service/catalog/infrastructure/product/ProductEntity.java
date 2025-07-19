@@ -11,6 +11,8 @@ import org.hibernate.annotations.UuidGenerator;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -28,5 +30,8 @@ public class ProductEntity {
 
     @Column
     private String description;
+
+    @Column
+    private BigDecimal price;
 }
 

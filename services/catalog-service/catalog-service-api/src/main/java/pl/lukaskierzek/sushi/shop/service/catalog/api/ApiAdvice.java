@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import pl.lukaskierzek.sushi.shop.service.catalog.domain.product.ProductDetailsNotFoundException;
+import pl.lukaskierzek.sushi.shop.service.catalog.domain.product.ProductNotFoundException;
 
 import java.util.List;
 
@@ -22,8 +22,8 @@ class ApiAdvice {
         return ResponseEntity.badRequest().body(new ValidationErrorResponse(errors));
     }
 
-    @ExceptionHandler(ProductDetailsNotFoundException.class)
-    ResponseEntity<Void> handleProductDetailsNotFoundException(ProductDetailsNotFoundException ex) {
+    @ExceptionHandler(ProductNotFoundException.class)
+    ResponseEntity<Void> handleProductDetailsNotFoundException(ProductNotFoundException ex) {
         return ResponseEntity.notFound().build();
     }
 

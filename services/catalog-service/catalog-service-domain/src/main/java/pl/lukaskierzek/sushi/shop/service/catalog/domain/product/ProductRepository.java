@@ -7,4 +7,6 @@ public interface ProductRepository {
     String saveProduct(Product product);
 
     Optional<Product> getProductById(String id);
+
+    void deleteProduct(Product product);
 }

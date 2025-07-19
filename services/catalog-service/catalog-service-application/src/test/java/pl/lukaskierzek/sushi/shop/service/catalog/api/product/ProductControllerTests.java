@@ -12,6 +12,8 @@ import pl.lukaskierzek.sushi.shop.service.catalog.application.CatalogServiceAppl
 import pl.lukaskierzek.sushi.shop.service.catalog.infrastructure.product.ProductEntity;
 import pl.lukaskierzek.sushi.shop.service.catalog.infrastructure.product.ProductJpaRepository;
 
+import java.math.BigDecimal;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -39,10 +41,10 @@ class ProductControllerTests {
     }
 
     @Test
-    void should_create_product_and_return_201() {
+    void should_create_product_when_request_is_valid() {
         // given
 
-        var givenRequest = new ProductRequest("Valid Name", "A valid description longer than 10");
+        var givenRequest = new ProductRequest("Valid Name", "A valid description longer than 10", new BigDecimal(20));
 
         var givenHeaders = new HttpHeaders();
         givenHeaders.setContentType(APPLICATION_JSON);
@@ -67,10 +69,10 @@ class ProductControllerTests {
     }
 
     @Test
-    void should_not_create_product_and_return_400() throws JSONException {
+    void should_return_400_when_creating_product_with_invalid_data() throws JSONException {
         // given
 
-        var givenRequest = new ProductRequest("x", "short");
+        var givenRequest = new ProductRequest("x", "short", new BigDecimal(-1));
 
         var givenHeaders = new HttpHeaders();
         givenHeaders.setContentType(APPLICATION_JSON);
@@ -87,12 +89,13 @@ class ProductControllerTests {
     }
 
     @Test
-    void should_get_product_details_by_id_and_return_200() {
+    void should_return_product_details_when_product_exists() {
         // given
 
         var givenProduct = productRepository.save(ProductEntity.builder()
                 .name("Name")
                 .description("Description")
+                .price(new BigDecimal(200))
                 .build());
 
         // when
@@ -110,7 +113,7 @@ class ProductControllerTests {
     }
 
     @Test
-    void should_not_get_product_details_by_id_and_return_401() {
+    void should_return_404_when_getting_non_existing_product() {
         // when
 
         var result = restTemplate.getForEntity(BASE_URL + "/" + UUID.randomUUID(), ProductDetailsResponse.class);
@@ -119,5 +122,102 @@ class ProductControllerTests {
 
         assertThat(result.getStatusCode()).isEqualTo(NOT_FOUND);
         assertThat(result.getBody()).isNull();
+    }
+
+    @Test
+    void should_update_existing_product_when_patch_request_is_valid() {
+        // given
+        var givenProduct = productRepository.save(ProductEntity.builder()
+                .name("Original Name")
+                .description("Original Description")
+                .price(new BigDecimal("100.00"))
+                .build());
+
+        var patchRequest = Map.of(
+                "name", "Updated Name",
+                "price", new BigDecimal("150.00")
+        );
+
+        var headers = new HttpHeaders();
+        headers.setContentType(APPLICATION_JSON);
+        var entity = new HttpEntity<>(patchRequest, headers);
+
+        // when
+        var result = restTemplate.exchange(
+                BASE_URL + "/" + givenProduct.getId(),
+                HttpMethod.PATCH,
+                entity,
+                Void.class
+        );
+
+        // then
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        var updatedProduct = productRepository.findById(givenProduct.getId()).orElseThrow();
+        assertThat(updatedProduct.getName()).isEqualTo("Updated Name");
+        assertThat(updatedProduct.getDescription()).isEqualTo("Original Description"); // unchanged
+        assertThat(updatedProduct.getPrice()).isEqualTo(new BigDecimal("150.00"));
+    }
+
+    @Test
+    void should_return_404_when_patching_non_existing_product() {
+        // given
+        var randomId = UUID.randomUUID().toString();
+
+        var patchRequest = Map.of("name", "Doesn't Matter");
+
+        var headers = new HttpHeaders();
+        headers.setContentType(APPLICATION_JSON);
+        var entity = new HttpEntity<>(patchRequest, headers);
+
+        // when
+        var result = restTemplate.exchange(
+                BASE_URL + "/" + randomId,
+                HttpMethod.PATCH,
+                entity,
+                Void.class
+        );
+
+        // then
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void should_delete_existing_product_and_return_204() {
+        // given
+        var product = productRepository.save(ProductEntity.builder()
+                .name("To be deleted")
+                .description("This product will be deleted")
+                .price(new BigDecimal("99.99"))
+                .build());
+
+        // when
+        var response = restTemplate.exchange(
+                BASE_URL + "/" + product.getId(),
+                HttpMethod.DELETE,
+                HttpEntity.EMPTY,
+                Void.class
+        );
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(productRepository.findById(product.getId())).isEmpty();
+    }
+
+    @Test
+    void should_return_404_when_deleting_non_existing_product() {
+        // given
+        var nonExistingId = UUID.randomUUID().toString();
+
+        // when
+        var response = restTemplate.exchange(
+                BASE_URL + "/" + nonExistingId,
+                HttpMethod.DELETE,
+                HttpEntity.EMPTY,
+                Void.class
+        );
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 }

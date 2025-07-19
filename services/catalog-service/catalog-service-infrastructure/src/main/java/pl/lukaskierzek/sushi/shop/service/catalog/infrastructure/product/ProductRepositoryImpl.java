@@ -13,10 +13,7 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public String saveProduct(Product product) {
-        var entity = ProductEntity.builder()
-                .name(product.name())
-                .description(product.description())
-                .build();
+        var entity = toProductEntity(product);
         return jpaRepository.save(entity).getId();
     }
 
@@ -26,11 +23,26 @@ public class ProductRepositoryImpl implements ProductRepository {
                 .map(this::toProduct);
     }
 
+    @Override
+    public void deleteProduct(Product product) {
+        jpaRepository.delete(toProductEntity(product));
+    }
+
+    private ProductEntity toProductEntity(Product product) {
+        return ProductEntity.builder()
+                .id(product.id())
+                .name(product.name())
+                .description(product.description())
+                .price(product.price())
+                .build();
+    }
+
     private Product toProduct(ProductEntity entity) {
         return Product.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .description(entity.getDescription())
+                .price(entity.getPrice())
                 .build();
     }
 }

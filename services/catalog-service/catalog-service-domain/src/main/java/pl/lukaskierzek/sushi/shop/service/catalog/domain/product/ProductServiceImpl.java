@@ -13,6 +13,7 @@ public class ProductServiceImpl implements ProductService {
         var product = Product.builder()
                 .name(command.name())
                 .description(command.description())
+                .price(command.price())
                 .build();
 
         return repository.saveProduct(product);
@@ -21,6 +22,25 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product getProductById(GetProductDetailsQuery query) {
         return repository.getProductById(query.id())
-                .orElseThrow(ProductDetailsNotFoundException::new);
+                .orElseThrow(ProductNotFoundException::new);
+    }
+
+    @Override
+    public void patchProduct(PatchProductCommand command) {
+        var product = repository.getProductById(command.id())
+                .orElseThrow(ProductNotFoundException::new)
+                .updateName(command.name())
+                .updateDescription(command.description())
+                .updatePrice(command.price());
+
+        // validation
+
+        repository.saveProduct(product);
+    }
+
+    @Override
+    public void deleteProduct(DeleteProductCommand command) {
+        repository.deleteProduct(repository.getProductById(command.id())
+                .orElseThrow(ProductNotFoundException::new));
     }
 }
