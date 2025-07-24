@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: basket-service
+  data:
+    redis:
+      caches:
+        ttl:
+          carts: PT24H
+logging:
+  level:
+    org:
+      zalando:
+        logbook:
+          Logbook: TRACE

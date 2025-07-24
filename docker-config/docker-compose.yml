@@ -27,6 +27,10 @@ services:
       KAFKA_CREATE_TOPICS: "pl.lukaskierzek.catalog.product.price-updated:1:1"
     networks:
       - kafka-net
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
 networks:
   kafka-net:
     driver: bridge
