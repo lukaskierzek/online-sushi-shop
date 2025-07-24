@@ -27,10 +27,11 @@ class Cart {
         items.add(item);
     }
 
-    BigDecimal calculateTotal() {
+    Money calculateTotal() {
         return items.stream()
-            .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            .map(CartItem::calculatePrice)
+            .reduce(Money::add)
+            .orElse(new Money(Currency.PLN, BigDecimal.ZERO));
     }
 }
 

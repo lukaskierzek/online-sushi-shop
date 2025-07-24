@@ -14,13 +14,16 @@ class CartItem {
 
     private String id;
     private Integer quantity;
-    private BigDecimal price;
+    private Money price;
 
-    static CartItem of(String productId, Integer quantity, BigDecimal price) {
+    static CartItem of(String productId, Integer quantity, Money price) {
         return new CartItem(
             validateProductId(productId),
             validateQuantity(quantity),
-            validatePrice(price)
-        );
+            price);
+    }
+
+    Money calculatePrice() {
+        return new Money(price.currency(), price.amount().multiply(BigDecimal.valueOf(quantity)));
     }
 }

@@ -11,18 +11,18 @@ import org.springframework.stereotype.Repository;
 class CartRepository {
 
     @Cacheable
-    public Cart getCart(String id) {
+    public Cart getCart(String userId) {
         // ignored
         return null;
     }
 
-    @CachePut(key = "#cart.id")
+    @CachePut(key = "#cart.userId")
     public Cart setCart(Cart cart) {
         return cart;
     }
 
     @CacheEvict
-    public void evictCart(String id) {
+    public void evictCart(String userId) {
         // ignored
     }
 }
