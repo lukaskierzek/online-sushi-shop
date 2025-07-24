@@ -4,8 +4,8 @@ spring:
   data:
     redis:
       caches:
-        ttl:
-          carts: PT24H
+        carts:
+          ttl: PT24H
 logging:
   level:
     org:

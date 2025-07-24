@@ -27,4 +27,11 @@ class CartValidator {
         }
         return price;
     }
+
+    static String validateUserId(String userId) {
+        if (userId == null || userId.trim().isEmpty()) {
+            throw new InvalidCartException("User ID cannot be null or empty");
+        }
+        return userId;
+    }
 }

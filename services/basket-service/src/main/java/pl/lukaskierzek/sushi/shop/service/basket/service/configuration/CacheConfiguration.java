@@ -14,7 +14,7 @@ import java.time.Duration;
 class CacheConfiguration {
 
     @Bean("redisCacheManager")
-    CacheManager redisCacheManager(RedisConnectionFactory connectionFactory, @Value("${spring.data.redis.caches.ttl.carts}") Duration ttl) {
+    CacheManager redisCacheManager(RedisConnectionFactory connectionFactory, @Value("${spring.data.redis.caches.carts.ttl}") Duration ttl) {
         var defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
             .entryTtl(ttl);
 
