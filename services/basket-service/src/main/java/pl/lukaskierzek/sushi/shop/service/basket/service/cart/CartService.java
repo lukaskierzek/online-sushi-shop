@@ -83,9 +83,6 @@ class CartService {
 
             var items = cart.getItems();
 
-            var nonModifiableItems = items.stream()
-                .filter(i -> !CART_ITEM_PREDICATE.test(i, event.id()));
-
             var modifiableItems = items.stream()
                 .filter(i -> CART_ITEM_PREDICATE.test(i, event.id()))
                 .filter(i -> !i.getPrice().equals(event.price))
@@ -97,6 +94,9 @@ class CartService {
             if (!changed.get()) {
                 return;
             }
+
+            var nonModifiableItems = items.stream()
+                .filter(i -> !CART_ITEM_PREDICATE.test(i, event.id()));
 
             var newItems = Stream.concat(nonModifiableItems, modifiableItems)
                 .collect(toUnmodifiableSet());
