@@ -7,8 +7,10 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.util.Collections.unmodifiableSet;
 import static java.util.UUID.randomUUID;
 import static lombok.AccessLevel.PRIVATE;
+import static pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartValidator.validateCartItem;
 import static pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartValidator.validateUserId;
 
 @Getter
@@ -24,7 +26,11 @@ class Cart {
     }
 
     void addItem(CartItem item) {
-        items.add(item);
+        items.add(validateCartItem(items, item));
+    }
+
+    Set<CartItem> getItems() {
+        return unmodifiableSet(items);
     }
 
     Money calculateTotal() {

@@ -23,3 +23,9 @@ class CartNotFoundException extends RuntimeException {
         super(message);
     }
 }
+
+class InvalidCartItemException extends RuntimeException {
+    InvalidCartItemException(String message) {
+        super(message);
+    }
+}
