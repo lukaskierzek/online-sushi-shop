@@ -4,12 +4,12 @@ spring:
   grpc:
     client:
       product:
-        address: localhost:8080
+        address: localhost:1800
         negotiation-type: plaintext
   application:
     name: basket-service
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: localhost:9093
     consumer:
       auto-offset-reset: earliest
       enable-auto-commit: true
