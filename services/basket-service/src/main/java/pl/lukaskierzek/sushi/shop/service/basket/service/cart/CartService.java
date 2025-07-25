@@ -74,6 +74,8 @@ class CartService {
             return;
         }
 
+        var changed = new AtomicBoolean(false);
+
         var cartsWithItem = CartMapper.toCartsWithItem(userIds, repository::getCart);
 
         for (var cartEntry : cartsWithItem.entrySet()) {
@@ -86,7 +88,15 @@ class CartService {
 
             var modifiableItems = items.stream()
                 .filter(i -> CART_ITEM_PREDICATE.test(i, event.id()))
-                .map(i -> CartItem.of(i.getProductId(), i.getQuantity(), event.price()));
+                .filter(i -> !i.getPrice().equals(event.price))
+                .map(i -> {
+                    changed.set(true);
+                    return CartItem.of(i.getProductId(), i.getQuantity(), event.price());
+                });
+
+            if (!changed.get()) {
+                return;
+            }
 
             var newItems = Stream.concat(nonModifiableItems, modifiableItems)
                 .collect(toUnmodifiableSet());
