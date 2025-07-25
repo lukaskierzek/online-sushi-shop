@@ -40,7 +40,7 @@ class ProductPriceMismatchException extends CartDomainException {
     }
 }
 
-class InvalidMoneyException extends RuntimeException {
+class InvalidMoneyException extends CartDomainException {
     InvalidMoneyException(String message) {
         super(message);
     }
