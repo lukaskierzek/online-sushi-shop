@@ -1,6 +1,5 @@
 package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,45 +7,44 @@ import org.springframework.util.CollectionUtils;
 import pl.lukaskierzek.sushi.shop.service.GetProductRequest;
 import pl.lukaskierzek.sushi.shop.service.ProductServiceGrpc.ProductServiceBlockingStub;
 import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartController.CartItemRequest;
-import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartController.CartItemResponse;
 import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartController.CartItemsRequest;
 import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartController.CartResponse;
 
-import java.math.BigDecimal;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiPredicate;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartMapper.toCartResponse;
 
 @Service
 class CartService {
 
-    private final RedisTemplate<Object, Object> redisTemplate;
+    private static final BiPredicate<CartItem, String> CART_ITEM_PREDICATE =
+        (cartItem, productId) -> cartItem.getProductId().equals(productId);
+
+    private final CartRepository repository;
     private final ProductServiceBlockingStub productsStub;
 
-    CartService(RedisTemplate<Object, Object> redisTemplate, ProductServiceBlockingStub productsStub) {
-        this.redisTemplate = redisTemplate;
+    CartService(CartRepository repository, ProductServiceBlockingStub productsStub) {
+        this.repository = repository;
         this.productsStub = productsStub;
     }
 
     String createCart(String userId) {
-        var cart = (Cart) redisTemplate.opsForValue().get("carts::" + userId);
-        if (cart != null) {
+        var maybeCart = repository.getCart(userId);
+        if (maybeCart.isPresent()) {
             throw new CartAlreadyExistsException("Cart for this user already exists");
         }
 
-        cart = Cart.newCart(userId);
-        redisTemplate.opsForValue().set("carts::" + userId, cart);
+        var cart = Cart.newCart(userId);
+        repository.saveCart(cart);
         return cart.getId();
     }
 
     CartResponse getCart(String userId) {
         var cart = getCartOrThrow(userId);
-
-        return new CartResponse(cart.getItems().stream()
-            .map(cartItem -> new CartItemResponse(cartItem.getId(), cartItem.getQuantity(), cartItem.getPrice()))
-            .collect(toUnmodifiableSet()),
-            cart.calculateTotal());
+        return toCartResponse(cart);
     }
 
     @Transactional
@@ -63,46 +61,52 @@ class CartService {
             });
 
         if (changed.get()) {
-            redisTemplate.opsForValue().set("carts::" + userId, cart);
-
-            cart.getItems()
-                .forEach(cartItem -> redisTemplate.opsForSet().add("product-to-users::" + cartItem.getId(), userId));
+            repository.saveCart(cart);
+            repository.saveProductUsersIds(userId, cart.getItems());
         }
     }
 
     @Transactional
     @KafkaListener(topics = "pl.lukaskierzek.catalog.product.price-updated", groupId = "basket-service")
     public void onCartItemPriceUpdated(CartItemPriceUpdated event) {
-        String productId = event.id();
-        Money newPrice = event.price();
-
-        Set<Object> userIds = redisTemplate.opsForSet().members("product-to-users::" + productId);
+        var userIds = repository.getProductUsersIds(event.id());
         if (CollectionUtils.isEmpty(userIds)) {
             return;
         }
 
-        //TODO: end the method
+        var cartsWithItem = CartMapper.toCartsWithItem(userIds, repository::getCart);
+
+        for (var cartEntry : cartsWithItem.entrySet()) {
+            var cart = cartEntry.getValue();
+
+            var items = cart.getItems();
+
+            var nonModifiableItems = items.stream()
+                .filter(i -> !CART_ITEM_PREDICATE.test(i, event.id()));
+
+            var modifiableItems = items.stream()
+                .filter(i -> CART_ITEM_PREDICATE.test(i, event.id()))
+                .map(i -> CartItem.of(i.getProductId(), i.getQuantity(), event.price()));
+
+            var newItems = Stream.concat(nonModifiableItems, modifiableItems)
+                .collect(toUnmodifiableSet());
+
+            cart.replaceItems(newItems);
+
+            repository.saveCart(cart);
+        }
     }
 
     private Cart getCartOrThrow(String userId) {
-        var cart = (Cart) redisTemplate.opsForValue().get("carts::" + userId);
-        if (cart == null) {
-            throw new CartNotFoundException("Cart not found");
-        }
-        return cart;
+        return repository.getCart(userId)
+            .orElseThrow(() -> new CartNotFoundException("Cart not found"));
     }
 
     private CartItem toCartItem(CartItemRequest cartItemRequest) {
         var product = productsStub.getProduct(GetProductRequest.newBuilder()
             .setId(cartItemRequest.id())
             .build());
-        return CartItem.of(cartItemRequest.id(), cartItemRequest.quantity(), toMoney(product.getPrice()));
-    }
-
-    private Money toMoney(pl.lukaskierzek.sushi.shop.service.Money price) {
-        return new Money(
-            Currency.valueOf(price.getCurrency().name()),
-            new BigDecimal(price.getAmount()));
+        return CartMapper.toCartItem(cartItemRequest, product);
     }
 
     record CartItemPriceUpdated(String id, Money price) {

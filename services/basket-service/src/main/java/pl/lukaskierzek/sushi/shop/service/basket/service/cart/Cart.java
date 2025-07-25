@@ -1,5 +1,6 @@
 package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 
+import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -10,8 +11,6 @@ import java.util.Set;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.UUID.randomUUID;
 import static lombok.AccessLevel.PRIVATE;
-import static pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartValidator.validateCartItem;
-import static pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartValidator.validateUserId;
 
 @Getter
 @AllArgsConstructor(access = PRIVATE)
@@ -22,11 +21,17 @@ class Cart {
     private final Set<CartItem> items;
 
     static Cart newCart(String userId) {
-        return new Cart(randomUUID().toString(), validateUserId(userId), new HashSet<>());
+        validateUserId(userId);
+        return new Cart(randomUUID().toString(), userId, new HashSet<>());
     }
 
     void addItem(CartItem item) {
-        items.add(validateCartItem(items, item));
+        items.add(validateNoDuplicate(item));
+    }
+
+    void replaceItems(Set<CartItem> newItems) {
+        items.clear();
+        newItems.forEach(this::addItem);
     }
 
     Set<CartItem> getItems() {
@@ -39,5 +44,17 @@ class Cart {
             .reduce(Money::add)
             .orElse(new Money(Currency.PLN, BigDecimal.ZERO));
     }
-}
 
+    private CartItem validateNoDuplicate(CartItem item) {
+        if (items.stream().anyMatch(i -> i.getProductId().equals(item.getProductId()))) {
+            throw new InvalidCartItemException("Cart item already added");
+        }
+        return item;
+    }
+
+    private static void validateUserId(String userId) {
+        if (StringUtils.isEmpty(userId)) {
+            throw new InvalidCartException("User ID cannot be null or empty");
+        }
+    }
+}

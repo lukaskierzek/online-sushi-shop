@@ -1,9 +1,11 @@
 package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Set;
 
 import static java.net.URI.create;
@@ -43,5 +45,21 @@ class CartController {
     }
 
     record CartItemRequest(String id, Integer quantity) {
+    }
+}
+
+@RestControllerAdvice
+class CartExceptionHandler {
+
+    @ExceptionHandler(CartDomainException.class)
+    ResponseEntity<Map<String, String>> handleCartDomainExceptions(CartDomainException ex) {
+        var body = Map.of("error", ex.getMessage());
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(CartNotFoundException.class)
+    ResponseEntity<Map<String, String>> handleCartNotFound(CartNotFoundException ex) {
+        var body = Map.of("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 }
