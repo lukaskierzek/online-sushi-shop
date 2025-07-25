@@ -1,4 +1,11 @@
+server:
+  port: 8081
 spring:
+  grpc:
+    client:
+      product:
+        address: localhost:8080
+        negotiation-type: plaintext
   application:
     name: basket-service
   kafka:

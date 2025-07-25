@@ -1,5 +1,6 @@
 package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 
+import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,7 @@ class CartService {
     private final CartRepository repository;
     private final ProductServiceBlockingStub productsStub;
 
-    CartService(CartRepository repository, ProductServiceBlockingStub productsStub) {
+    CartService(CartRepository repository, @GrpcClient("product") ProductServiceBlockingStub productsStub) {
         this.repository = repository;
         this.productsStub = productsStub;
     }
