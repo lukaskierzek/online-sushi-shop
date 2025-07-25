@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartMapper.toCartResponse;
+import static pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartMapper.toCartsWithItem;
 
 @Service
 class CartService {
@@ -67,7 +68,7 @@ class CartService {
     }
 
     @Transactional
-    @KafkaListener(topics = "pl.lukaskierzek.catalog.product.price-updated", groupId = "basket-service")
+    @KafkaListener(topics = "pl.lukaskierzek.catalog.product.price-updated")
     public void onCartItemPriceUpdated(CartItemPriceUpdated event) {
         var userIds = repository.getProductUsersIds(event.id());
         if (CollectionUtils.isEmpty(userIds)) {
@@ -76,7 +77,7 @@ class CartService {
 
         var changed = new AtomicBoolean(false);
 
-        var cartsWithItem = CartMapper.toCartsWithItem(userIds, repository::getCart);
+        var cartsWithItem = toCartsWithItem(userIds, repository::getCart);
 
         for (var cartEntry : cartsWithItem.entrySet()) {
             var cart = cartEntry.getValue();

@@ -18,24 +18,24 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 @UtilityClass
 class CartMapper {
 
-    CartResponse toCartResponse(Cart cart) {
+    static CartResponse toCartResponse(Cart cart) {
         return new CartResponse(cart.getItems().stream()
             .map(CartMapper::toCartItemResponse)
             .collect(toUnmodifiableSet()),
             cart.calculateTotal());
     }
 
-    CartItem toCartItem(CartItemRequest cartItemRequest, GetProductResponse getProductResponse) {
+    static CartItem toCartItem(CartItemRequest cartItemRequest, GetProductResponse getProductResponse) {
         return CartItem.of(cartItemRequest.id(), cartItemRequest.quantity(), toMoney(getProductResponse.getPrice()));
     }
 
-    Money toMoney(pl.lukaskierzek.sushi.shop.service.Money price) {
+    static Money toMoney(pl.lukaskierzek.sushi.shop.service.Money price) {
         return new Money(
             Currency.valueOf(price.getCurrency().name()),
             new BigDecimal(price.getAmount()));
     }
 
-    Map<String, Cart> toCartsWithItem(Set<String> userIds, Function<String, Optional<Cart>> cartMapper) {
+    static Map<String, Cart> toCartsWithItem(Set<String> userIds, Function<String, Optional<Cart>> cartMapper) {
         return userIds.stream()
             .map(userId -> Map.entry(userId, cartMapper.apply(userId)))
             .filter(entry -> entry.getValue().isPresent())
