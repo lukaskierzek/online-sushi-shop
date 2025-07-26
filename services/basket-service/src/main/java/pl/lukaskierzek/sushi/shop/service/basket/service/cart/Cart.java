@@ -4,6 +4,7 @@ import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +15,7 @@ import static lombok.AccessLevel.PRIVATE;
 
 @Getter
 @AllArgsConstructor(access = PRIVATE)
-class Cart {
+class Cart implements Serializable {
 
     private final String id;
     private final String userId;

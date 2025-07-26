@@ -1,8 +1,9 @@
 package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
-record Money(Currency currency, BigDecimal amount) {
+record Money(Currency currency, BigDecimal amount) implements Serializable {
 
     Money {
         if (currency == null) {

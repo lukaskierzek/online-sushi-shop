@@ -16,14 +16,12 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       group-id: basket-service
-  data:
-    redis:
-      caches:
-        carts:
-          ttl: PT24H
 logging:
   level:
     org:
       zalando:
         logbook:
           Logbook: TRACE
+kafka:
+  topics:
+    product-price-updated: pl.lukaskierzek.catalog.product.price-updated

@@ -4,6 +4,7 @@ import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -11,7 +12,7 @@ import static lombok.AccessLevel.PRIVATE;
 
 @Getter
 @AllArgsConstructor(access = PRIVATE)
-class CartItem {
+class CartItem implements Serializable {
 
     private final String productId;
     private final Integer quantity;

@@ -1,5 +1,7 @@
 package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -27,10 +29,12 @@ class CartService {
 
     private final CartRepository repository;
     private final ProductServiceBlockingStub productsStub;
+    private final ObjectMapper mapper;
 
-    CartService(CartRepository repository, @GrpcClient("product") ProductServiceBlockingStub productsStub) {
+    CartService(CartRepository repository, @GrpcClient("product") ProductServiceBlockingStub productsStub, ObjectMapper mapper) {
         this.repository = repository;
         this.productsStub = productsStub;
+        this.mapper = mapper;
     }
 
     String createCart(String userId) {
@@ -68,9 +72,10 @@ class CartService {
         }
     }
 
-    @Transactional
-    @KafkaListener(topics = "pl.lukaskierzek.catalog.product.price-updated")
-    public void onCartItemPriceUpdated(CartItemPriceUpdated event) {
+    @KafkaListener(topics = "${kafka.topics.product-price-updated}", groupId = "${spring.kafka.consumer.group-id}")
+    public void onCartItemPriceUpdated(String payload) throws JsonProcessingException {
+        var event = mapper.readValue(payload, CartItemPriceUpdated.class);
+
         var userIds = repository.getProductUsersIds(event.id());
         if (CollectionUtils.isEmpty(userIds)) {
             return;
