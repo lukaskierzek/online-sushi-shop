@@ -19,11 +19,19 @@ class ProductService {
     void createProduct(ProductRequest request) {
         var category = categoryService.getProductCategory(request.categoryId());
         //TODO:  validation (name already exists)
+        validateProductName(request.name());
         var product = Product.create(request.name(), request.description(), new Money(Currency.PLN, request.price()), category);
     }
 
     @EventListener
     public void onProductPriceUpdated(ProductPriceUpdated event) {
         kafkaTemplate.send("pl.lukaskierzek.catalog.product.price-updated", event.toString());
+    }
+
+    void validateProductName(String productName) {
+        var maybeExistingProductName = productRepository.getProductByName(productName);
+        if (maybeExistingProductName.isPresent()) {
+            throw new InvalidProductException("Product with provided name already exists");
+        }
     }
 }
