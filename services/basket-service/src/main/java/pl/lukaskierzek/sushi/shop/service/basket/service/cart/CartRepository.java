@@ -1,6 +1,8 @@
 package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +13,7 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
+@Slf4j
 @Repository
 class CartRepository {
 
@@ -19,35 +22,55 @@ class CartRepository {
 
     private final RedisTemplate<Object, Object> redisTemplate;
     private final Duration ttl;
+    private final ApplicationEventPublisher eventPublisher;
 
-    CartRepository(RedisTemplate<Object, Object> redisTemplate, @Value("${spring.data.redis.caches.carts.ttl:PT24H}") Duration ttl) {
+    CartRepository(RedisTemplate<Object, Object> redisTemplate, @Value("${spring.data.redis.caches.carts.ttl:PT24H}") Duration ttl, ApplicationEventPublisher eventPublisher) {
         this.redisTemplate = redisTemplate;
         this.ttl = ttl;
+        this.eventPublisher = eventPublisher;
     }
 
-    public Optional<Cart> getCart(String userId) {
+    Optional<Cart> getCart(String userId) {
         return Optional.ofNullable(redisTemplate.opsForValue().get(buildCartKey(userId)))
             .map(Cart.class::cast);
     }
 
-    public void saveCart(Cart cart) {
+    void saveCart(Cart cart) {
+        final var events = Set.copyOf(cart.getEvents());
+        cart.clearEvents();
+
         redisTemplate.opsForValue().set(buildCartKey(cart.getUserId()), cart, ttl);
+
+        log.info("Cart created {}{}", CARTS_PREFIX, cart.getId());
+
+        events.forEach(eventPublisher::publishEvent);
     }
 
-    public void saveProductUsersIds(String userId, Set<CartItem> cartItems) {
+    void saveProductUsersIds(String userId, Set<CartItem> cartItems) {
         cartItems.forEach(cartItem -> {
             var ops = redisTemplate.boundSetOps(buildProductToUserKey(cartItem.getProductId()));
             ops.add(userId);
             ops.expire(ttl);
+
+            log.info("User {} added to {} - {}", userId, PRODUCT_TO_USERS_PREFIX, cartItem.getProductId());
         });
     }
 
-    public Set<String> getProductUsersIds(String productId) {
+    Set<String> getProductUsersIds(String productId) {
         return Optional.ofNullable(redisTemplate.opsForSet().members(buildProductToUserKey(productId)))
             .map(objects -> objects.stream()
                 .map(String.class::cast)
                 .collect(toUnmodifiableSet()))
             .orElseGet(HashSet::new);
+    }
+
+    void deleteProductUsersIds(String userId, Set<String> productsIds) {
+        productsIds.forEach(productId -> {
+            var ops = redisTemplate.boundSetOps(buildProductToUserKey(productId));
+            ops.remove(userId);
+
+            log.info("User {} removed from {} - {}", userId, PRODUCT_TO_USERS_PREFIX, productId);
+        });
     }
 
     private String buildCartKey(String userId) {
