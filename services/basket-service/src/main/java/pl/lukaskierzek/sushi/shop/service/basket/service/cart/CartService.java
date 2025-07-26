@@ -13,8 +13,9 @@ import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartController.Car
 import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartController.CartItemsRequest;
 import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartController.CartResponse;
 
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
@@ -23,9 +24,6 @@ import static pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartMapper.
 
 @Service
 class CartService {
-
-    private static final BiPredicate<CartItem, String> CART_ITEM_PREDICATE =
-        (cartItem, productId) -> cartItem.getProductId().equals(productId);
 
     private final CartRepository repository;
     private final ProductServiceBlockingStub productsStub;
@@ -72,6 +70,7 @@ class CartService {
         }
     }
 
+    @Transactional
     @KafkaListener(topics = "${kafka.topics.product-price-updated}", groupId = "${spring.kafka.consumer.group-id}")
     public void onCartItemPriceUpdated(String payload) throws JsonProcessingException {
         var event = mapper.readValue(payload, CartItemPriceUpdated.class);
@@ -81,31 +80,32 @@ class CartService {
             return;
         }
 
-        var changed = new AtomicBoolean(false);
-
         var cartsWithItem = toCartsWithItem(userIds, repository::getCart);
 
         for (var cartEntry : cartsWithItem.entrySet()) {
+            var changed = new AtomicBoolean(false);
+
             var cart = cartEntry.getValue();
 
             var items = cart.getItems();
 
-            var modifiableItems = items.stream()
-                .filter(i -> CART_ITEM_PREDICATE.test(i, event.id()))
-                .filter(i -> !i.getPrice().equals(event.price))
-                .map(i -> {
+            var modifiableItems = new HashSet<CartItem>();
+            var nonModifiableItems = new HashSet<CartItem>();
+
+            for (var item : items) {
+                if (item.getProductId().equals(event.id()) && !Objects.equals(item.getPrice(), event.price())) {
                     changed.set(true);
-                    return CartItem.of(i.getProductId(), i.getQuantity(), event.price());
-                });
+                    modifiableItems.add(CartItem.of(item.getProductId(), item.getQuantity(), event.price()));
+                    continue;
+                }
+                nonModifiableItems.add(item);
+            }
 
             if (!changed.get()) {
                 return;
             }
 
-            var nonModifiableItems = items.stream()
-                .filter(i -> !CART_ITEM_PREDICATE.test(i, event.id()));
-
-            var newItems = Stream.concat(nonModifiableItems, modifiableItems)
+            var newItems = Stream.concat(nonModifiableItems.stream(), modifiableItems.stream())
                 .collect(toUnmodifiableSet());
 
             cart.replaceItems(newItems);

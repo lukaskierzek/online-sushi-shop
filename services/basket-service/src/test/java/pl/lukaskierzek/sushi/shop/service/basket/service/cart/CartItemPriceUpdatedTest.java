@@ -42,7 +42,11 @@ class CartItemPriceUpdatedTest extends IntegrationTest {
         var cart = Cart.newCart(userId);
         cart.addItem(CartItem.of(productId, 1, new Money(Currency.PLN, new BigDecimal("10.00"))));
         redisTemplate.opsForValue().set("carts::" + userId, cart);
-        redisTemplate.opsForSet().add("product-to-users::" + productId, userId);
+
+        cart.getItems().forEach(cartItem -> {
+            var ops = redisTemplate.boundSetOps("product-to-users::" + cartItem.getProductId());
+            ops.add(userId);
+        });
 
         var newPrice = new Money(Currency.EUR, new BigDecimal("20.00"));
         var event = new CartItemPriceUpdated(productId, newPrice);

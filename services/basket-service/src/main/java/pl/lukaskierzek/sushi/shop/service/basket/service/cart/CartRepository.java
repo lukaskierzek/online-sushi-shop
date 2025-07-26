@@ -5,7 +5,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
-import java.util.Objects;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -43,11 +43,11 @@ class CartRepository {
     }
 
     public Set<String> getProductUsersIds(String productId) {
-        var productIdMembers = redisTemplate.opsForSet().members(buildProductToUserKey(productId));
-
-        return Optional.ofNullable(productIdMembers).stream()
-            .map(Objects::toString)
-            .collect(toUnmodifiableSet());
+        return Optional.ofNullable(redisTemplate.opsForSet().members(buildProductToUserKey(productId)))
+            .map(objects -> objects.stream()
+                .map(String.class::cast)
+                .collect(toUnmodifiableSet()))
+            .orElseGet(HashSet::new);
     }
 
     private String buildCartKey(String userId) {

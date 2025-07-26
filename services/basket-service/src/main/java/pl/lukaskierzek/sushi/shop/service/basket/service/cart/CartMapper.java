@@ -7,12 +7,10 @@ import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartController.Car
 import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartController.CartResponse;
 
 import java.math.BigDecimal;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
-import static java.util.stream.Collectors.toUnmodifiableMap;
+import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 @UtilityClass
@@ -36,11 +34,14 @@ class CartMapper {
     }
 
     static Map<String, Cart> toCartsWithItem(Set<String> userIds, Function<String, Optional<Cart>> cartMapper) {
-        return userIds.stream()
-            .map(userId -> Map.entry(userId, cartMapper.apply(userId)))
-            .filter(entry -> entry.getValue().isPresent())
-            .map(entry -> Map.entry(entry.getKey(), entry.getValue().get()))
-            .collect(toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+        var result = new HashMap<String, Cart>();
+
+        for (var userId : userIds) {
+            cartMapper.apply(userId)
+                .ifPresent(value -> result.put(userId, value));
+        }
+
+        return unmodifiableMap(result);
     }
 
     private CartItemResponse toCartItemResponse(CartItem cartItem) {

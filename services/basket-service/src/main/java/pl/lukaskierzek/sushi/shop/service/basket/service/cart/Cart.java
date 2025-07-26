@@ -2,6 +2,7 @@ package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 
 import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.io.Serializable;
@@ -13,6 +14,7 @@ import static java.util.Collections.unmodifiableSet;
 import static java.util.UUID.randomUUID;
 import static lombok.AccessLevel.PRIVATE;
 
+@EqualsAndHashCode
 @Getter
 @AllArgsConstructor(access = PRIVATE)
 class Cart implements Serializable {
