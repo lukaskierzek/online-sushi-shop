@@ -4,58 +4,111 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.assertj.core.api.Assertions.*;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class CartItemTests {
 
     @Test
-    void shouldCreateValidCartItem() {
-        Money price = new Money(Currency.PLN, BigDecimal.valueOf(10));
-        CartItem item = new CartItem("product-1", 2, price);
+    void shouldCreateCartItemWithValidFields() {
+        CartItem item = new CartItem("product-123", 2, new Money(Currency.PLN, new BigDecimal("10.00")));
 
-        assertThat(item.productId()).isEqualTo("product-1");
-        assertThat(item.quantity()).isEqualTo(2);
-        assertThat(item.unitPrice()).isEqualTo(price);
+        assertEquals("product-123", item.productId());
+        assertEquals(2, item.quantity());
+        assertEquals(new BigDecimal("10.00"), item.unitPrice().amount());
     }
 
     @Test
-    void shouldCalculatePriceCorrectly() {
-        CartItem item = new CartItem("prod", 3, new Money(Currency.PLN, BigDecimal.TEN));
+    void shouldThrowExceptionWhenProductIdIsNull() {
+        Exception exception = assertThrows(InvalidCartException.class, () -> {
+            new CartItem(null, 1, new Money(Currency.PLN, new BigDecimal("5.00")));
+        });
+
+        assertEquals("Product ID cannot be null or empty", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenProductIdIsEmpty() {
+        Exception exception = assertThrows(InvalidCartException.class, () -> {
+            new CartItem("", 1, new Money(Currency.PLN, new BigDecimal("5.00")));
+        });
+
+        assertEquals("Product ID cannot be null or empty", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenQuantityIsNull() {
+        Exception exception = assertThrows(InvalidCartException.class, () -> {
+            new CartItem("product-123", null, new Money(Currency.PLN, new BigDecimal("5.00")));
+        });
+
+        assertEquals("Quantity must be greater than 0", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenQuantityIsZero() {
+        Exception exception = assertThrows(InvalidCartException.class, () -> {
+            new CartItem("product-123", 0, new Money(Currency.PLN, new BigDecimal("5.00")));
+        });
+
+        assertEquals("Quantity must be greater than 0", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenQuantityIsNegative() {
+        Exception exception = assertThrows(InvalidCartException.class, () -> {
+            new CartItem("product-123", -5, new Money(Currency.PLN, new BigDecimal("5.00")));
+        });
+
+        assertEquals("Quantity must be greater than 0", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenPriceIsNull() {
+        Exception exception = assertThrows(InvalidCartException.class, () -> {
+            new CartItem("product-123", 1, null);
+        });
+
+        assertEquals("Price cannot be null", exception.getMessage());
+    }
+
+    @Test
+    void shouldCalculateTotalPriceCorrectly() {
+        Money unitPrice = new Money(Currency.EUR, new BigDecimal("19.99"));
+        CartItem item = new CartItem("item-001", 3, unitPrice);
+
         Money total = item.calculatePrice();
 
-        assertThat(total).isEqualTo(new Money(Currency.PLN, BigDecimal.valueOf(30)));
+        assertEquals(Currency.EUR, total.currency());
+        assertEquals(new BigDecimal("59.97"), total.amount());
     }
 
     @Test
-    void shouldNotAllowEmptyProductId() {
-        assertThatThrownBy(() -> new CartItem("", 1, new Money(Currency.PLN, BigDecimal.ONE)))
-            .isInstanceOf(InvalidCartException.class)
-            .hasMessage("Product ID cannot be null or empty");
+    void shouldBeEqualIfProductIdIsSame() {
+        CartItem item1 = new CartItem("prod-001", 1, new Money(Currency.USD, new BigDecimal("5.00")));
+        CartItem item2 = new CartItem("prod-001", 5, new Money(Currency.USD, new BigDecimal("5.00")));
+
+        assertEquals(item1, item2);
+        assertEquals(item1.hashCode(), item2.hashCode());
     }
 
     @Test
-    void shouldNotAllowZeroOrNegativeQuantity() {
-        assertThatThrownBy(() -> new CartItem("prod", 0, new Money(Currency.PLN, BigDecimal.TEN)))
-            .isInstanceOf(InvalidCartException.class)
-            .hasMessage("Quantity must be greater than 0");
+    void shouldNotBeEqualIfProductIdIsDifferent() {
+        CartItem item1 = new CartItem("prod-001", 1, new Money(Currency.USD, new BigDecimal("5.00")));
+        CartItem item2 = new CartItem("prod-002", 1, new Money(Currency.USD, new BigDecimal("5.00")));
 
-        assertThatThrownBy(() -> new CartItem("prod", -1, new Money(Currency.PLN, BigDecimal.TEN)))
-            .isInstanceOf(InvalidCartException.class);
+        assertNotEquals(item1, item2);
     }
 
     @Test
-    void shouldNotAllowNullPrice() {
-        assertThatThrownBy(() -> new CartItem("prod", 1, null))
-            .isInstanceOf(InvalidCartException.class)
-            .hasMessage("Price cannot be null");
-    }
+    void shouldBehaveCorrectlyInHashSet() {
+        Set<CartItem> set = new HashSet<>();
+        set.add(new CartItem("prod-001", 1, new Money(Currency.USD, new BigDecimal("5.00"))));
+        set.add(new CartItem("prod-001", 5, new Money(Currency.USD, new BigDecimal("5.00")))); // duplicate by ID
 
-    @Test
-    void shouldCompareItemsByProductId() {
-        CartItem i1 = new CartItem("prod", 1, new Money(Currency.PLN, BigDecimal.ONE));
-        CartItem i2 = new CartItem("prod", 5, new Money(Currency.PLN, BigDecimal.TEN));
-
-        assertThat(i1).isEqualTo(i2);
-        assertThat(i1.hashCode()).isEqualTo(i2.hashCode());
+        assertEquals(1, set.size());
     }
 }

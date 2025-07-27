@@ -5,85 +5,137 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class CartTests {
+
+    private Cart cart;
+
+    @BeforeEach
+    void setup() {
+        cart = Cart.newCart("user-123");
+    }
 
     @Test
     void shouldCreateNewCartWithValidUserId() {
         Cart cart = Cart.newCart("user-123");
 
-        assertThat(cart.getUserId()).isEqualTo("user-123");
-        assertThat(cart.getItems()).isEmpty();
-        assertThat(cart.getId()).isNotBlank();
+        assertNotNull(cart.getId());
+        assertEquals("user-123", cart.getUserId());
+        assertTrue(cart.getItems().isEmpty());
+        assertTrue(cart.getEvents().isEmpty());
     }
 
     @Test
-    void shouldNotCreateCartWithEmptyUserId() {
-        assertThatThrownBy(() -> Cart.newCart(""))
-            .isInstanceOf(InvalidCartException.class)
-            .hasMessage("User ID cannot be null or empty");
+    void shouldThrowExceptionWhenUserIdIsNull() {
+        Exception exception = assertThrows(InvalidCartException.class, () -> {
+            Cart.newCart(null);
+        });
+
+        assertEquals("User ID cannot be null or empty", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserIdIsEmpty() {
+        Exception exception = assertThrows(InvalidCartException.class, () -> {
+            Cart.newCart("");
+        });
+
+        assertEquals("User ID cannot be null or empty", exception.getMessage());
     }
 
     @Test
     void shouldAddItemToCart() {
-        Cart cart = Cart.newCart("user-1");
-        CartItem item = new CartItem("prod-1", 2, new Money(Currency.PLN, BigDecimal.valueOf(10)));
+        CartItem item = new CartItem("prod-001", 2, new Money(Currency.PLN, new BigDecimal("10.00")));
 
         cart.addItem(item);
 
-        assertThat(cart.getItems()).containsExactly(item);
+        assertEquals(1, cart.getItems().size());
+        assertTrue(cart.getItems().contains(item));
+
+        // Check event
+        assertEquals(1, cart.getEvents().size());
+        assertTrue(cart.getEvents().stream().anyMatch(e -> e instanceof DomainEvent.CartItemAddedEvent));
     }
 
     @Test
-    void shouldNotAddDuplicateItem() {
-        Cart cart = Cart.newCart("user-1");
-        CartItem item1 = new CartItem("prod-1", 1, new Money(Currency.PLN, BigDecimal.TEN));
-        CartItem item2 = new CartItem("prod-1", 3, new Money(Currency.PLN, BigDecimal.valueOf(5)));
+    void shouldThrowExceptionWhenAddingDuplicateItem() {
+        CartItem item1 = new CartItem("prod-001", 2, new Money(Currency.PLN, new BigDecimal("10.00")));
+        CartItem item2 = new CartItem("prod-001", 1, new Money(Currency.PLN, new BigDecimal("15.00")));
 
         cart.addItem(item1);
 
-        assertThatThrownBy(() -> cart.addItem(item2))
-            .isInstanceOf(InvalidCartItemException.class)
-            .hasMessage("Cart item already added");
+        Exception exception = assertThrows(InvalidCartItemException.class, () -> {
+            cart.addItem(item2);
+        });
+
+        assertEquals("Cart item already added", exception.getMessage());
     }
 
     @Test
-    void shouldReplaceCartItems() {
-        Cart cart = Cart.newCart("user-1");
-        CartItem oldItem = new CartItem("prod-1", 1, new Money(Currency.PLN, BigDecimal.valueOf(5)));
-        CartItem newItem = new CartItem("prod-2", 2, new Money(Currency.PLN, BigDecimal.valueOf(10)));
+    void shouldReplaceItemsCorrectly() {
+        CartItem oldItem = new CartItem("old", 1, new Money(Currency.PLN, new BigDecimal("5.00")));
+        CartItem newItem1 = new CartItem("new1", 2, new Money(Currency.PLN, new BigDecimal("3.00")));
+        CartItem newItem2 = new CartItem("new2", 1, new Money(Currency.PLN, new BigDecimal("7.00")));
 
         cart.addItem(oldItem);
-        cart.replaceItems(Set.of(newItem));
+        cart.clearEvents(); // ignore previous add event
 
-        assertThat(cart.getItems()).containsExactly(newItem);
+        cart.replaceItems(Set.of(newItem1, newItem2));
+
+        Set<CartItem> items = cart.getItems();
+        assertEquals(2, items.size());
+        assertTrue(items.contains(newItem1));
+        assertTrue(items.contains(newItem2));
+        assertFalse(items.contains(oldItem));
+
+        // Check events
+        assertEquals(3, cart.getEvents().size()); // 1 removed + 2 added
+        assertTrue(cart.getEvents().stream().anyMatch(e -> e instanceof DomainEvent.CartItemsRemovedEvent));
     }
 
     @Test
-    void shouldCalculateTotalPricePrice() {
-        Cart cart = Cart.newCart("user-1");
-        cart.addItem(new CartItem("p1", 1, new Money(Currency.PLN, BigDecimal.valueOf(10))));
-        cart.addItem(new CartItem("p2", 2, new Money(Currency.PLN, BigDecimal.valueOf(5)))); // 10
+    void shouldCalculateTotalPriceCorrectly() {
+        cart.addItem(new CartItem("p1", 1, new Money(Currency.PLN, new BigDecimal("10.00"))));
+        cart.addItem(new CartItem("p2", 2, new Money(Currency.PLN, new BigDecimal("5.00"))));
 
         Money total = cart.calculateTotalPrice();
 
-        assertThat(total).isEqualTo(new Money(Currency.PLN, BigDecimal.valueOf(20)));
+        assertEquals(Currency.PLN, total.currency());
+        assertEquals(new BigDecimal("20.00"), total.amount());
     }
 
     @Test
-    void shouldReturnZeroWhenCartIsEmpty() {
-        Cart cart = Cart.newCart("user-1");
+    void shouldReturnZeroPriceForEmptyCart() {
+        Money total = cart.calculateTotalPrice();
 
-        assertThat(cart.calculateTotalPrice()).isEqualTo(new Money(Currency.PLN, BigDecimal.ZERO));
+        assertEquals(Currency.PLN, total.currency());
+        assertEquals(BigDecimal.ZERO, total.amount());
     }
 
     @Test
-    void shouldReturnUnmodifiableItemsSet() {
-        Cart cart = Cart.newCart("user-1");
+    void shouldClearEvents() {
+        CartItem item = new CartItem("item", 1, new Money(Currency.PLN, new BigDecimal("5.00")));
+        cart.addItem(item);
 
-        assertThatThrownBy(() -> cart.getItems().add(
-            new CartItem("p1", 1, new Money(Currency.PLN, BigDecimal.TEN))))
-            .isInstanceOf(UnsupportedOperationException.class);
+        assertFalse(cart.getEvents().isEmpty());
+
+        cart.clearEvents();
+
+        assertTrue(cart.getEvents().isEmpty());
+    }
+
+    @Test
+    void shouldReturnUnmodifiableItemsAndEvents() {
+        assertThrows(UnsupportedOperationException.class, () -> {
+            cart.getItems().add(new CartItem("id", 1, new Money(Currency.PLN, BigDecimal.ONE)));
+        });
+
+        assertThrows(UnsupportedOperationException.class, () -> {
+            cart.getEvents().add(new DomainEvent() {
+            });
+        });
     }
 }
