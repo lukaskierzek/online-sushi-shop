@@ -19,12 +19,15 @@ import static java.util.UUID.randomUUID;
 import static lombok.AccessLevel.PRIVATE;
 
 @EqualsAndHashCode
-@Getter
 @AllArgsConstructor(access = PRIVATE)
 class Cart implements Serializable {
 
+    @Getter
     private final String id;
+
+    @Getter
     private final String userId;
+
     private final Set<CartItem> items;
     private final Set<DomainEvent> events;
 
