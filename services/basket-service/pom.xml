@@ -16,6 +16,8 @@
 	<properties>
 		<java.version>24</java.version>
         <logbook.version>3.9.0</logbook.version>
+        <testcontainers-redis-junit.version>1.6.4</testcontainers-redis-junit.version>
+        <grpc-lib.version>0.0.1-SNAPSHOT</grpc-lib.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -43,7 +45,7 @@
         <dependency>
             <groupId>pl.lukaskierzek.sushi.shop.service</groupId>
             <artifactId>grpc-lib</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${grpc-lib.version}</version>
         </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -58,7 +60,7 @@
         <dependency>
             <groupId>com.redis.testcontainers</groupId>
             <artifactId>testcontainers-redis-junit</artifactId>
-            <version>1.6.4</version>
+            <version>${testcontainers-redis-junit.version}</version>
             <scope>test</scope>
         </dependency>
 

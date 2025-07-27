@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import pl.lukaskierzek.sushi.shop.service.basket.service.IntegrationTest;
-import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartService.CartItemPriceUpdated;
+import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartKafkaConsumer.CartItemPriceUpdatedEventDto;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -49,7 +49,7 @@ class CartItemPriceUpdatedTest extends IntegrationTest {
         });
 
         var newPrice = new Money(Currency.EUR, new BigDecimal("20.00"));
-        var event = new CartItemPriceUpdated(productId, newPrice);
+        var event = new CartItemPriceUpdatedEventDto(productId, newPrice);
 
         kafkaTemplate.send(productPriceUpdatedTopic, mapper.writeValueAsString(event));
 
