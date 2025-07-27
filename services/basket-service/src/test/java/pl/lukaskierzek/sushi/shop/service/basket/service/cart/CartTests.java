@@ -28,7 +28,7 @@ class CartTests {
     @Test
     void shouldAddItemToCart() {
         Cart cart = Cart.newCart("user-1");
-        CartItem item = CartItem.of("prod-1", 2, new Money(Currency.PLN, BigDecimal.valueOf(10)));
+        CartItem item = new CartItem("prod-1", 2, new Money(Currency.PLN, BigDecimal.valueOf(10)));
 
         cart.addItem(item);
 
@@ -38,8 +38,8 @@ class CartTests {
     @Test
     void shouldNotAddDuplicateItem() {
         Cart cart = Cart.newCart("user-1");
-        CartItem item1 = CartItem.of("prod-1", 1, new Money(Currency.PLN, BigDecimal.TEN));
-        CartItem item2 = CartItem.of("prod-1", 3, new Money(Currency.PLN, BigDecimal.valueOf(5)));
+        CartItem item1 = new CartItem("prod-1", 1, new Money(Currency.PLN, BigDecimal.TEN));
+        CartItem item2 = new CartItem("prod-1", 3, new Money(Currency.PLN, BigDecimal.valueOf(5)));
 
         cart.addItem(item1);
 
@@ -51,8 +51,8 @@ class CartTests {
     @Test
     void shouldReplaceCartItems() {
         Cart cart = Cart.newCart("user-1");
-        CartItem oldItem = CartItem.of("prod-1", 1, new Money(Currency.PLN, BigDecimal.valueOf(5)));
-        CartItem newItem = CartItem.of("prod-2", 2, new Money(Currency.PLN, BigDecimal.valueOf(10)));
+        CartItem oldItem = new CartItem("prod-1", 1, new Money(Currency.PLN, BigDecimal.valueOf(5)));
+        CartItem newItem = new CartItem("prod-2", 2, new Money(Currency.PLN, BigDecimal.valueOf(10)));
 
         cart.addItem(oldItem);
         cart.replaceItems(Set.of(newItem));
@@ -61,12 +61,12 @@ class CartTests {
     }
 
     @Test
-    void shouldCalculateTotalPrice() {
+    void shouldCalculateTotalPricePrice() {
         Cart cart = Cart.newCart("user-1");
-        cart.addItem(CartItem.of("p1", 1, new Money(Currency.PLN, BigDecimal.valueOf(10))));
-        cart.addItem(CartItem.of("p2", 2, new Money(Currency.PLN, BigDecimal.valueOf(5)))); // 10
+        cart.addItem(new CartItem("p1", 1, new Money(Currency.PLN, BigDecimal.valueOf(10))));
+        cart.addItem(new CartItem("p2", 2, new Money(Currency.PLN, BigDecimal.valueOf(5)))); // 10
 
-        Money total = cart.calculateTotal();
+        Money total = cart.calculateTotalPrice();
 
         assertThat(total).isEqualTo(new Money(Currency.PLN, BigDecimal.valueOf(20)));
     }
@@ -75,7 +75,7 @@ class CartTests {
     void shouldReturnZeroWhenCartIsEmpty() {
         Cart cart = Cart.newCart("user-1");
 
-        assertThat(cart.calculateTotal()).isEqualTo(new Money(Currency.PLN, BigDecimal.ZERO));
+        assertThat(cart.calculateTotalPrice()).isEqualTo(new Money(Currency.PLN, BigDecimal.ZERO));
     }
 
     @Test
@@ -83,7 +83,7 @@ class CartTests {
         Cart cart = Cart.newCart("user-1");
 
         assertThatThrownBy(() -> cart.getItems().add(
-            CartItem.of("p1", 1, new Money(Currency.PLN, BigDecimal.TEN))))
+            new CartItem("p1", 1, new Money(Currency.PLN, BigDecimal.TEN))))
             .isInstanceOf(UnsupportedOperationException.class);
     }
 }

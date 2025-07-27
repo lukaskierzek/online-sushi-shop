@@ -1,32 +1,25 @@
 package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 
 import io.micrometer.common.util.StringUtils;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import static lombok.AccessLevel.PRIVATE;
+record CartItem(
+    String productId,
+    Integer quantity,
+    Money unitPrice
+) implements Serializable {
 
-@Getter
-@AllArgsConstructor(access = PRIVATE)
-class CartItem implements Serializable {
-
-    private final String productId;
-    private final Integer quantity;
-    private final Money price;
-
-    static CartItem of(String productId, Integer quantity, Money price) {
+    CartItem {
         validateProductId(productId);
         validateQuantity(quantity);
-        validatePrice(price);
-        return new CartItem(productId, quantity, price);
+        validatePrice(unitPrice);
     }
 
     Money calculatePrice() {
-        return new Money(price.currency(), price.amount().multiply(BigDecimal.valueOf(quantity)));
+        return new Money(unitPrice.currency(), unitPrice.amount().multiply(BigDecimal.valueOf(quantity)));
     }
 
     private static void validateProductId(String id) {

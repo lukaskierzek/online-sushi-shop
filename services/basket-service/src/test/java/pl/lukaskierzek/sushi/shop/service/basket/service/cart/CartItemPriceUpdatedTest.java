@@ -40,11 +40,11 @@ class CartItemPriceUpdatedTest extends IntegrationTest {
         final var productId = UUID.randomUUID().toString();
 
         var cart = Cart.newCart(userId);
-        cart.addItem(CartItem.of(productId, 1, new Money(Currency.PLN, new BigDecimal("10.00"))));
+        cart.addItem(new CartItem(productId, 1, new Money(Currency.PLN, new BigDecimal("10.00"))));
         redisTemplate.opsForValue().set("carts::" + userId, cart);
 
         cart.getItems().forEach(cartItem -> {
-            var ops = redisTemplate.boundSetOps("product-to-users::" + cartItem.getProductId());
+            var ops = redisTemplate.boundSetOps("product-to-users::" + cartItem.productId());
             ops.add(userId);
         });
 
@@ -59,8 +59,13 @@ class CartItemPriceUpdatedTest extends IntegrationTest {
                 var updatedCart = (Cart) redisTemplate.opsForValue().get("carts::" + userId);
                 assertNotNull(updatedCart);
                 var item = updatedCart.getItems().iterator().next();
-                assertThat(item.getPrice().amount()).isEqualTo(newPrice.amount());
-                assertThat(item.getPrice().currency()).isEqualTo(newPrice.currency());
+                assertThat(item.unitPrice().amount()).isEqualTo(newPrice.amount());
+                assertThat(item.unitPrice().currency()).isEqualTo(newPrice.currency());
+
+                var productToUsersMembers = redisTemplate.opsForSet().members("product-to-users::" + item.productId());
+                assertNotNull(productToUsersMembers);
+                assertThat(productToUsersMembers.size()).isEqualTo(1);
+                assertThat(productToUsersMembers.iterator().next()).isEqualTo(userId);
             });
     }
 }

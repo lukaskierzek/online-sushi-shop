@@ -48,11 +48,11 @@ class CartRepository {
 
     void saveProductUsersIds(String userId, Set<CartItem> cartItems) {
         cartItems.forEach(cartItem -> {
-            var ops = redisTemplate.boundSetOps(buildProductToUserKey(cartItem.getProductId()));
+            var ops = redisTemplate.boundSetOps(buildProductToUserKey(cartItem.productId()));
             ops.add(userId);
             ops.expire(ttl);
 
-            log.info("User {} added to {} - {}", userId, PRODUCT_TO_USERS_PREFIX, cartItem.getProductId());
+            log.info("User {} added to {} - {}", userId, PRODUCT_TO_USERS_PREFIX, cartItem.productId());
         });
     }
 

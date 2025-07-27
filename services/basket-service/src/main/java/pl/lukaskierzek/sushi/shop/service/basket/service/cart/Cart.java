@@ -40,7 +40,7 @@ class Cart implements Serializable {
 
     void replaceItems(Set<CartItem> newItems) {
         events.add(new CartItemsRemovedEvent(id, items.stream()
-            .map(CartItem::getProductId)
+            .map(CartItem::productId)
             .collect(Collectors.toUnmodifiableSet())));
         items.clear();
         newItems.forEach(this::addItem);
@@ -58,7 +58,7 @@ class Cart implements Serializable {
         events.clear();
     }
 
-    Money calculateTotal() {
+    Money calculateTotalPrice() {
         return items.stream()
             .map(CartItem::calculatePrice)
             .reduce(Money::add)
@@ -66,7 +66,7 @@ class Cart implements Serializable {
     }
 
     private CartItem validateNoDuplicate(CartItem item) {
-        if (items.stream().anyMatch(i -> i.getProductId().equals(item.getProductId()))) {
+        if (items.stream().anyMatch(i -> i.productId().equals(item.productId()))) {
             throw new InvalidCartItemException("Cart item already added");
         }
         return item;

@@ -22,11 +22,11 @@ class CartMapper {
         return new CartResponse(cart.getItems().stream()
             .map(CartMapper::toCartItemResponse)
             .collect(toUnmodifiableSet()),
-            cart.calculateTotal());
+            cart.calculateTotalPrice());
     }
 
     static CartItem toCartItem(CartItemRequest cartItemRequest, GetProductResponse getProductResponse) {
-        return CartItem.of(cartItemRequest.id(), cartItemRequest.quantity(), toMoney(getProductResponse.getPrice()));
+        return new CartItem(cartItemRequest.id(), cartItemRequest.quantity(), toMoney(getProductResponse.getPrice()));
     }
 
     static Money toMoney(pl.lukaskierzek.sushi.shop.service.Money price) {
@@ -74,8 +74,8 @@ class CartMapper {
         var nonModifiableItems = new HashSet<CartItem>();
 
         for (var item : items) {
-            if (item.getProductId().equals(event.id()) && !Objects.equals(item.getPrice(), event.price())) {
-                modifiableItems.add(CartItem.of(item.getProductId(), item.getQuantity(), event.price()));
+            if (item.productId().equals(event.id()) && !Objects.equals(item.unitPrice(), event.price())) {
+                modifiableItems.add(new CartItem(item.productId(), item.quantity(), event.price()));
                 continue;
             }
             nonModifiableItems.add(item);
@@ -90,6 +90,6 @@ class CartMapper {
     }
 
     private CartItemResponse toCartItemResponse(CartItem cartItem) {
-        return new CartItemResponse(cartItem.getProductId(), cartItem.getQuantity(), cartItem.getPrice());
+        return new CartItemResponse(cartItem.productId(), cartItem.quantity(), cartItem.unitPrice());
     }
 }
