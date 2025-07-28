@@ -74,10 +74,10 @@ class CartRepository {
     }
 
     private String buildCartKey(OwnerId ownerId) {
-        return CARTS_PREFIX.concat(ownerId.toString());
+        return CARTS_PREFIX + ownerId;
     }
 
     private String buildProductToOwnerKey(String productId) {
-        return PRODUCT_TO_OWNERS_PREFIX.concat(productId);
+        return PRODUCT_TO_OWNERS_PREFIX + productId;
     }
 }
