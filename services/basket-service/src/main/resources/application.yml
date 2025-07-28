@@ -1,6 +1,11 @@
 server:
   port: 8081
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:9999/realms/online-sushi-shop/protocol/openid-connect/certs
   grpc:
     client:
       product:

@@ -18,7 +18,7 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 class CartRepository {
 
     private static final String CARTS_PREFIX = "carts::";
-    private static final String PRODUCT_TO_USERS_PREFIX = "product-to-users::";
+    private static final String PRODUCT_TO_OWNERS_PREFIX = "product-to-owners::";
 
     private final RedisTemplate<Object, Object> redisTemplate;
     private final Duration ttl;
@@ -30,8 +30,8 @@ class CartRepository {
         this.eventPublisher = eventPublisher;
     }
 
-    Optional<Cart> getCart(String userId) {
-        return Optional.ofNullable(redisTemplate.opsForValue().get(buildCartKey(userId)))
+    Optional<Cart> getCart(OwnerId ownerId) {
+        return Optional.ofNullable(redisTemplate.opsForValue().get(buildCartKey(ownerId)))
             .map(Cart.class::cast);
     }
 
@@ -39,45 +39,45 @@ class CartRepository {
         final var events = Set.copyOf(cart.getEvents());
         cart.clearEvents();
 
-        redisTemplate.opsForValue().set(buildCartKey(cart.getUserId()), cart, ttl);
+        redisTemplate.opsForValue().set(buildCartKey(cart.getOwnerId()), cart, ttl);
 
         log.info("Cart created {}{}", CARTS_PREFIX, cart.getId());
 
         events.forEach(eventPublisher::publishEvent);
     }
 
-    void saveProductUsersIds(String userId, Set<CartItem> cartItems) {
+    void saveProductOwnersIds(OwnerId ownerId, Set<CartItem> cartItems) {
         cartItems.forEach(cartItem -> {
-            var ops = redisTemplate.boundSetOps(buildProductToUserKey(cartItem.productId()));
-            ops.add(userId);
+            var ops = redisTemplate.boundSetOps(buildProductToOwnerKey(cartItem.productId()));
+            ops.add(ownerId);
             ops.expire(ttl);
 
-            log.info("User {} added to {} - {}", userId, PRODUCT_TO_USERS_PREFIX, cartItem.productId());
+            log.info("Owner {} added to {} - {}", ownerId, PRODUCT_TO_OWNERS_PREFIX, cartItem.productId());
         });
     }
 
-    Set<String> getProductUsersIds(String productId) {
-        return Optional.ofNullable(redisTemplate.opsForSet().members(buildProductToUserKey(productId)))
+    Set<OwnerId> getProductOwnersIds(String productId) {
+        return Optional.ofNullable(redisTemplate.opsForSet().members(buildProductToOwnerKey(productId)))
             .map(objects -> objects.stream()
-                .map(String.class::cast)
+                .map(OwnerId.class::cast)
                 .collect(toUnmodifiableSet()))
             .orElseGet(HashSet::new);
     }
 
-    void deleteProductUsersIds(String userId, Set<String> productsIds) {
+    void deleteProductOwnersIds(OwnerId ownerId, Set<String> productsIds) {
         productsIds.forEach(productId -> {
-            var ops = redisTemplate.boundSetOps(buildProductToUserKey(productId));
-            ops.remove(userId);
+            var ops = redisTemplate.boundSetOps(buildProductToOwnerKey(productId));
+            ops.remove(ownerId);
 
-            log.info("User {} removed from {} - {}", userId, PRODUCT_TO_USERS_PREFIX, productId);
+            log.info("Owner {} removed from {} - {}", ownerId, PRODUCT_TO_OWNERS_PREFIX, productId);
         });
     }
 
-    private String buildCartKey(String userId) {
-        return CARTS_PREFIX.concat(userId);
+    private String buildCartKey(OwnerId ownerId) {
+        return CARTS_PREFIX.concat(ownerId.toString());
     }
 
-    private String buildProductToUserKey(String productId) {
-        return PRODUCT_TO_USERS_PREFIX.concat(productId);
+    private String buildProductToOwnerKey(String productId) {
+        return PRODUCT_TO_OWNERS_PREFIX.concat(productId);
     }
 }

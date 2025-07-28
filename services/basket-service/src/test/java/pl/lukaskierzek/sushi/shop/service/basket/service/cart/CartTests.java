@@ -23,7 +23,7 @@ class CartTests {
         Cart cart = Cart.newCart("user-123");
 
         assertNotNull(cart.getId());
-        assertEquals("user-123", cart.getUserId());
+        assertEquals("user-123", cart.getOwnerId());
         assertTrue(cart.getItems().isEmpty());
         assertTrue(cart.getEvents().isEmpty());
     }

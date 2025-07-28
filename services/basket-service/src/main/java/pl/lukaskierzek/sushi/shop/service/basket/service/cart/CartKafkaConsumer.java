@@ -27,12 +27,12 @@ class CartKafkaConsumer {
     public void onCartItemPriceUpdated(String payload) throws JsonProcessingException {
         var event = mapper.readValue(payload, CartItemPriceUpdatedEventDto.class);
 
-        var userIds = repository.getProductUsersIds(event.id());
-        if (CollectionUtils.isEmpty(userIds)) {
+        var ownerIds = repository.getProductOwnersIds(event.id());
+        if (CollectionUtils.isEmpty(ownerIds)) {
             return;
         }
 
-        var cartsWithItem = toCartsWithItem(userIds, repository::getCart);
+        var cartsWithItem = toCartsWithItem(ownerIds, repository::getCart);
 
         var carts = toCarts(event, cartsWithItem);
         if (carts.isEmpty()) {

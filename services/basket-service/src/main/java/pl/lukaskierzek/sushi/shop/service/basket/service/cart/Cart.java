@@ -1,6 +1,5 @@
 package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 
-import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -26,23 +25,23 @@ class Cart implements Serializable {
     private final String id;
 
     @Getter
-    private final String userId;
+    private final OwnerId ownerId;
 
     private final Set<CartItem> items;
     private final Set<DomainEvent> events;
 
-    static Cart newCart(String userId) {
-        validateUserId(userId);
-        return new Cart(randomUUID().toString(), userId, new HashSet<>(), new LinkedHashSet<>());
+    static Cart newCart(OwnerId ownerId) {
+        validateOwnerId(ownerId);
+        return new Cart(randomUUID().toString(), ownerId, new HashSet<>(), new LinkedHashSet<>());
     }
 
     void addItem(CartItem item) {
         items.add(validateNoDuplicate(item));
-        events.add(new CartItemAddedEvent(id, items));
+        events.add(new CartItemAddedEvent(ownerId, items));
     }
 
     void replaceItems(Set<CartItem> newItems) {
-        events.add(new CartItemsRemovedEvent(id, items.stream()
+        events.add(new CartItemsRemovedEvent(ownerId, items.stream()
             .map(CartItem::productId)
             .collect(Collectors.toUnmodifiableSet())));
         items.clear();
@@ -75,9 +74,9 @@ class Cart implements Serializable {
         return item;
     }
 
-    private static void validateUserId(String userId) {
-        if (StringUtils.isEmpty(userId)) {
-            throw new InvalidCartException("User ID cannot be null or empty");
+    private static void validateOwnerId(OwnerId ownerId) {
+        if (ownerId == null) {
+            throw new InvalidCartException("Owner ID cannot be null or empty");
         }
     }
 }

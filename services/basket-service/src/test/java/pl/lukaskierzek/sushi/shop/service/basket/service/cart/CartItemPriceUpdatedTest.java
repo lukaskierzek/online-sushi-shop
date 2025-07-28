@@ -79,7 +79,7 @@ class CartItemPriceUpdatedTest extends IntegrationTest {
 
     @Test
     void shouldNotUpdateCartItemPriceViaKafkaAndThrowExceptionAndRollback() throws JsonProcessingException, InterruptedException {
-        doThrow(new RuntimeException("ERROR")).when(cartRepository).saveProductUsersIds(any(), any());
+        doThrow(new RuntimeException("ERROR")).when(cartRepository).saveProductOwnersIds(any(), any());
 
         final var userId = UUID.randomUUID().toString();
         final var productId = UUID.randomUUID().toString();

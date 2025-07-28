@@ -5,9 +5,9 @@ import java.util.Set;
 
 interface DomainEvent extends Serializable {
 
-    record CartItemAddedEvent(String userId, Set<CartItem> items) implements DomainEvent {
+    record CartItemAddedEvent(OwnerId ownerId, Set<CartItem> items) implements DomainEvent {
     }
 
-    record CartItemsRemovedEvent(String userId, Set<String> productsIds) implements DomainEvent {
+    record CartItemsRemovedEvent(OwnerId ownerId, Set<String> productsIds) implements DomainEvent {
     }
 }

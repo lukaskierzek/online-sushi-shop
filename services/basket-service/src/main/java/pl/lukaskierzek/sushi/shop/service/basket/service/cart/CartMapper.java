@@ -2,9 +2,6 @@ package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 
 import lombok.experimental.UtilityClass;
 import pl.lukaskierzek.sushi.shop.service.GetProductResponse;
-import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartController.CartItemRequest;
-import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartController.CartItemResponse;
-import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartController.CartResponse;
 import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartKafkaConsumer.CartItemPriceUpdatedEventDto;
 
 import java.math.BigDecimal;
@@ -26,18 +23,18 @@ class CartMapper {
             cart.calculateTotalPrice());
     }
 
-    static Map<String, Cart> toCartsWithItem(Set<String> userIds, Function<String, Optional<Cart>> cartMapper) {
-        var result = new HashMap<String, Cart>();
+    static Map<OwnerId, Cart> toCartsWithItem(Set<OwnerId> ownerIds, Function<OwnerId, Optional<Cart>> cartMapper) {
+        var result = new HashMap<OwnerId, Cart>();
 
-        for (var userId : userIds) {
-            cartMapper.apply(userId)
-                .ifPresent(value -> result.put(userId, value));
+        for (var ownerId : ownerIds) {
+            cartMapper.apply(ownerId)
+                .ifPresent(value -> result.put(ownerId, value));
         }
 
         return unmodifiableMap(result);
     }
 
-    static Set<Cart> toCarts(CartItemPriceUpdatedEventDto event, Map<String, Cart> cartsWithItem) {
+    static Set<Cart> toCarts(CartItemPriceUpdatedEventDto event, Map<OwnerId, Cart> cartsWithItem) {
         var result = new HashSet<Cart>();
 
         for (var cartEntry : cartsWithItem.entrySet()) {

@@ -3,7 +3,10 @@ package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 import java.util.Set;
@@ -16,36 +19,53 @@ import static org.springframework.http.ResponseEntity.created;
 @RequiredArgsConstructor
 class CartController {
 
+    private static final String ANONYMOUS_ID_HEADER = "X-Anonymous-Id";
+
     private final CartService service;
 
     @PostMapping
-        //TODO: add retrieving userId from JWT
-    ResponseEntity<String> post(String userId) {
-        var cartId = service.createCart(userId);
+    ResponseEntity<String> post(@AuthenticationPrincipal Jwt jwt,
+                                @RequestHeader(value = ANONYMOUS_ID_HEADER, required = false) String anonymousId) {
+        var cartId = service.createCart(resolveOwnerId(jwt, anonymousId));
         return created(create("/carts/" + cartId)).body(cartId);
     }
 
     @GetMapping
-    CartResponse get(String userId) {
-        return service.getCart(userId);
+    CartResponse get(@AuthenticationPrincipal Jwt jwt,
+                     @RequestHeader(value = ANONYMOUS_ID_HEADER, required = false) String anonymousId) {
+        return service.getCart(resolveOwnerId(jwt, anonymousId));
     }
 
     @PutMapping
-    void put(String userId, @RequestBody CartItemsRequest request) {
-        service.updateCart(userId, request);
+    void put(@AuthenticationPrincipal Jwt jwt,
+             @RequestHeader(value = ANONYMOUS_ID_HEADER, required = false) String anonymousId,
+             @RequestBody CartItemsRequest request) {
+        service.updateCart(resolveOwnerId(jwt, anonymousId), request);
     }
 
-    record CartResponse(Set<CartItemResponse> items, Money totalPrice) {
-    }
+    private OwnerId resolveOwnerId(Jwt jwt, String anonymousId) {
+        if (jwt != null) {
+            return new OwnerId(jwt.getSubject(), null);
+        }
 
-    record CartItemResponse(String id, Integer quantity, Money price) {
-    }
+        if (anonymousId != null) {
+            return new OwnerId(null, anonymousId);
+        }
 
-    record CartItemsRequest(Set<CartItemRequest> items) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing user identifier");
     }
+}
 
-    record CartItemRequest(String id, Integer quantity) {
-    }
+record CartResponse(Set<CartItemResponse> items, Money totalPrice) {
+}
+
+record CartItemResponse(String id, Integer quantity, Money price) {
+}
+
+record CartItemsRequest(Set<CartItemRequest> items) {
+}
+
+record CartItemRequest(String id, Integer quantity) {
 }
 
 @RestControllerAdvice
