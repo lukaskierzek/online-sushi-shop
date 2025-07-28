@@ -11,7 +11,7 @@ import org.springframework.util.backoff.FixedBackOff;
 class KafkaConfiguration {
 
     @Bean
-    public DefaultErrorHandler errorHandler() {
+    DefaultErrorHandler errorHandler() {
         return new DefaultErrorHandler(
             (consumerRecord, exception) -> log.error("DLT: Failed message: {}", consumerRecord, exception),
             new FixedBackOff(3000L, 3)
