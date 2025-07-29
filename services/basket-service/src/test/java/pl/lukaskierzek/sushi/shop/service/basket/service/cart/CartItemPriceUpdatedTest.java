@@ -1,10 +1,6 @@
 package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import pl.lukaskierzek.sushi.shop.service.basket.service.IntegrationTest;
 import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartKafkaConsumer.CartItemPriceUpdatedEventDto;
@@ -22,27 +18,8 @@ import static org.mockito.Mockito.doThrow;
 
 class CartItemPriceUpdatedTest extends IntegrationTest {
 
-    @Autowired
-    KafkaTemplate<String, String> kafkaTemplate;
-
-    @Value("${kafka.topics.product-price-updated}")
-    String productPriceUpdatedTopic;
-
-    @Value("${kafka.consumer.fixed-backoff.interval}")
-    long consumerBackoffInterval;
-
-    @Value("${kafka.consumer.fixed-backoff.attempts}")
-    int consumerBackoffAttempts;
-
     @MockitoSpyBean
     CartRepository cartRepository;
-
-    @BeforeEach
-    void setUp() {
-        assertNotNull(redisTemplate.getConnectionFactory());
-        redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
-        kafkaTemplate.flush();
-    }
 
     @Test
     void shouldUpdateCartItemPriceViaKafka() throws Exception {
