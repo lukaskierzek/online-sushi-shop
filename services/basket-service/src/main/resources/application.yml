@@ -1,16 +1,12 @@
 server:
   port: 8081
+
 spring:
   security:
     oauth2:
       resourceserver:
         jwt:
           jwk-set-uri: http://localhost:9999/realms/online-sushi-shop/protocol/openid-connect/certs
-  grpc:
-    client:
-      product:
-        address: localhost:1800
-        negotiation-type: plaintext
   application:
     name: basket-service
   kafka:
@@ -21,12 +17,20 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       group-id: basket-service
+
 logging:
   level:
     org:
       zalando:
         logbook:
           Logbook: TRACE
+
 kafka:
   topics:
     product-price-updated: pl.lukaskierzek.catalog.product.price-updated
+
+grpc:
+  client:
+    product:
+      address: localhost:1800
+      negotiation-type: plaintext

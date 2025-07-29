@@ -2,14 +2,20 @@ package pl.lukaskierzek.sushi.shop.service.basket.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redis.testcontainers.RedisContainer;
+import net.devh.boot.grpc.client.autoconfigure.GrpcClientAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerFactoryAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -21,6 +27,12 @@ import org.testcontainers.utility.DockerImageName;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+@DirtiesContext
+@Import(GrpcTestConfiguration.class)
+@ImportAutoConfiguration({
+    GrpcServerAutoConfiguration.class,
+    GrpcServerFactoryAutoConfiguration.class,
+    GrpcClientAutoConfiguration.class})
 @AutoConfigureMockMvc
 @Testcontainers
 @ActiveProfiles("test")
@@ -51,8 +63,9 @@ public class IntegrationTest {
 
     @BeforeEach
     void setUp() {
-        assertNotNull(redisTemplate.getConnectionFactory());
-        redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
+        var connectionFactory = redisTemplate.getConnectionFactory();
+        assertNotNull(connectionFactory);
+        connectionFactory.getConnection().serverCommands().flushAll();
         kafkaTemplate.flush();
     }
 

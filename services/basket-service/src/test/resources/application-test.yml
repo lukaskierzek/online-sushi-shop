@@ -10,6 +10,7 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
 kafka:
   topics:
     product-price-updated: pl.lukaskierzek.catalog.product.price-updated-test
