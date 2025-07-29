@@ -57,3 +57,9 @@ class CartItemPriceProcessingException extends RuntimeException {
         super(message);
     }
 }
+
+class OwnerIdNotFoundException extends RuntimeException {
+    OwnerIdNotFoundException(String message) {
+        super(message);
+    }
+}

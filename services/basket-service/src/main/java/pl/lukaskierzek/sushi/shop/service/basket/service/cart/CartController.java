@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 import java.util.Set;
@@ -52,7 +51,7 @@ class CartController {
             return new OwnerId(null, anonymousId);
         }
 
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing user identifier");
+        throw new OwnerIdNotFoundException("Missing user identifier");
     }
 }
 
@@ -81,5 +80,11 @@ class CartExceptionHandler {
     ResponseEntity<Map<String, String>> handleCartNotFound(CartNotFoundException ex) {
         var body = Map.of("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(OwnerIdNotFoundException.class)
+    ResponseEntity<Map<String, String>> handleOwnerIdNotFoundException(OwnerIdNotFoundException ex) {
+        var body = Map.of("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 }

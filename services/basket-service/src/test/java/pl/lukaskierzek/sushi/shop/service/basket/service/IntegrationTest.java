@@ -5,23 +5,26 @@ import com.redis.testcontainers.RedisContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+@AutoConfigureMockMvc
 @Testcontainers
 @ActiveProfiles("test")
-@SpringBootTest(classes = BasketServiceApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = BasketServiceApplication.class, webEnvironment = RANDOM_PORT)
 @EmbeddedKafka
 public class IntegrationTest {
 
@@ -35,7 +38,7 @@ public class IntegrationTest {
     protected KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
-    protected TestRestTemplate restTemplate;
+    protected MockMvc mvc;
 
     @Value("${kafka.topics.product-price-updated}")
     protected String productPriceUpdatedTopic;
