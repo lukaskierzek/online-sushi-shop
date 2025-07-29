@@ -41,7 +41,7 @@ class CartControllerTests extends IntegrationTest {
     }
 
     @Test
-    void shouldReturnBadRequestWhenNoUserIdentification() throws Exception {
+    void shouldReturnUnauthorizedWhenNoUserIdentification() throws Exception {
         mvc.perform(post("/carts"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("Missing user identifier"));
