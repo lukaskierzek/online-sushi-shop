@@ -15,11 +15,6 @@ class OwnerIdTests {
 
     @Test
     void shouldThrowForEmptyUserId() {
-        assertThrows(InvalidOwnerIdException.class, () -> new OwnerId("", "anon"));
-    }
-
-    @Test
-    void shouldThrowForEmptyAnonymousId() {
-        assertThrows(InvalidOwnerIdException.class, () -> new OwnerId("user", ""));
+        assertThrows(InvalidOwnerIdException.class, () -> new OwnerId("", ""));
     }
 }

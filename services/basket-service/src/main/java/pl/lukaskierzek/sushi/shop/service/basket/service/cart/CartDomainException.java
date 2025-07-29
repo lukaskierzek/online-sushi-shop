@@ -46,7 +46,14 @@ class InvalidOwnerIdException extends CartDomainException {
 }
 
 class CartNotFoundException extends RuntimeException {
+
     CartNotFoundException(String message) {
+        super(message);
+    }
+}
+
+class CartItemPriceProcessingException extends RuntimeException {
+    CartItemPriceProcessingException(String message) {
         super(message);
     }
 }

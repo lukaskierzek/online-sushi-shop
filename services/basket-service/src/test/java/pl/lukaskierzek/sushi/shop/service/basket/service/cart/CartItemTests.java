@@ -17,17 +17,17 @@ class CartItemTests {
 
     @Test
     void shouldThrowForEmptyProductId() {
-        assertThrows(InvalidCartException.class, () -> new CartItem("", 2, new Money(Currency.PLN, BigDecimal.TEN)));
+        assertThrows(InvalidCartItemException.class, () -> new CartItem("", 2, new Money(Currency.PLN, BigDecimal.TEN)));
     }
 
     @Test
     void shouldThrowForInvalidQuantity() {
-        assertThrows(InvalidCartException.class, () -> new CartItem("prod", 0, new Money(Currency.PLN, BigDecimal.TEN)));
+        assertThrows(InvalidCartItemException.class, () -> new CartItem("prod", 0, new Money(Currency.PLN, BigDecimal.TEN)));
     }
 
     @Test
     void shouldThrowForNullPrice() {
-        assertThrows(InvalidCartException.class, () -> new CartItem("prod", 1, null));
+        assertThrows(InvalidCartItemException.class, () -> new CartItem("prod", 1, null));
     }
 
     @Test

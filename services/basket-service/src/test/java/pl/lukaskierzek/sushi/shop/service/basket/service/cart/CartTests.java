@@ -3,7 +3,6 @@ package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,38 +27,72 @@ class CartTests {
     @Test
     void shouldAddItemToCart() {
         Cart cart = Cart.newCart(validOwner);
-        cart.addItem(item1);
-        assertTrue(cart.getItems().contains(item1));
+        cart.addCartItem(item1.productId(), item1.quantity(), item1.unitPrice());
+
+        assertEquals(1, cart.getItems().size());
+        assertTrue(cart.getItems().stream().anyMatch(i -> i.productId().equals(item1.productId())));
         assertEquals(1, cart.getEvents().size());
     }
 
     @Test
     void shouldThrowWhenAddingDuplicateItem() {
         Cart cart = Cart.newCart(validOwner);
-        cart.addItem(item1);
-        assertThrows(InvalidCartItemException.class, () -> cart.addItem(item1));
+        cart.addCartItem(item1.productId(), item1.quantity(), item1.unitPrice());
+
+        assertThrows(InvalidCartItemException.class, () ->
+            cart.addCartItem(item1.productId(), item1.quantity(), item1.unitPrice()));
     }
 
     @Test
-    void shouldReplaceItemsInCart() {
+    void shouldRemoveItemFromCart() {
         Cart cart = Cart.newCart(validOwner);
-        cart.addItem(item1);
+        cart.addCartItem(item1.productId(), item1.quantity(), item1.unitPrice());
 
-        Set<CartItem> newItems = Set.of(item2);
-        cart.replaceItems(newItems);
+        cart.removeCartItem(item1.productId());
 
-        assertEquals(1, cart.getItems().size());
-        assertTrue(cart.getItems().contains(item2));
-        assertEquals(3, cart.getEvents().size()); // item1 added, items removed, item2 added
+        assertTrue(cart.getItems().isEmpty());
+        assertEquals(2, cart.getEvents().size()); // added + removed
+    }
+
+    @Test
+    void shouldThrowWhenRemovingNonExistentItem() {
+        Cart cart = Cart.newCart(validOwner);
+        assertThrows(InvalidCartItemException.class, () -> cart.removeCartItem("not-existing-id"));
+    }
+
+    @Test
+    void shouldUpdateQuantity() {
+        Cart cart = Cart.newCart(validOwner);
+        cart.addCartItem(item1.productId(), 1, item1.unitPrice()); // initial quantity = 1
+
+        cart.updateCartItemQuantity(item1.productId(), 3); // update to 3
+
+        var updatedItem = cart.getItems().stream()
+            .filter(i -> i.productId().equals(item1.productId()))
+            .findFirst()
+            .orElseThrow();
+
+        assertEquals(3, updatedItem.quantity());
+        assertEquals(1, cart.getEvents().size()); // added
+    }
+
+    @Test
+    void shouldThrowWhenUpdatingQuantityToInvalidValue() {
+        Cart cart = Cart.newCart(validOwner);
+        cart.addCartItem(item1.productId(), 1, item1.unitPrice());
+
+        assertThrows(InvalidCartItemException.class, () ->
+            cart.updateCartItemQuantity(item1.productId(), 0)); // invalid quantity
     }
 
     @Test
     void shouldCalculateTotalPrice() {
         Cart cart = Cart.newCart(validOwner);
-        cart.addItem(item1); // 2 x 10 = 20
-        cart.addItem(item2); // 1 x 15 = 15
+        cart.addCartItem(item1.productId(), item1.quantity(), item1.unitPrice()); // 2 x 10 = 20
+        cart.addCartItem(item2.productId(), item2.quantity(), item2.unitPrice()); // 1 x 15 = 15
 
         Money total = cart.calculateTotalPrice();
+
         assertEquals(new Money(Currency.PLN, new BigDecimal("35.00")), total);
     }
 
@@ -72,8 +105,11 @@ class CartTests {
     @Test
     void shouldClearEvents() {
         Cart cart = Cart.newCart(validOwner);
-        cart.addItem(item1);
+        cart.addCartItem(item1.productId(), item1.quantity(), item1.unitPrice());
+        assertFalse(cart.getEvents().isEmpty());
+
         cart.clearEvents();
+
         assertTrue(cart.getEvents().isEmpty());
     }
 }

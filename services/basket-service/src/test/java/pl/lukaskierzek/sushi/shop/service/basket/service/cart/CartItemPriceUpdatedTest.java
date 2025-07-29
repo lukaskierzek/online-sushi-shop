@@ -1,6 +1,5 @@
 package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import pl.lukaskierzek.sushi.shop.service.basket.service.IntegrationTest;
+import pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartKafkaConsumer.CartItemPriceUpdatedEventDto;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -25,11 +25,14 @@ class CartItemPriceUpdatedTest extends IntegrationTest {
     @Autowired
     KafkaTemplate<String, String> kafkaTemplate;
 
-    @Autowired
-    ObjectMapper objectMapper;
-
     @Value("${kafka.topics.product-price-updated}")
     String productPriceUpdatedTopic;
+
+    @Value("${kafka.consumer.fixed-backoff.interval}")
+    long consumerBackoffInterval;
+
+    @Value("${kafka.consumer.fixed-backoff.attempts}")
+    int consumerBackoffAttempts;
 
     @MockitoSpyBean
     CartRepository cartRepository;
@@ -48,28 +51,30 @@ class CartItemPriceUpdatedTest extends IntegrationTest {
         var productId = UUID.randomUUID().toString();
 
         var cart = Cart.newCart(ownerId);
-        cart.addItem(new CartItem(productId, 1, new Money(Currency.PLN, new BigDecimal("10.00"))));
+        cart.addCartItem(productId, 1, new Money(Currency.PLN, new BigDecimal("10.00")));
         redisTemplate.opsForValue().set(redisCartKey(ownerId), cart);
 
         redisTemplate.boundSetOps(redisProductKey(productId)).add(ownerId);
 
         var updatedPrice = new Money(Currency.EUR, new BigDecimal("20.00"));
-        var kafkaEvent = new CartKafkaConsumer.CartItemPriceUpdatedEventDto(productId, updatedPrice);
+        var kafkaEvent = new CartItemPriceUpdatedEventDto(productId, updatedPrice);
 
         // when
         kafkaTemplate.send(productPriceUpdatedTopic, objectMapper.writeValueAsString(kafkaEvent));
 
         // then
-        await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {
-            Cart updatedCart = (Cart) redisTemplate.opsForValue().get(redisCartKey(ownerId));
-            assertNotNull(updatedCart);
+        await()
+            .atMost(Duration.ofMillis(((long) consumerBackoffAttempts * consumerBackoffInterval) + consumerBackoffInterval))
+            .untilAsserted(() -> {
+                Cart updatedCart = (Cart) redisTemplate.opsForValue().get(redisCartKey(ownerId));
+                assertNotNull(updatedCart);
 
-            var updatedItem = updatedCart.getItems().iterator().next();
-            assertThat(updatedItem.unitPrice()).isEqualTo(updatedPrice);
+                var updatedItem = updatedCart.getItems().iterator().next();
+                assertThat(updatedItem.unitPrice()).isEqualTo(updatedPrice);
 
-            Set<Object> owners = redisTemplate.opsForSet().members(redisProductKey(productId));
-            assertThat(owners).containsExactly(ownerId);
-        });
+                Set<Object> owners = redisTemplate.opsForSet().members(redisProductKey(productId));
+                assertThat(owners).containsExactly(ownerId);
+            });
     }
 
     @Test
@@ -79,10 +84,9 @@ class CartItemPriceUpdatedTest extends IntegrationTest {
         var productId = UUID.randomUUID().toString();
 
         var originalPrice = new Money(Currency.PLN, new BigDecimal("10.00"));
-        var originalItem = new CartItem(productId, 1, originalPrice);
 
         var cart = Cart.newCart(ownerId);
-        cart.addItem(originalItem);
+        cart.addCartItem(productId, 1, originalPrice);
         redisTemplate.opsForValue().set(redisCartKey(ownerId), cart);
         redisTemplate.boundSetOps(redisProductKey(productId)).add(ownerId);
 
@@ -92,13 +96,13 @@ class CartItemPriceUpdatedTest extends IntegrationTest {
             .saveCart(any());
 
         var updatedPrice = new Money(Currency.EUR, new BigDecimal("20.00"));
-        var kafkaEvent = new CartKafkaConsumer.CartItemPriceUpdatedEventDto(productId, updatedPrice);
+        var kafkaEvent = new CartItemPriceUpdatedEventDto(productId, updatedPrice);
 
         // when
         kafkaTemplate.send(productPriceUpdatedTopic, objectMapper.writeValueAsString(kafkaEvent));
 
         // then
-        Thread.sleep(5000);
+        Thread.sleep(((long) consumerBackoffAttempts * consumerBackoffInterval) + consumerBackoffInterval);
 
         Cart unchangedCart = (Cart) redisTemplate.opsForValue().get(redisCartKey(ownerId));
         assertNotNull(unchangedCart);

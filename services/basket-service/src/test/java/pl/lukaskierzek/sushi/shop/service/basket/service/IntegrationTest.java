@@ -1,5 +1,6 @@
 package pl.lukaskierzek.sushi.shop.service.basket.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redis.testcontainers.RedisContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,12 +15,15 @@ import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
 @ActiveProfiles("test")
-@SpringBootTest(classes = BasketServiceApplication.class)
+@SpringBootTest(classes = BasketServiceApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EmbeddedKafka
 public class IntegrationTest {
 
     @Autowired
     protected RedisTemplate<Object, Object> redisTemplate;
+
+    @Autowired
+    protected ObjectMapper objectMapper;
 
     @Container
     static RedisContainer redisContainer = new RedisContainer(DockerImageName.parse("redis:alpine"));

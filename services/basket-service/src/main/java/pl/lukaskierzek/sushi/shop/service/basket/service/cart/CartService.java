@@ -7,9 +7,11 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.lukaskierzek.sushi.shop.service.GetProductRequest;
 import pl.lukaskierzek.sushi.shop.service.ProductServiceGrpc.ProductServiceBlockingStub;
 import pl.lukaskierzek.sushi.shop.service.basket.service.cart.DomainEvent.CartItemAddedEvent;
-import pl.lukaskierzek.sushi.shop.service.basket.service.cart.DomainEvent.CartItemsRemovedEvent;
+import pl.lukaskierzek.sushi.shop.service.basket.service.cart.DomainEvent.CartItemRemovedEvent;
 
-import static java.util.stream.Collectors.toUnmodifiableSet;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import static pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartMapper.*;
 
 @Service
@@ -42,35 +44,55 @@ class CartService {
 
     @Transactional
     public void updateCart(OwnerId ownerId, CartItemsRequest request) {
-        var newItems = request.items().stream()
-            .map(this::toCartItem)
-            .collect(toUnmodifiableSet());
-
         var cart = getCartOrThrow(ownerId);
-        cart.replaceItems(newItems);
+        var existingItems = cart.getItems().stream()
+            .collect(Collectors.toMap(CartItem::productId, item -> item));
+
+        var incomingItems = request.items().stream()
+            .collect(Collectors.toMap(CartItemRequest::id, item -> item));
+
+        for (var existingItem : existingItems.values()) {
+            if (!incomingItems.containsKey(existingItem.productId())) {
+                cart.removeCartItem(existingItem.productId());
+            }
+        }
+
+        for (var requestItem : request.items()) {
+            var productId = requestItem.id();
+            var quantity = requestItem.quantity();
+
+            var product = productsStub.getProduct(
+                GetProductRequest.newBuilder().setId(productId).build());
+
+            var unitPrice = MoneyMapper.toMoney(product.getPrice());
+
+            if (!existingItems.containsKey(productId)) {
+                cart.addCartItem(productId, quantity, unitPrice);
+                continue;
+            }
+
+            var existing = existingItems.get(productId);
+            if (!Objects.equals(existing.quantity(), quantity)) {
+                cart.updateCartItemQuantity(productId, quantity);
+            }
+        }
 
         repository.saveCart(cart);
     }
 
+
     @EventListener
     public void onCartItemAdded(CartItemAddedEvent event) {
-        repository.saveProductOwnersIds(event.ownerId(), event.items());
+        repository.saveProductOwnersIds(event.ownerId(), event.productId());
     }
 
     @EventListener
-    public void onCartItemsRemoved(CartItemsRemovedEvent event) {
-        repository.deleteProductOwnersIds(event.ownerId(), event.productsIds());
+    public void onCartItemsRemoved(CartItemRemovedEvent event) {
+        repository.deleteProductOwnersIds(event.ownerId(), event.productId());
     }
 
     private Cart getCartOrThrow(OwnerId ownerId) {
         return repository.getCart(ownerId)
             .orElseThrow(() -> new CartNotFoundException("Cart not found"));
-    }
-
-    private CartItem toCartItem(CartItemRequest cartItemRequest) {
-        var product = productsStub.getProduct(GetProductRequest.newBuilder()
-            .setId(cartItemRequest.id())
-            .build());
-        return CartItemMapper.toCartItem(cartItemRequest, product);
     }
 }

@@ -46,14 +46,12 @@ class CartRepository {
         events.forEach(eventPublisher::publishEvent);
     }
 
-    void saveProductOwnersIds(OwnerId ownerId, Set<CartItem> cartItems) {
-        cartItems.forEach(cartItem -> {
-            var ops = redisTemplate.boundSetOps(buildProductToOwnerKey(cartItem.productId()));
-            ops.add(ownerId);
-            ops.expire(ttl);
+    void saveProductOwnersIds(OwnerId ownerId, String productId) {
+        var ops = redisTemplate.boundSetOps(buildProductToOwnerKey(productId));
+        ops.add(ownerId);
+        ops.expire(ttl);
 
-            log.info("Owner {} added to {} - {}", ownerId, PRODUCT_TO_OWNERS_PREFIX, cartItem.productId());
-        });
+        log.info("Owner {} added to {} - {}", ownerId, PRODUCT_TO_OWNERS_PREFIX, productId);
     }
 
     Set<OwnerId> getProductOwnersIds(String productId) {
@@ -64,13 +62,11 @@ class CartRepository {
             .orElseGet(HashSet::new);
     }
 
-    void deleteProductOwnersIds(OwnerId ownerId, Set<String> productsIds) {
-        productsIds.forEach(productId -> {
-            var ops = redisTemplate.boundSetOps(buildProductToOwnerKey(productId));
-            ops.remove(ownerId);
+    void deleteProductOwnersIds(OwnerId ownerId, String itemId) {
+        var ops = redisTemplate.boundSetOps(buildProductToOwnerKey(itemId));
+        ops.remove(ownerId);
 
-            log.info("Owner {} removed from {} - {}", ownerId, PRODUCT_TO_OWNERS_PREFIX, productId);
-        });
+        log.info("Owner {} removed from {} - {}", ownerId, PRODUCT_TO_OWNERS_PREFIX, itemId);
     }
 
     private String buildCartKey(OwnerId ownerId) {

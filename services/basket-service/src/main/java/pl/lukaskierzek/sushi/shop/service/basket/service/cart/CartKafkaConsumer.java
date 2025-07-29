@@ -3,17 +3,13 @@ package pl.lukaskierzek.sushi.shop.service.basket.service.cart;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Set;
-
-import static pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartMapper.toCarts;
-import static pl.lukaskierzek.sushi.shop.service.basket.service.cart.CartMapper.toCartsWithItem;
-
+@Slf4j
 @Component
 @RequiredArgsConstructor
 class CartKafkaConsumer {
@@ -21,33 +17,36 @@ class CartKafkaConsumer {
     private final ObjectMapper mapper;
     private final CartRepository repository;
     private final TransactionTemplate transactionTemplate;
-    private final ApplicationEventPublisher eventPublisher;
 
     @KafkaListener(topics = "${kafka.topics.product-price-updated}", groupId = "${spring.kafka.consumer.group-id}")
-    public void onCartItemPriceUpdated(String payload) throws JsonProcessingException {
-        var event = mapper.readValue(payload, CartItemPriceUpdatedEventDto.class);
+    public void onCartItemPriceUpdated(String payload) {
+        CartItemPriceUpdatedEventDto event;
+        try {
+            event = mapper.readValue(payload, CartItemPriceUpdatedEventDto.class);
+        } catch (JsonProcessingException e) {
+            log.error("Cannot convert json to CartItemPriceUpdatedEventDto", e);
+
+            throw new CartItemPriceProcessingException("Cannot convert json: " + payload + " to CartItemPriceUpdatedEventDto");
+        }
 
         var ownerIds = repository.getProductOwnersIds(event.id());
         if (CollectionUtils.isEmpty(ownerIds)) {
             return;
         }
 
-        var cartsWithItem = toCartsWithItem(ownerIds, repository::getCart);
+        transactionTemplate.executeWithoutResult(tx -> {
+            for (var ownerId : ownerIds) {
 
-        var carts = toCarts(event, cartsWithItem);
-        if (carts.isEmpty()) {
-            return;
-        }
+                var cart = repository.getCart(ownerId)
+                    .orElseThrow(() -> new CartNotFoundException("Cart not found"));
 
-        transactionTemplate.executeWithoutResult(status ->
-            carts.forEach(cart -> {
-                final var events = Set.copyOf(cart.getEvents());
-                cart.clearEvents();
+                cart.updateCartItemPrice(event.id(), event.price());
 
                 repository.saveCart(cart);
-                events.forEach(eventPublisher::publishEvent);
-            }));
+            }
+        });
     }
+
 
     record CartItemPriceUpdatedEventDto(String id, Money price) {
     }

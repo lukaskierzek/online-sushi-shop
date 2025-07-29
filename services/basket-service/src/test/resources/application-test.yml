@@ -13,3 +13,7 @@ spring:
 kafka:
   topics:
     product-price-updated: pl.lukaskierzek.catalog.product.price-updated-test
+  consumer:
+    fixed-backoff:
+      interval: 1000
+      attempts: 3

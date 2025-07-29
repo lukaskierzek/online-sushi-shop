@@ -7,7 +7,7 @@ import java.io.Serializable;
 record OwnerId(String userId, String anonymousId) implements Serializable {
 
     OwnerId {
-        if (StringUtils.isEmpty(anonymousId) || StringUtils.isEmpty(userId)) {
+        if (StringUtils.isEmpty(anonymousId) && StringUtils.isEmpty(userId)) {
             throw new InvalidOwnerIdException("Owner ID cannot be null or empty");
         }
     }
