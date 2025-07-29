@@ -2,13 +2,9 @@ package pl.lukaskierzek.sushi.shop.service.basket.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redis.testcontainers.RedisContainer;
-import net.devh.boot.grpc.client.autoconfigure.GrpcClientAutoConfiguration;
-import net.devh.boot.grpc.server.autoconfigure.GrpcServerAutoConfiguration;
-import net.devh.boot.grpc.server.autoconfigure.GrpcServerFactoryAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -29,10 +25,6 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @DirtiesContext
 @Import(GrpcTestConfiguration.class)
-@ImportAutoConfiguration({
-    GrpcServerAutoConfiguration.class,
-    GrpcServerFactoryAutoConfiguration.class,
-    GrpcClientAutoConfiguration.class})
 @AutoConfigureMockMvc
 @Testcontainers
 @ActiveProfiles("test")

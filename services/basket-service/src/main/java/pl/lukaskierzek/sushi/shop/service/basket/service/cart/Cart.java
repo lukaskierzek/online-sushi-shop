@@ -44,6 +44,7 @@ class Cart implements Serializable {
         events.clear();
     }
 
+    //TODO: add calculation in foreign currencies
     Money calculateTotalPrice() {
         return items.stream()
             .map(CartItem::calculatePrice)
