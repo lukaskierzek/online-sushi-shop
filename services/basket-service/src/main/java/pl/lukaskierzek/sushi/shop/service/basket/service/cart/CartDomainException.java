@@ -4,10 +4,6 @@ abstract class CartDomainException extends RuntimeException {
     protected CartDomainException(String message) {
         super(message);
     }
-
-    protected CartDomainException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }
 
 class InvalidCartException extends CartDomainException {
@@ -28,20 +24,42 @@ class CartAlreadyExistsException extends CartDomainException {
     }
 }
 
-class CartNotFoundException extends CartDomainException {
-    CartNotFoundException(String message) {
-        super(message);
-    }
-}
-
 class ProductPriceMismatchException extends CartDomainException {
+
     ProductPriceMismatchException(String message) {
         super(message);
     }
 }
 
 class InvalidMoneyException extends CartDomainException {
+
     InvalidMoneyException(String message) {
+        super(message);
+    }
+}
+
+class InvalidOwnerIdException extends CartDomainException {
+
+    InvalidOwnerIdException(String message) {
+        super(message);
+    }
+}
+
+class CartNotFoundException extends RuntimeException {
+
+    CartNotFoundException(String message) {
+        super(message);
+    }
+}
+
+class CartItemPriceProcessingException extends RuntimeException {
+    CartItemPriceProcessingException(String message) {
+        super(message);
+    }
+}
+
+class OwnerIdNotFoundException extends RuntimeException {
+    OwnerIdNotFoundException(String message) {
         super(message);
     }
 }

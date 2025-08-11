@@ -22,21 +22,21 @@ record CartItem(
         return new Money(unitPrice.currency(), unitPrice.amount().multiply(BigDecimal.valueOf(quantity)));
     }
 
-    private static void validateProductId(String id) {
+    private void validateProductId(String id) {
         if (StringUtils.isEmpty(id)) {
-            throw new InvalidCartException("Product ID cannot be null or empty");
+            throw new InvalidCartItemException("Product ID cannot be null or empty");
         }
     }
 
-    private static void validateQuantity(Integer quantity) {
+    private void validateQuantity(Integer quantity) {
         if (quantity == null || quantity <= 0) {
-            throw new InvalidCartException("Quantity must be greater than 0");
+            throw new InvalidCartItemException("Quantity must be greater than 0");
         }
     }
 
-    private static void validatePrice(Money price) {
+    private void validatePrice(Money price) {
         if (price == null) {
-            throw new InvalidCartException("Price cannot be null");
+            throw new InvalidCartItemException("Price cannot be null");
         }
     }
 

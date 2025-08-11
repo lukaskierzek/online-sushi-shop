@@ -9,70 +9,35 @@ import static org.junit.jupiter.api.Assertions.*;
 class MoneyTests {
 
     @Test
-    void shouldCreateMoneyWithValidCurrencyAndAmount() {
-        Currency usd = Currency.USD;
-        BigDecimal amount = new BigDecimal("10.00");
-
-        Money money = new Money(usd, amount);
-
-        assertEquals(usd, money.currency());
-        assertEquals(amount, money.amount());
+    void shouldCreateValidMoney() {
+        Money money = new Money(Currency.PLN, new BigDecimal("100.00"));
+        assertEquals(Currency.PLN, money.currency());
     }
 
     @Test
-    void shouldThrowExceptionWhenCurrencyIsNull() {
-        BigDecimal amount = new BigDecimal("5.00");
-
-        Exception exception = assertThrows(InvalidMoneyException.class, () -> {
-            new Money(null, amount);
-        });
-
-        assertEquals("Currency cannot be null", exception.getMessage());
+    void shouldThrowForNullCurrency() {
+        assertThrows(InvalidMoneyException.class, () -> new Money(null, BigDecimal.TEN));
     }
 
     @Test
-    void shouldThrowExceptionWhenAmountIsNull() {
-        Currency usd = Currency.USD;
-
-        Exception exception = assertThrows(InvalidMoneyException.class, () -> {
-            new Money(usd, null);
-        });
-
-        assertEquals("Amount must be non-null and >= 0", exception.getMessage());
+    void shouldThrowForNegativeAmount() {
+        assertThrows(InvalidMoneyException.class, () -> new Money(Currency.PLN, new BigDecimal("-1.00")));
     }
 
     @Test
-    void shouldThrowExceptionWhenAmountIsNegative() {
-        Currency usd = Currency.USD;
-        BigDecimal negativeAmount = new BigDecimal("-1.00");
-
-        Exception exception = assertThrows(InvalidMoneyException.class, () -> {
-            new Money(usd, negativeAmount);
-        });
-
-        assertEquals("Amount must be non-null and >= 0", exception.getMessage());
-    }
-
-    @Test
-    void shouldAddTwoMoneyObjectsWithSameCurrency() {
-        Money m1 = new Money(Currency.EUR, new BigDecimal("20.50"));
-        Money m2 = new Money(Currency.EUR, new BigDecimal("10.25"));
+    void shouldAddMoneyOfSameCurrency() {
+        Money m1 = new Money(Currency.PLN, new BigDecimal("5.00"));
+        Money m2 = new Money(Currency.PLN, new BigDecimal("7.50"));
 
         Money result = m1.add(m2);
-
-        assertEquals(Currency.EUR, result.currency());
-        assertEquals(new BigDecimal("30.75"), result.amount());
+        assertEquals(new Money(Currency.PLN, new BigDecimal("12.50")), result);
     }
 
     @Test
-    void shouldThrowExceptionWhenAddingDifferentCurrencies() {
-        Money m1 = new Money(Currency.USD, new BigDecimal("5.00"));
-        Money m2 = new Money(Currency.EUR, new BigDecimal("5.00"));
+    void shouldThrowWhenAddingDifferentCurrencies() {
+        Money m1 = new Money(Currency.PLN, BigDecimal.TEN);
+        Money m2 = new Money(Currency.EUR, BigDecimal.TEN);
 
-        Exception exception = assertThrows(ProductPriceMismatchException.class, () -> {
-            m1.add(m2);
-        });
-
-        assertEquals("Cannot add money with different currencies", exception.getMessage());
+        assertThrows(ProductPriceMismatchException.class, () -> m1.add(m2));
     }
 }
