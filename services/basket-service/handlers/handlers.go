@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/pkg/models"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/pkg/repositories"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/repositories"
 	"github.com/shopspring/decimal"
 )
 

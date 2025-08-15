@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/pkg/db"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/pkg/handlers"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/pkg/middlewares"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/pkg/repositories"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/db"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/handlers"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/middlewares"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/repositories"
 )
 
 func main() {

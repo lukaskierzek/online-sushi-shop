@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/pkg/models"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
 	"github.com/redis/go-redis/v9"
 	"github.com/shopspring/decimal"
 )

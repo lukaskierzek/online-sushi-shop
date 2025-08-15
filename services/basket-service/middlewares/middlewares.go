@@ -8,8 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/pkg/models"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/pkg/repositories"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/repositories"
 	"github.com/redis/go-redis/v9"
 	"github.com/shopspring/decimal"
 )
