@@ -32,18 +32,18 @@ services:
     image: redis:alpine
     ports:
       - "6379:6379"
-    gripmock:
-      image: bavix/gripmock
-      volumes:
-        - ./gripmock/catalog.proto:/proto/catalog.proto:ro
-        - ./gripmock/catalog.json:/stubs/catalog.json:ro
-      command: |
-        --stub=/stubs \
-        --imports=/proto \
-        /proto/catalog.proto
-      ports:
-        - "4770:4770"
-        - "4771:4771"
+  gripmock:
+    image: bavix/gripmock
+    volumes:
+      - ./gripmock/catalog.proto:/proto/catalog.proto:ro
+      - ./gripmock/catalog.json:/stubs/catalog.json:ro
+    command: |
+      --stub=/stubs \
+      --imports=/proto \
+      /proto/catalog.proto
+    ports:
+      - "4770:4770"
+      - "4771:4771"
 networks:
   kafka-net:
     driver: bridge
