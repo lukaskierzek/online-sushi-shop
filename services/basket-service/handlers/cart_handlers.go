@@ -3,20 +3,23 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/catalogpb"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/repositories"
 	"github.com/shopspring/decimal"
 )
 
-type Handler struct {
-	r *repositories.Repository
+type CartHandler struct {
+	r             *repositories.CartRepository
+	catalogClient catalogpb.CatalogServiceClient
 }
 
-func NewHandler(r *repositories.Repository) *Handler {
-	return &Handler{r: r}
+func NewCartHandler(r *repositories.CartRepository, catalogClient catalogpb.CatalogServiceClient) *CartHandler {
+	return &CartHandler{r: r, catalogClient: catalogClient}
 }
 
 // @Summary get user's cart
@@ -24,7 +27,7 @@ func NewHandler(r *repositories.Repository) *Handler {
 // @Produce json
 // @Success 200 {object} models.Cart
 // @Router / [get]
-func (h *Handler) GetCart(c *gin.Context) {
+func (h *CartHandler) GetCart(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"cart": c.MustGet("cart").(models.Cart),
 	})
@@ -33,19 +36,23 @@ func (h *Handler) GetCart(c *gin.Context) {
 // @Summary update user's cart
 // @ID update-users-cart
 // @Produce json
-// @Param data body patchCartRequest true "patch cart data"
+// @Param data body putCartRequest true "put cart data"
 // @Success 200 {object} models.Cart
-// @Router / [patch]
-func (h *Handler) PatchCart(c *gin.Context) {
+// @Router / [put]
+func (h *CartHandler) PutCart(c *gin.Context) {
 	cart := c.MustGet("cart").(models.Cart)
 
-	input, err := bindPatchCartInput(c)
+	input, err := bindPutCartInput(c)
 	if err != nil {
 		return
 	}
 
 	for _, item := range input.Items {
-		cart = updateCartItems(cart, item.ProductID, item.Quantity)
+		cart, err = updateCartItems(cart, item.ProductID, item.Quantity, h.catalogClient)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 	}
 
 	if len(input.Items) == 0 {
@@ -67,19 +74,19 @@ func (h *Handler) PatchCart(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"cart": cart})
 }
 
-// @Description Patch cart data
-type patchCartRequest struct {
-	Items []patchCartInput `json:"items" binding:"required"`
+// @Description PUT cart data
+type putCartRequest struct {
+	Items []putCartInput `json:"items" binding:"required"`
 }
 
-// @Description Patch cart input
-type patchCartInput struct {
+// @Description PUT cart input
+type putCartInput struct {
 	ProductID string `json:"product_id" binding:"required"`
 	Quantity  int32  `json:"quantity" binding:"required"`
 }
 
-func bindPatchCartInput(c *gin.Context) (patchCartRequest, error) {
-	var input patchCartRequest
+func bindPutCartInput(c *gin.Context) (putCartRequest, error) {
+	var input putCartRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return input, err
@@ -87,13 +94,17 @@ func bindPatchCartInput(c *gin.Context) (patchCartRequest, error) {
 	return input, nil
 }
 
-func updateCartItems(cart models.Cart, productID string, quantity int32) models.Cart {
-	price := resolveProductPrice(productID)
+func updateCartItems(cart models.Cart, productID string, quantity int32, catalogClient catalogpb.CatalogServiceClient) (models.Cart, error) {
+	price, err := resolveProductPrice(productID, catalogClient)
+	if err != nil {
+		return models.Cart{}, err
+	}
+
 	for i, item := range cart.CartItems {
 		if item.ProductID == productID {
 			cart.CartItems[i].Quantity = quantity
 			cart.CartItems[i].UnitPrice = price
-			return cart
+			return cart, nil
 		}
 	}
 	cart.CartItems = append(cart.CartItems, models.CartItem{
@@ -102,7 +113,7 @@ func updateCartItems(cart models.Cart, productID string, quantity int32) models.
 		Quantity:  quantity,
 		UnitPrice: price,
 	})
-	return cart
+	return cart, nil
 }
 
 func calculateTotal(items []models.CartItem) decimal.Decimal {
@@ -113,8 +124,21 @@ func calculateTotal(items []models.CartItem) decimal.Decimal {
 	return total
 }
 
-func resolveProductPrice(productID string) decimal.Decimal {
-	//TODO: Get data via gRPC
+func resolveProductPrice(productID string, catalogClient catalogpb.CatalogServiceClient) (decimal.Decimal, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	return decimal.NewFromInt(2137)
+	resp, err := catalogClient.GetProduct(ctx, &catalogpb.GetProductRequest{
+		Id: productID,
+	})
+	if err != nil {
+		return decimal.Decimal{}, err
+	}
+
+	price, err := decimal.NewFromString(resp.Price)
+	if err != nil {
+		return decimal.Decimal{}, err
+	}
+
+	return price, nil
 }

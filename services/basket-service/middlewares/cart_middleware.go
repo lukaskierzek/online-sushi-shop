@@ -14,7 +14,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func CartMiddleware(r *repositories.Repository, jwtSecret string) gin.HandlerFunc {
+func NewCartMiddleware(r *repositories.CartRepository, jwtSecret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
@@ -44,7 +44,7 @@ func CartMiddleware(r *repositories.Repository, jwtSecret string) gin.HandlerFun
 	}
 }
 
-func ensureCartIDCookie(c *gin.Context, r *repositories.Repository, ctx context.Context) (string, error) {
+func ensureCartIDCookie(c *gin.Context, r *repositories.CartRepository, ctx context.Context) (string, error) {
 	cartID, err := c.Cookie("cart_id")
 	if err != nil || cartID == "" {
 		newCart, err := createNewCart(r, ctx)
@@ -78,7 +78,7 @@ func extractUserID(c *gin.Context, jwtSecret string) (string, error) {
 	return "", nil
 }
 
-func loadOrMergeCart(ctx context.Context, r *repositories.Repository, cartID, userID string) (models.Cart, error) {
+func loadOrMergeCart(ctx context.Context, r *repositories.CartRepository, cartID, userID string) (models.Cart, error) {
 	return r.GetCart(ctx, repositories.GetCartQuery{
 		ID:      cartID,
 		OwnerID: userID,
@@ -92,7 +92,7 @@ func updateCartIDCookieIfNeeded(c *gin.Context, cart models.Cart, userID string)
 	}
 }
 
-func createNewCart(r *repositories.Repository, ctx context.Context) (models.Cart, error) {
+func createNewCart(r *repositories.CartRepository, ctx context.Context) (models.Cart, error) {
 	newCart := models.Cart{
 		ID:         uuid.New().String(),
 		OwnerID:    "",

@@ -40,7 +40,7 @@ const docTemplate = `{
                     }
                 }
             },
-            "patch": {
+            "put": {
                 "produces": [
                     "application/json"
                 ],
@@ -48,12 +48,12 @@ const docTemplate = `{
                 "operationId": "update-users-cart",
                 "parameters": [
                     {
-                        "description": "patch cart data",
+                        "description": "put cart data",
                         "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.patchCartRequest"
+                            "$ref": "#/definitions/handlers.putCartRequest"
                         }
                     }
                 ],
@@ -69,8 +69,8 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.patchCartInput": {
-            "description": "Patch cart input",
+        "handlers.putCartInput": {
+            "description": "PUT cart input",
             "type": "object",
             "required": [
                 "product_id",
@@ -85,8 +85,8 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.patchCartRequest": {
-            "description": "Patch cart data",
+        "handlers.putCartRequest": {
+            "description": "PUT cart data",
             "type": "object",
             "required": [
                 "items"
@@ -95,7 +95,7 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/handlers.patchCartInput"
+                        "$ref": "#/definitions/handlers.putCartInput"
                     }
                 }
             }

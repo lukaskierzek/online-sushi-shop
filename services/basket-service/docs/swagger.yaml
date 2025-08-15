@@ -1,7 +1,7 @@
 basePath: /api/v1/cart
 definitions:
-  handlers.patchCartInput:
-    description: Patch cart input
+  handlers.putCartInput:
+    description: PUT cart input
     properties:
       product_id:
         type: string
@@ -11,12 +11,12 @@ definitions:
     - product_id
     - quantity
     type: object
-  handlers.patchCartRequest:
-    description: Patch cart data
+  handlers.putCartRequest:
+    description: PUT cart data
     properties:
       items:
         items:
-          $ref: '#/definitions/handlers.patchCartInput'
+          $ref: '#/definitions/handlers.putCartInput'
         type: array
     required:
     - items
@@ -72,15 +72,15 @@ paths:
           schema:
             $ref: '#/definitions/models.Cart'
       summary: get user's cart
-    patch:
+    put:
       operationId: update-users-cart
       parameters:
-      - description: patch cart data
+      - description: put cart data
         in: body
         name: data
         required: true
         schema:
-          $ref: '#/definitions/handlers.patchCartRequest'
+          $ref: '#/definitions/handlers.putCartRequest'
       produces:
       - application/json
       responses:

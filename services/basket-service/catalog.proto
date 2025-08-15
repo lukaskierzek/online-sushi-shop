@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package catalog;
+option go_package = "/catalogpb";
+
+message GetProductRequest {
+  string id = 1;
+}
+
+message GetProductResponse {
+  string price = 1;
+}
+
+service CatalogService {
+  rpc GetProduct(GetProductRequest) returns (GetProductResponse);
+}
