@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -44,13 +45,19 @@ func (h *CartHandler) PutCart(c *gin.Context) {
 
 	input, err := bindPutCartInput(c)
 	if err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, &models.ErrorResponse{Key: "request", Value: "read"})
 		return
 	}
 
 	for _, item := range input.Items {
-		cart, err = updateCartItems(cart, item.ProductID, item.Quantity, h.catalogClient)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		cart, err = updateCartItems(cart, item.ProductID, item.Quantity, h.catalogClient, ctx)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			fmt.Println(err)
+			c.JSON(http.StatusBadRequest, &models.ErrorResponse{Key: "request", Value: "update"})
 			return
 		}
 	}
@@ -67,7 +74,8 @@ func (h *CartHandler) PutCart(c *gin.Context) {
 	cart.TotalPrice = calculateTotal(cart.CartItems)
 
 	if _, err := h.r.SaveCart(context.Background(), cart); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, &models.ErrorResponse{Key: "request", Value: "save"})
 		return
 	}
 
@@ -88,14 +96,13 @@ type putCartInput struct {
 func bindPutCartInput(c *gin.Context) (putCartRequest, error) {
 	var input putCartRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return input, err
 	}
 	return input, nil
 }
 
-func updateCartItems(cart models.Cart, productID string, quantity int32, catalogClient catalogpb.CatalogServiceClient) (models.Cart, error) {
-	price, err := resolveProductPrice(productID, catalogClient)
+func updateCartItems(cart models.Cart, productID string, quantity int32, catalogClient catalogpb.CatalogServiceClient, ctx context.Context) (models.Cart, error) {
+	price, err := resolveProductPrice(productID, catalogClient, ctx)
 	if err != nil {
 		return models.Cart{}, err
 	}
@@ -124,11 +131,11 @@ func calculateTotal(items []models.CartItem) decimal.Decimal {
 	return total
 }
 
-func resolveProductPrice(productID string, catalogClient catalogpb.CatalogServiceClient) (decimal.Decimal, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func resolveProductPrice(productID string, catalogClient catalogpb.CatalogServiceClient, ctx context.Context) (decimal.Decimal, error) {
+	tCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	resp, err := catalogClient.GetProduct(ctx, &catalogpb.GetProductRequest{
+	resp, err := catalogClient.GetProduct(tCtx, &catalogpb.GetProductRequest{
 		Id: productID,
 	})
 	if err != nil {

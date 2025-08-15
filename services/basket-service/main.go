@@ -20,6 +20,7 @@ import (
 
 var (
 	_                 = utils.LoadLocalEnv()
+	serverPort        = utils.GetEnv("SERVER_PORT")
 	jwtSecret         = utils.GetEnv("JWT_SECRET")
 	dbURL             = utils.GetEnv("DB_URL")
 	dbIndex           = utils.GetEnv("DB_INDEX")
@@ -41,9 +42,15 @@ var (
 // @host localhost:8080
 // @BasePath /api/v1/cart
 func main() {
+	catalogClient, conn := createCatalogGrpcClient()
+
 	redisClient := createRedisClient()
-	router := createRouter(redisClient)
-	router.Run(":8080")
+	router := createRouter(redisClient, catalogClient)
+
+	defer redisClient.Close()
+	defer conn.Close()
+
+	router.Run(":" + serverPort)
 }
 
 func createRedisClient() *redis.Client {
@@ -58,10 +65,8 @@ func createRedisClient() *redis.Client {
 	})
 }
 
-func createRouter(redisClient *redis.Client) *gin.Engine {
+func createRouter(redisClient *redis.Client, catalogClient catalogpb.CatalogServiceClient) *gin.Engine {
 	r := repositories.NewCartRepository(redisClient)
-
-	catalogClient := createCatalogGrpcClient()
 
 	h := handlers.NewCartHandler(r, catalogClient)
 
@@ -79,7 +84,7 @@ func createRouter(redisClient *redis.Client) *gin.Engine {
 	return router
 }
 
-func createCatalogGrpcClient() catalogpb.CatalogServiceClient {
+func createCatalogGrpcClient() (catalogpb.CatalogServiceClient, *grpc.ClientConn) {
 	conn, err := grpc.NewClient(
 		catalogGrpcTarget,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -87,7 +92,7 @@ func createCatalogGrpcClient() catalogpb.CatalogServiceClient {
 	if err != nil {
 		panic(err)
 	}
-	defer conn.Close()
 
-	return catalogpb.NewCatalogServiceClient(conn)
+	result := catalogpb.NewCatalogServiceClient(conn)
+	return result, conn
 }
