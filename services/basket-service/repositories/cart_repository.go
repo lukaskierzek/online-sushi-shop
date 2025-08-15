@@ -19,7 +19,7 @@ func NewCartRepository(db *redis.Client) *CartRepository {
 	}
 }
 
-func (r CartRepository) SaveCart(ctx context.Context, cart models.Cart) (models.Cart, error) {
+func (r *CartRepository) SaveCart(ctx context.Context, cart models.Cart) (models.Cart, error) {
 	data, err := json.Marshal(cart)
 	if err != nil {
 		return models.Cart{}, err
@@ -38,7 +38,7 @@ type GetCartQuery struct {
 	OwnerID string
 }
 
-func (r CartRepository) GetCart(ctx context.Context, query GetCartQuery) (models.Cart, error) {
+func (r *CartRepository) GetCart(ctx context.Context, query GetCartQuery) (models.Cart, error) {
 	guestCart, err := r.loadCartByID(ctx, query.ID)
 	if err != nil {
 		return models.Cart{}, err
@@ -58,11 +58,11 @@ func (r CartRepository) GetCart(ctx context.Context, query GetCartQuery) (models
 	case guestCart != nil:
 		return *guestCart, nil
 	default:
-		return models.Cart{}, redis.Nil
+		return models.Cart{}, nil
 	}
 }
 
-func (r CartRepository) loadCartByID(ctx context.Context, id string) (*models.Cart, error) {
+func (r *CartRepository) loadCartByID(ctx context.Context, id string) (*models.Cart, error) {
 	if id == "" {
 		return nil, nil
 	}
@@ -80,16 +80,16 @@ func (r CartRepository) loadCartByID(ctx context.Context, id string) (*models.Ca
 	return &cart, nil
 }
 
-func (r CartRepository) saveCart(ctx context.Context, id string, cart models.Cart) error {
+func (r *CartRepository) saveCart(ctx context.Context, id string, cart models.Cart) error {
 	data, _ := json.Marshal(cart)
 	return r.db.Set(ctx, "carts::"+id, data, 0).Err()
 }
 
-func (r CartRepository) deleteCart(ctx context.Context, id string) error {
+func (r *CartRepository) deleteCart(ctx context.Context, id string) error {
 	return r.db.Del(ctx, "carts::"+id).Err()
 }
 
-func (r CartRepository) mergeAndSaveCarts(ctx context.Context, userCart, guestCart models.Cart, ownerID string) (models.Cart, error) {
+func (r *CartRepository) mergeAndSaveCarts(ctx context.Context, userCart, guestCart models.Cart, ownerID string) (models.Cart, error) {
 	merged := r.MergeCarts(userCart, guestCart)
 	merged.OwnerID = ownerID
 	if err := r.saveCart(ctx, ownerID, merged); err != nil {
@@ -101,7 +101,7 @@ func (r CartRepository) mergeAndSaveCarts(ctx context.Context, userCart, guestCa
 	return merged, nil
 }
 
-func (r CartRepository) ensureOwnerID(ctx context.Context, cart models.Cart, ownerID string) (models.Cart, error) {
+func (r *CartRepository) ensureOwnerID(ctx context.Context, cart models.Cart, ownerID string) (models.Cart, error) {
 	if cart.OwnerID == "" && ownerID != "" {
 		cart.OwnerID = ownerID
 		if err := r.saveCart(ctx, ownerID, cart); err != nil {
@@ -111,7 +111,7 @@ func (r CartRepository) ensureOwnerID(ctx context.Context, cart models.Cart, own
 	return cart, nil
 }
 
-func (r CartRepository) transferGuestToUser(ctx context.Context, guestCart models.Cart, ownerID string) (models.Cart, error) {
+func (r *CartRepository) transferGuestToUser(ctx context.Context, guestCart models.Cart, ownerID string) (models.Cart, error) {
 	guestCart.OwnerID = ownerID
 	if err := r.saveCart(ctx, ownerID, guestCart); err != nil {
 		return models.Cart{}, err
@@ -122,7 +122,7 @@ func (r CartRepository) transferGuestToUser(ctx context.Context, guestCart model
 	return guestCart, nil
 }
 
-func (r CartRepository) MergeCarts(cart1 models.Cart, cart2 models.Cart) models.Cart {
+func (r *CartRepository) MergeCarts(cart1 models.Cart, cart2 models.Cart) models.Cart {
 	itemMap := make(map[string]models.CartItem)
 
 	for _, item := range cart1.CartItems {

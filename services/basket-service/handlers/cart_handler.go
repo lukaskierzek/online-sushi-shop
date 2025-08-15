@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -15,12 +16,12 @@ import (
 )
 
 type CartHandler struct {
-	r             *repositories.CartRepository
-	catalogClient catalogpb.CatalogServiceClient
+	cartRepository *repositories.CartRepository
+	catalogClient  catalogpb.CatalogServiceClient
 }
 
-func NewCartHandler(r *repositories.CartRepository, catalogClient catalogpb.CatalogServiceClient) *CartHandler {
-	return &CartHandler{r: r, catalogClient: catalogClient}
+func NewCartHandler(cartRepository *repositories.CartRepository, catalogClient catalogpb.CatalogServiceClient) *CartHandler {
+	return &CartHandler{cartRepository: cartRepository, catalogClient: catalogClient}
 }
 
 // @Summary get user's cart
@@ -28,7 +29,7 @@ func NewCartHandler(r *repositories.CartRepository, catalogClient catalogpb.Cata
 // @Produce json
 // @Success 200 {object} models.Cart
 // @Router / [get]
-func (h *CartHandler) GetCart(c *gin.Context) {
+func (handler *CartHandler) GetCart(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"cart": c.MustGet("cart").(models.Cart),
 	})
@@ -40,13 +41,13 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 // @Param data body putCartRequest true "put cart data"
 // @Success 200 {object} models.Cart
 // @Router / [put]
-func (h *CartHandler) PutCart(c *gin.Context) {
+func (handler *CartHandler) PutCart(c *gin.Context) {
 	cart := c.MustGet("cart").(models.Cart)
 
 	input, err := bindPutCartInput(c)
 	if err != nil {
-		fmt.Println(err)
-		c.JSON(http.StatusBadRequest, &models.ErrorResponse{Key: "request", Value: "read"})
+		fmt.Printf("ERROR|%v", err)
+		c.AbortWithError(400, err)
 		return
 	}
 
@@ -54,10 +55,10 @@ func (h *CartHandler) PutCart(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		cart, err = updateCartItems(cart, item.ProductID, item.Quantity, h.catalogClient, ctx)
+		cart, err = updateCartItems(cart, item.ProductID, item.Quantity, handler.catalogClient, ctx)
 		if err != nil {
-			fmt.Println(err)
-			c.JSON(http.StatusBadRequest, &models.ErrorResponse{Key: "request", Value: "update"})
+			fmt.Printf("ERROR|%v", err)
+			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 	}
@@ -73,9 +74,9 @@ func (h *CartHandler) PutCart(c *gin.Context) {
 
 	cart.TotalPrice = calculateTotal(cart.CartItems)
 
-	if _, err := h.r.SaveCart(context.Background(), cart); err != nil {
-		fmt.Println(err)
-		c.JSON(http.StatusBadRequest, &models.ErrorResponse{Key: "request", Value: "save"})
+	if _, err := handler.cartRepository.SaveCart(context.Background(), cart); err != nil {
+		fmt.Printf("ERROR|%v", err)
+		c.AbortWithError(500, errors.New("an internal server error occurred"))
 		return
 	}
 

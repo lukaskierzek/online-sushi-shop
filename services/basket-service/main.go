@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -56,7 +57,7 @@ func main() {
 func createRedisClient() *redis.Client {
 	idx, err := strconv.Atoi(dbIndex)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return redis.NewClient(&redis.Options{
@@ -71,6 +72,8 @@ func createRouter(redisClient *redis.Client, catalogClient catalogpb.CatalogServ
 	h := handlers.NewCartHandler(r, catalogClient)
 
 	router := gin.New()
+
+	router.Use(middlewares.NewErrorMiddleware())
 
 	cartV1 := router.Group("/api/v1/cart")
 	cartV1.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -89,8 +92,9 @@ func createCatalogGrpcClient() (catalogpb.CatalogServiceClient, *grpc.ClientConn
 		catalogGrpcTarget,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
+
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	result := catalogpb.NewCatalogServiceClient(conn)

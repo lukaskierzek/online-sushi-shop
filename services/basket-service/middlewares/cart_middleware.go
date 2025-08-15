@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -20,19 +21,22 @@ func NewCartMiddleware(r *repositories.CartRepository, jwtSecret string) gin.Han
 
 		cartID, err := ensureCartIDCookie(c, r, ctx)
 		if err != nil {
-			c.AbortWithError(500, err)
+			fmt.Printf("ERROR|%v", err)
+			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
 		userID, err := extractUserID(c, jwtSecret)
 		if err != nil {
-			c.AbortWithError(500, err)
+			fmt.Printf("ERROR|%v", err)
+			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
 		cart, err := loadOrMergeCart(ctx, r, cartID, userID)
 		if err != nil && err != redis.Nil {
-			c.AbortWithError(500, err)
+			fmt.Printf("ERROR|%v", err)
+			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
