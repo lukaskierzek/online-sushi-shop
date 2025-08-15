@@ -46,6 +46,17 @@ const docTemplate = `{
                 ],
                 "summary": "update user's cart",
                 "operationId": "update-users-cart",
+                "parameters": [
+                    {
+                        "description": "patch cart data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.patchCartRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -58,7 +69,39 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handlers.patchCartInput": {
+            "description": "Patch cart input",
+            "type": "object",
+            "required": [
+                "product_id",
+                "quantity"
+            ],
+            "properties": {
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.patchCartRequest": {
+            "description": "Patch cart data",
+            "type": "object",
+            "required": [
+                "items"
+            ],
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.patchCartInput"
+                    }
+                }
+            }
+        },
         "models.Cart": {
+            "description": "Shopping cart information",
             "type": "object",
             "properties": {
                 "cart_items": {
@@ -79,6 +122,7 @@ const docTemplate = `{
             }
         },
         "models.CartItem": {
+            "description": "Shopping cart item information",
             "type": "object",
             "properties": {
                 "id": {

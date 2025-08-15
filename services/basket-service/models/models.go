@@ -2,7 +2,8 @@ package models
 
 import "github.com/shopspring/decimal"
 
-// Shopping Cart Item
+// Shopping cart item info
+// @Description Shopping cart item information
 type CartItem struct {
 	ID        string          `json:"id"`
 	ProductID string          `json:"product_id"`
@@ -10,7 +11,8 @@ type CartItem struct {
 	Quantity  int32           `json:"quantity"`
 }
 
-// Shopping Cart
+// Shopping cart info
+// @Description Shopping cart information
 type Cart struct {
 	ID         string          `json:"id"`
 	OwnerID    string          `json:"owner_id"`

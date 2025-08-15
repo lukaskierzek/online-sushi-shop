@@ -33,6 +33,7 @@ func (h *Handler) GetCart(c *gin.Context) {
 // @Summary update user's cart
 // @ID update-users-cart
 // @Produce json
+// @Param data body patchCartRequest true "patch cart data"
 // @Success 200 {object} models.Cart
 // @Router / [patch]
 func (h *Handler) PatchCart(c *gin.Context) {
@@ -43,7 +44,19 @@ func (h *Handler) PatchCart(c *gin.Context) {
 		return
 	}
 
-	cart = updateCartItems(cart, input.ProductID, input.Quantity)
+	for _, item := range input.Items {
+		cart = updateCartItems(cart, item.ProductID, item.Quantity)
+	}
+
+	if len(input.Items) == 0 {
+		cart = models.Cart{
+			ID:         cart.ID,
+			OwnerID:    cart.OwnerID,
+			CartItems:  []models.CartItem{},
+			TotalPrice: decimal.NewFromInt(0),
+		}
+	}
+
 	cart.TotalPrice = calculateTotal(cart.CartItems)
 
 	if _, err := h.r.SaveCart(context.Background(), cart); err != nil {
@@ -54,13 +67,19 @@ func (h *Handler) PatchCart(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"cart": cart})
 }
 
+// @Description Patch cart data
+type patchCartRequest struct {
+	Items []patchCartInput `json:"items" binding:"required"`
+}
+
+// @Description Patch cart input
 type patchCartInput struct {
 	ProductID string `json:"product_id" binding:"required"`
 	Quantity  int32  `json:"quantity" binding:"required"`
 }
 
-func bindPatchCartInput(c *gin.Context) (patchCartInput, error) {
-	var input patchCartInput
+func bindPatchCartInput(c *gin.Context) (patchCartRequest, error) {
+	var input patchCartRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return input, err
@@ -95,5 +114,7 @@ func calculateTotal(items []models.CartItem) decimal.Decimal {
 }
 
 func resolveProductPrice(productID string) decimal.Decimal {
-	panic("not implemented yet")
+	//TODO: Get data via gRPC
+
+	return decimal.NewFromInt(2137)
 }

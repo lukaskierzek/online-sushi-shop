@@ -1,6 +1,28 @@
 basePath: /api/v1/cart
 definitions:
+  handlers.patchCartInput:
+    description: Patch cart input
+    properties:
+      product_id:
+        type: string
+      quantity:
+        type: integer
+    required:
+    - product_id
+    - quantity
+    type: object
+  handlers.patchCartRequest:
+    description: Patch cart data
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/handlers.patchCartInput'
+        type: array
+    required:
+    - items
+    type: object
   models.Cart:
+    description: Shopping cart information
     properties:
       cart_items:
         items:
@@ -14,6 +36,7 @@ definitions:
         type: number
     type: object
   models.CartItem:
+    description: Shopping cart item information
     properties:
       id:
         type: string
@@ -51,6 +74,13 @@ paths:
       summary: get user's cart
     patch:
       operationId: update-users-cart
+      parameters:
+      - description: patch cart data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.patchCartRequest'
       produces:
       - application/json
       responses:

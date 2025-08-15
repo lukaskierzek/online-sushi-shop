@@ -48,16 +48,16 @@ func main() {
 
 	h := handlers.NewHandler(r)
 
-	router := gin.Default()
+	router := gin.New()
 
 	cartV1 := router.Group("/api/v1/cart")
 	cartV1.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	cartV1Protected := router.Group("/api/v1/cart")
+	cartV1Protected.Use(middlewares.CartMiddleware(r, jwtSecret))
 
 	cartV1Protected.GET("/", h.GetCart)
 	cartV1Protected.PATCH("/", h.PatchCart)
-	cartV1Protected.Use(middlewares.CartMiddleware(r, jwtSecret))
 
 	router.Run(":8080")
 }
