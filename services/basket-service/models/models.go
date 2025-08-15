@@ -19,10 +19,3 @@ type Cart struct {
 	CartItems  []CartItem      `json:"cart_items"`
 	TotalPrice decimal.Decimal `json:"total_price"`
 }
-
-// Error response
-// @Description Error response
-type ErrorResponse struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
