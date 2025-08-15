@@ -1,0 +1,93 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Shopping Cart API.",
+        "title": "Shopping Cart API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1/cart",
+    "paths": {
+        "/": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "get user's cart",
+                "operationId": "get-users-cart",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Cart"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "update user's cart",
+                "operationId": "update-users-cart",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Cart"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.Cart": {
+            "type": "object",
+            "properties": {
+                "cart_items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.CartItem"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                },
+                "total_price": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.CartItem": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

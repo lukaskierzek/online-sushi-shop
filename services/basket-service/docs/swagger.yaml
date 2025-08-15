@@ -1,0 +1,62 @@
+basePath: /api/v1/cart
+definitions:
+  models.Cart:
+    properties:
+      cart_items:
+        items:
+          $ref: '#/definitions/models.CartItem'
+        type: array
+      id:
+        type: string
+      owner_id:
+        type: string
+      total_price:
+        type: number
+    type: object
+  models.CartItem:
+    properties:
+      id:
+        type: string
+      price:
+        type: number
+      product_id:
+        type: string
+      quantity:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Shopping Cart API.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Shopping Cart API
+  version: "1.0"
+paths:
+  /:
+    get:
+      operationId: get-users-cart
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Cart'
+      summary: get user's cart
+    patch:
+      operationId: update-users-cart
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Cart'
+      summary: update user's cart
+swagger: "2.0"

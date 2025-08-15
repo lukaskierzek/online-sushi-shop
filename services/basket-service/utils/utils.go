@@ -9,7 +9,7 @@ import (
 
 func LoadLocalEnv() interface{} {
 	if _, runningInContainer := os.LookupEnv("CONTAINER"); !runningInContainer {
-		err := godotenv.Load("../.env.local")
+		err := godotenv.Load(".env.local")
 		if err != nil {
 			log.Fatal(err)
 		}

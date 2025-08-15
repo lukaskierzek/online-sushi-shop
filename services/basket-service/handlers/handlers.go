@@ -19,12 +19,22 @@ func NewHandler(r *repositories.Repository) *Handler {
 	return &Handler{r: r}
 }
 
+// @Summary get user's cart
+// @ID get-users-cart
+// @Produce json
+// @Success 200 {object} models.Cart
+// @Router / [get]
 func (h *Handler) GetCart(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"cart": c.MustGet("cart").(models.Cart),
 	})
 }
 
+// @Summary update user's cart
+// @ID update-users-cart
+// @Produce json
+// @Success 200 {object} models.Cart
+// @Router / [patch]
 func (h *Handler) PatchCart(c *gin.Context) {
 	cart := c.MustGet("cart").(models.Cart)
 
