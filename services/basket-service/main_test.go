@@ -30,9 +30,10 @@ func TestGetCart(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/cart/", nil)
+	req.RemoteAddr = "127.0.0.1:8080"
 	router.ServeHTTP(w, req)
 
-	assertCartResponse(t, w, rdb, true)
+	assertCartResponse(t, w, rdb)
 }
 
 func TestPutCart(t *testing.T) {
@@ -85,27 +86,18 @@ func TestPutCart(t *testing.T) {
 	body, _ := json.Marshal(request)
 	req, _ := http.NewRequest("PUT", "/api/v1/cart/", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
-	req.AddCookie(&http.Cookie{Name: "cart_id", Value: cart.ID})
+	req.RemoteAddr = "127.0.0.1:8080"
+
 	router.ServeHTTP(w, req)
 
-	assertCartResponse(t, w, rdb, false)
+	assertCartResponse(t, w, rdb)
 }
 
-func assertCartResponse(t *testing.T, w *httptest.ResponseRecorder, rdb *redis.Client, cartIDCookieRequired bool) {
+func assertCartResponse(t *testing.T, w *httptest.ResponseRecorder, rdb *redis.Client) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var cartIDCookie string
-
-	if cartIDCookieRequired {
-		cookies := w.Result().Cookies()
-		for _, cookie := range cookies {
-			if cookie.Name == "cart_id" {
-				cartIDCookie = cookie.Value
-			}
-		}
-
-		assert.NotEqual(t, "", cartIDCookie)
-	}
+	cookies := w.Result().Cookies()
+	assert.Equal(t, "cart_id", cookies[0].Name)
 
 	var cartResponse cartResponse
 	err := json.Unmarshal(w.Body.Bytes(), &cartResponse)
@@ -130,10 +122,7 @@ func assertCartResponse(t *testing.T, w *httptest.ResponseRecorder, rdb *redis.C
 
 	assert.NotNil(t, dbCart)
 	assert.Equal(t, cartResponse.Cart, dbCart)
-
-	if cartIDCookieRequired {
-		assert.Equal(t, cartIDCookie, dbCart.ID)
-	}
+	assert.Equal(t, dbCart.ID, cookies[0].Value)
 }
 
 type cartResponse struct {

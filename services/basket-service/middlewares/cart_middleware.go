@@ -67,7 +67,7 @@ func ensureCartIDCookie(c *gin.Context, r *repositories.CartRepository, ctx cont
 			return "", err
 		}
 		cartID = newCart.ID
-		c.SetCookie(cart_id, cartID, int(cartIDCookieTtl.Seconds()), "/", clientIP, false, true)
+		c.SetCookie(cart_id, cartID, int(cartIDCookieTtl.Seconds()), "/", clientIP, true, true)
 	}
 	return cartID, nil
 }
@@ -103,7 +103,7 @@ func loadOrMergeCart(ctx context.Context, r *repositories.CartRepository, cartID
 func updateCartIDCookieIfNeeded(c *gin.Context, cart models.Cart, userID string, cartIDCookieTtl time.Duration, clientIP string) {
 	if userID != "" && cart.OwnerID == userID && cart.ID != userID {
 		cart.ID = userID
-		c.SetCookie(cart_id, userID, int(cartIDCookieTtl.Seconds()), "/", clientIP, false, true)
+		c.SetCookie(cart_id, userID, int(cartIDCookieTtl.Seconds()), "/", clientIP, true, true)
 	}
 }
 
