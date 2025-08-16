@@ -30,7 +30,7 @@ func NewCartMiddleware(r *repositories.CartRepository, applicationProperties uti
 			return
 		}
 
-		cartID, err := ensureCartIDCookie(c, r, ctx, applicationProperties.CartIDCookieTtlSeconds, clientIP)
+		cartID, err := ensureCartIDCookie(c, r, ctx, applicationProperties.CartIDCookieTtl, clientIP)
 		if err != nil {
 			fmt.Printf("ERROR|%v", err)
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
@@ -51,7 +51,7 @@ func NewCartMiddleware(r *repositories.CartRepository, applicationProperties uti
 			return
 		}
 
-		updateCartIDCookieIfNeeded(c, cart, userID, applicationProperties.CartIDCookieTtlSeconds, clientIP)
+		updateCartIDCookieIfNeeded(c, cart, userID, applicationProperties.CartIDCookieTtl, clientIP)
 
 		c.Set("cart", cart)
 

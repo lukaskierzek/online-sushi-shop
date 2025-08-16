@@ -17,18 +17,18 @@ func ResolveApplicationProperties(basePath string) ApplicationProperties {
 		log.Fatal(err)
 	}
 
-	cictm, err := strconv.Atoi(getEnv("CART_ID_COOKIE_TTL_MS"))
+	cictm, err := strconv.Atoi(getEnv("CART_ID_COOKIE_TTL"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	return ApplicationProperties{
-		ServerPort:             getEnv("SERVER_PORT"),
-		JwtSecret:              getEnv("JWT_SECRET"),
-		DBUrl:                  getEnv("DB_URL"),
-		DBIndex:                dbi,
-		CatalogGrpcTarget:      getEnv("CATALOG_GRPC_TARGET"),
-		CartIDCookieTtlSeconds: time.Duration(cictm) * time.Second,
+		ServerPort:        getEnv("SERVER_PORT"),
+		JwtSecret:         getEnv("JWT_SECRET"),
+		DBUrl:             getEnv("DB_URL"),
+		DBIndex:           dbi,
+		CatalogGrpcTarget: getEnv("CATALOG_GRPC_TARGET"),
+		CartIDCookieTtl:   time.Duration(cictm) * time.Second,
 	}
 }
 
@@ -56,10 +56,10 @@ func getEnv(key string) string {
 }
 
 type ApplicationProperties struct {
-	ServerPort             string
-	JwtSecret              string
-	DBUrl                  string
-	DBIndex                int
-	CatalogGrpcTarget      string
-	CartIDCookieTtlSeconds time.Duration
+	ServerPort        string
+	JwtSecret         string
+	DBUrl             string
+	DBIndex           int
+	CatalogGrpcTarget string
+	CartIDCookieTtl   time.Duration
 }

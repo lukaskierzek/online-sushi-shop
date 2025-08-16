@@ -28,7 +28,7 @@ func (r *CartRepository) SaveCart(ctx context.Context, cart models.Cart) (models
 		return models.Cart{}, err
 	}
 
-	err = r.db.SetEx(ctx, "carts::"+cart.ID, data, r.props.CartIDCookieTtlSeconds).Err()
+	err = r.db.SetEx(ctx, "carts::"+cart.ID, data, r.props.CartIDCookieTtl).Err()
 	if err != nil {
 		return models.Cart{}, err
 	}
@@ -85,7 +85,7 @@ func (r *CartRepository) loadCartByID(ctx context.Context, id string) (*models.C
 
 func (r *CartRepository) saveCart(ctx context.Context, id string, cart models.Cart) error {
 	data, _ := json.Marshal(cart)
-	return r.db.SetEx(ctx, "carts::"+id, data, r.props.CartIDCookieTtlSeconds).Err()
+	return r.db.SetEx(ctx, "carts::"+id, data, r.props.CartIDCookieTtl).Err()
 }
 
 func (r *CartRepository) deleteCart(ctx context.Context, id string) error {

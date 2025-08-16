@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/gRPC/catalogpb"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/utils"
 	"github.com/redis/go-redis/v9"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
@@ -20,10 +21,13 @@ import (
 )
 
 func TestGetCart(t *testing.T) {
+	t.Setenv("APP_ENV", "unit")
+	applicationProperties := utils.ResolveApplicationProperties(".")
+
 	s := miniredis.RunT(t)
 	defer s.Close()
 
-	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
+	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: applicationProperties.DBIndex})
 	defer rdb.Close()
 
 	router := createRouter(rdb, nil)
@@ -37,10 +41,13 @@ func TestGetCart(t *testing.T) {
 }
 
 func TestPutCart(t *testing.T) {
+	t.Setenv("APP_ENV", "unit")
+	applicationProperties := utils.ResolveApplicationProperties(".")
+
 	s := miniredis.RunT(t)
 	defer s.Close()
 
-	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
+	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: applicationProperties.DBIndex})
 	defer rdb.Close()
 
 	cartID := uuid.NewString()

@@ -12,15 +12,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	applicationProperties = utils.ResolveApplicationProperties("..")
-)
-
 func TestSaveCart(t *testing.T) {
+	t.Setenv("APP_ENV", "unit")
+	applicationProperties := utils.ResolveApplicationProperties("..")
+
 	s := miniredis.RunT(t)
 	defer s.Close()
 
-	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
+	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: applicationProperties.DBIndex})
 	defer rdb.Close()
 
 	r := &CartRepository{db: rdb, props: applicationProperties}
@@ -42,6 +41,9 @@ func TestSaveCart(t *testing.T) {
 }
 
 func TestGetEmptyCart(t *testing.T) {
+	t.Setenv("APP_ENV", "unit")
+	applicationProperties := utils.ResolveApplicationProperties("..")
+
 	s := miniredis.RunT(t)
 	defer s.Close()
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
@@ -60,6 +62,9 @@ func TestGetEmptyCart(t *testing.T) {
 }
 
 func TestGetOwnersCart(t *testing.T) {
+	t.Setenv("APP_ENV", "unit")
+	applicationProperties := utils.ResolveApplicationProperties("..")
+
 	s := miniredis.RunT(t)
 	defer s.Close()
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
@@ -77,6 +82,9 @@ func TestGetOwnersCart(t *testing.T) {
 }
 
 func TestGetGuestCart(t *testing.T) {
+	t.Setenv("APP_ENV", "unit")
+	applicationProperties := utils.ResolveApplicationProperties("..")
+
 	s := miniredis.RunT(t)
 	defer s.Close()
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
@@ -94,6 +102,9 @@ func TestGetGuestCart(t *testing.T) {
 }
 
 func TestGetTransferedCart(t *testing.T) {
+	t.Setenv("APP_ENV", "unit")
+	applicationProperties := utils.ResolveApplicationProperties("..")
+
 	s := miniredis.RunT(t)
 	defer s.Close()
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
@@ -115,6 +126,9 @@ func TestGetTransferedCart(t *testing.T) {
 }
 
 func TestGetMergedCart(t *testing.T) {
+	t.Setenv("APP_ENV", "unit")
+	applicationProperties := utils.ResolveApplicationProperties("..")
+
 	s := miniredis.RunT(t)
 	defer s.Close()
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
