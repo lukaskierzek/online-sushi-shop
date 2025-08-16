@@ -3,6 +3,7 @@ package repositories
 import (
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
@@ -74,7 +75,7 @@ func TestGetOwnersCart(t *testing.T) {
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(12), Quantity: 1}}
 	cart := createTestCart("CART-2", "OWNER-2", items)
-	saveCartToRedis(t, rdb, cart.OwnerID, cart)
+	saveCartToRedis(t, rdb, cart.OwnerID, cart, applicationProperties.CartIDCookieTtl)
 
 	result, err := r.GetCart(t.Context(), GetCartQuery{OwnerID: cart.OwnerID})
 	assert.NoError(t, err)
@@ -94,7 +95,7 @@ func TestGetGuestCart(t *testing.T) {
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(8), Quantity: 2}}
 	cart := createTestCart("CART-3", "", items)
-	saveCartToRedis(t, rdb, cart.ID, cart)
+	saveCartToRedis(t, rdb, cart.ID, cart, applicationProperties.CartIDCookieTtl)
 
 	result, err := r.GetCart(t.Context(), GetCartQuery{ID: cart.ID})
 	assert.NoError(t, err)
@@ -114,7 +115,7 @@ func TestGetTransferedCart(t *testing.T) {
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(10), Quantity: 1}}
 	guestCart := createTestCart("CART-4", "", items)
-	saveCartToRedis(t, rdb, guestCart.ID, guestCart)
+	saveCartToRedis(t, rdb, guestCart.ID, guestCart, applicationProperties.CartIDCookieTtl)
 
 	newOwnerID := "OWNER-4"
 	result, err := r.GetCart(t.Context(), GetCartQuery{ID: guestCart.ID, OwnerID: newOwnerID})
@@ -143,14 +144,14 @@ func TestGetMergedCart(t *testing.T) {
 		{ID: "2", ProductID: "P2", UnitPrice: decimal.NewFromInt(20), Quantity: 2},
 	}
 	guestCart := createTestCart("CART-5", "", guestItems)
-	saveCartToRedis(t, rdb, guestCart.ID, guestCart)
+	saveCartToRedis(t, rdb, guestCart.ID, guestCart, applicationProperties.CartIDCookieTtl)
 
 	ownerItems := []models.CartItem{
 		{ID: "3", ProductID: "P3", UnitPrice: decimal.NewFromInt(15), Quantity: 1},
 		{ID: "4", ProductID: "P4", UnitPrice: decimal.NewFromInt(25), Quantity: 1},
 	}
 	ownersCart := createTestCart("CART-6", ownerID, ownerItems)
-	saveCartToRedis(t, rdb, ownersCart.OwnerID, ownersCart)
+	saveCartToRedis(t, rdb, ownersCart.OwnerID, ownersCart, applicationProperties.CartIDCookieTtl)
 
 	result, err := r.GetCart(t.Context(), GetCartQuery{
 		ID:      guestCart.ID,
@@ -166,11 +167,11 @@ func TestGetMergedCart(t *testing.T) {
 	assert.ElementsMatch(t, expectedItems, result.CartItems)
 }
 
-func saveCartToRedis(t *testing.T, rdb *redis.Client, key string, cart models.Cart) {
+func saveCartToRedis(t *testing.T, rdb *redis.Client, key string, cart models.Cart, ttl time.Duration) {
 	t.Helper()
-	data, err := json.Marshal(cart)
+	data, err := json.Marshal(toCartEntity(cart))
 	assert.NoError(t, err)
-	assert.NoError(t, rdb.Set(t.Context(), "carts::"+key, data, 0).Err())
+	assert.NoError(t, rdb.SetEx(t.Context(), "carts::"+key, data, ttl).Err())
 }
 
 func createTestCart(id, ownerID string, items []models.CartItem) models.Cart {

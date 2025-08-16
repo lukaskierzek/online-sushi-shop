@@ -10,6 +10,20 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+type cartEntity struct {
+	ID         string           `json:"id"`
+	OwnerID    string           `json:"owner_id"`
+	CartItems  []cartItemEntity `json:"cart_items"`
+	TotalPrice decimal.Decimal  `json:"total_price"`
+}
+
+type cartItemEntity struct {
+	ID        string          `json:"id"`
+	ProductID string          `json:"product_id"`
+	UnitPrice decimal.Decimal `json:"price"`
+	Quantity  int32           `json:"quantity"`
+}
+
 type CartRepository struct {
 	db    *redis.Client
 	props utils.ApplicationProperties
@@ -23,7 +37,7 @@ func NewCartRepository(db *redis.Client, props utils.ApplicationProperties) *Car
 }
 
 func (r *CartRepository) SaveCart(ctx context.Context, cart models.Cart) (models.Cart, error) {
-	data, err := json.Marshal(cart)
+	data, err := json.Marshal(toCartEntity(cart))
 	if err != nil {
 		return models.Cart{}, err
 	}
@@ -84,7 +98,7 @@ func (r *CartRepository) loadCartByID(ctx context.Context, id string) (*models.C
 }
 
 func (r *CartRepository) saveCart(ctx context.Context, id string, cart models.Cart) error {
-	data, _ := json.Marshal(cart)
+	data, _ := json.Marshal(toCartEntity(cart))
 	return r.db.SetEx(ctx, "carts::"+id, data, r.props.CartIDCookieTtl).Err()
 }
 
@@ -154,5 +168,33 @@ func (r *CartRepository) MergeCarts(cart1 models.Cart, cart2 models.Cart) models
 		OwnerID:    cart1.OwnerID,
 		CartItems:  mergedItems,
 		TotalPrice: total,
+	}
+}
+
+func toCartEntity(cart models.Cart) cartEntity {
+	return cartEntity{
+		ID:         cart.ID,
+		OwnerID:    cart.OwnerID,
+		TotalPrice: cart.TotalPrice,
+		CartItems:  toCartItemsEntities(cart.CartItems),
+	}
+}
+
+func toCartItemsEntities(cartItems []models.CartItem) []cartItemEntity {
+	var result []cartItemEntity
+
+	for _, cartItem := range cartItems {
+		result = append(result, toCartItemEntity(cartItem))
+	}
+
+	return result
+}
+
+func toCartItemEntity(cartItem models.CartItem) cartItemEntity {
+	return cartItemEntity{
+		ID:        cartItem.ID,
+		ProductID: cartItem.ProductID,
+		UnitPrice: cartItem.UnitPrice,
+		Quantity:  cartItem.Quantity,
 	}
 }
