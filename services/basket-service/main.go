@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/kamilszymanski707/online-sushi-shop/basket-service/docs"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/gRPC/catalogpb"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/handlers"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/middlewares"
@@ -14,7 +15,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	_ "github.com/kamilszymanski707/online-sushi-shop/basket-service/docs"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -35,7 +35,6 @@ var (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8080
 // @BasePath /api/v1/cart
 func main() {
 	catalogClient, conn := createCatalogGrpcClient()

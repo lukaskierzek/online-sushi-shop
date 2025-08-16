@@ -1,33 +1,33 @@
 services:
-  postgres:
-    image: postgres:17.5-alpine3.22
-    restart: always
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_DB=onlinesushishop
-      - POSTGRES_USER=onlinesushishop
-      - POSTGRES_PASSWORD=Strong!Pass1@#
-  zookeeper:
-    image: wurstmeister/zookeeper
-    ports:
-      - "2181:2181"
-    networks:
-      - kafka-net
-  kafka:
-    image: wurstmeister/kafka
-    ports:
-      - "9092:9092"
-      - "9093:9093"
-    environment:
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://localhost:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9093
-      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "pl.lukaskierzek.catalog.product.price-updated:1:1"
-    networks:
-      - kafka-net
+  # postgres:
+  #   image: postgres:17.5-alpine3.22
+  #   restart: always
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_DB=onlinesushishop
+  #     - POSTGRES_USER=onlinesushishop
+  #     - POSTGRES_PASSWORD=Strong!Pass1@#
+  # zookeeper:
+  #   image: wurstmeister/zookeeper
+  #   ports:
+  #     - "2181:2181"
+  #   networks:
+  #     - kafka-net
+  # kafka:
+  #   image: wurstmeister/kafka
+  #   ports:
+  #     - "9092:9092"
+  #     - "9093:9093"
+  #   environment:
+  #     KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://localhost:9093
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+  #     KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9093
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_CREATE_TOPICS: "pl.lukaskierzek.catalog.product.price-updated:1:1"
+  #   networks:
+  #     - kafka-net
   redis:
     image: redis:alpine
     ports:
@@ -44,6 +44,23 @@ services:
     ports:
       - "4770:4770"
       - "4771:4771"
+  basket-service:
+    restart: always
+    environment:
+      SERVER_PORT: 8080
+      JWT_SECRET: a-string-secret-at-least-256-bits-long
+      DB_URL: redis:6379
+      DB_INDEX: 0
+      CATALOG_GRPC_TARGET: gripmock:4770
+      CART_ID_COOKIE_TTL: 604800
+      CONTAINER: true
+    build:
+      context: ../services/basket-service
+    depends_on:
+      - gripmock
+      - redis
+    ports:
+      - "8080:8080"
 networks:
   kafka-net:
     driver: bridge

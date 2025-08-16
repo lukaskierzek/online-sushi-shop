@@ -23,7 +23,7 @@ func NewCartMiddleware(r *repositories.CartRepository, applicationProperties uti
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		clientIP := c.ClientIP()
+		clientIP := "localhost"
 		if clientIP == "" {
 			fmt.Printf("ERROR|%s", "IP not found in the request")
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
