@@ -8,7 +8,7 @@ type CartItem struct {
 	ID        string          `json:"id"`
 	ProductID string          `json:"product_id"`
 	UnitPrice decimal.Decimal `json:"price"`
-	Quantity  int32           `json:"quantity"`
+	Quantity  int             `json:"quantity"`
 	Details   ProductDetails  `json:"details"`
 }
 

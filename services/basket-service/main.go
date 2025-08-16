@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/clients"
 	_ "github.com/kamilszymanski707/online-sushi-shop/basket-service/docs"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/gRPC/catalogpb"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/handlers"
@@ -55,7 +56,7 @@ func createRedisClient() *redis.Client {
 	})
 }
 
-func createRouter(redisClient *redis.Client, catalogClient catalogpb.CatalogServiceClient) *gin.Engine {
+func createRouter(redisClient *redis.Client, catalogClient *clients.CatalogClient) *gin.Engine {
 	r := repositories.NewCartRepository(redisClient, applicationProperties)
 
 	h := handlers.NewCartHandler(r, catalogClient)
@@ -79,7 +80,7 @@ func createRouter(redisClient *redis.Client, catalogClient catalogpb.CatalogServ
 	return router
 }
 
-func createCatalogGrpcClient() (catalogpb.CatalogServiceClient, *grpc.ClientConn) {
+func createCatalogGrpcClient() (*clients.CatalogClient, *grpc.ClientConn) {
 	conn, err := grpc.NewClient(
 		applicationProperties.CatalogGrpcTarget,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -90,5 +91,5 @@ func createCatalogGrpcClient() (catalogpb.CatalogServiceClient, *grpc.ClientConn
 	}
 
 	result := catalogpb.NewCatalogServiceClient(conn)
-	return result, conn
+	return clients.NewCatalogClient(result), conn
 }

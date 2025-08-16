@@ -11,6 +11,7 @@ import (
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/google/uuid"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/clients"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/gRPC/catalogpb"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/utils"
@@ -63,7 +64,8 @@ func TestPutCart(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	router := createRouter(rdb, createCatalogGrpcClientMock())
+	catalogClient := createCatalogGrpcClientMock()
+	router := createRouter(rdb, clients.NewCatalogClient(catalogClient))
 
 	w := httptest.NewRecorder()
 

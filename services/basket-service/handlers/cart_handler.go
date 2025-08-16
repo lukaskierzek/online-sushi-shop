@@ -5,11 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/gRPC/catalogpb"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/clients"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/repositories"
 	"github.com/shopspring/decimal"
@@ -17,10 +16,10 @@ import (
 
 type CartHandler struct {
 	cartRepository *repositories.CartRepository
-	catalogClient  catalogpb.CatalogServiceClient
+	catalogClient  *clients.CatalogClient
 }
 
-func NewCartHandler(cartRepository *repositories.CartRepository, catalogClient catalogpb.CatalogServiceClient) *CartHandler {
+func NewCartHandler(cartRepository *repositories.CartRepository, catalogClient *clients.CatalogClient) *CartHandler {
 	return &CartHandler{cartRepository: cartRepository, catalogClient: catalogClient}
 }
 
@@ -32,7 +31,7 @@ func NewCartHandler(cartRepository *repositories.CartRepository, catalogClient c
 // @Router / [get]
 func (handler *CartHandler) GetCart(c *gin.Context) {
 	cart := c.MustGet("cart").(models.Cart)
-	err := fetchCartItemsDetails(cart, handler.catalogClient, c.Request.Context())
+	err := fetchCartItemsDetails(cart, handler.catalogClient, c)
 	if err != nil {
 		fmt.Printf("ERROR|%v", err)
 		c.AbortWithError(500, errors.New("an internal server error occurred"))
@@ -62,10 +61,7 @@ func (handler *CartHandler) PutCart(c *gin.Context) {
 	}
 
 	for _, item := range input.Items {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		cart, err = updateCartItems(cart, item.ProductID, item.Quantity, handler.catalogClient, ctx)
+		cart, err = updateCartItems(cart, item.ProductID, item.Quantity, handler.catalogClient, c)
 		if err != nil {
 			fmt.Printf("ERROR|%v", err)
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
@@ -84,13 +80,13 @@ func (handler *CartHandler) PutCart(c *gin.Context) {
 
 	cart.TotalPrice = calculateTotal(cart.CartItems)
 
-	if _, err := handler.cartRepository.SaveCart(context.Background(), cart); err != nil {
+	if _, err := handler.cartRepository.SaveCart(cart, c); err != nil {
 		fmt.Printf("ERROR|%v", err)
 		c.AbortWithError(500, errors.New("an internal server error occurred"))
 		return
 	}
 
-	erro := fetchCartItemsDetails(cart, handler.catalogClient, c.Request.Context())
+	erro := fetchCartItemsDetails(cart, handler.catalogClient, c)
 	if erro != nil {
 		fmt.Printf("ERROR|%v", erro)
 		c.AbortWithError(500, errors.New("an internal server error occurred"))
@@ -108,7 +104,7 @@ type putCartRequest struct {
 // @Description PUT cart input
 type putCartInput struct {
 	ProductID string `json:"product_id" binding:"required"`
-	Quantity  int32  `json:"quantity" binding:"required"`
+	Quantity  int    `json:"quantity" binding:"required"`
 }
 
 func bindPutCartInput(c *gin.Context) (putCartRequest, error) {
@@ -119,8 +115,8 @@ func bindPutCartInput(c *gin.Context) (putCartRequest, error) {
 	return input, nil
 }
 
-func updateCartItems(cart models.Cart, productID string, quantity int32, catalogClient catalogpb.CatalogServiceClient, ctx context.Context) (models.Cart, error) {
-	price, err := resolveProductPrice(productID, catalogClient, ctx)
+func updateCartItems(cart models.Cart, productID string, quantity int, catalogClient *clients.CatalogClient, ctx context.Context) (models.Cart, error) {
+	price, err := catalogClient.GetProductPrice(productID, ctx)
 	if err != nil {
 		return models.Cart{}, err
 	}
@@ -149,53 +145,16 @@ func calculateTotal(items []models.CartItem) decimal.Decimal {
 	return total
 }
 
-func resolveProductPrice(productID string, catalogClient catalogpb.CatalogServiceClient, ctx context.Context) (decimal.Decimal, error) {
-	tCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	resp, err := catalogClient.GetProductPrice(tCtx, &catalogpb.GetProductPriceRequest{
-		Id: productID,
-	})
-	if err != nil {
-		return decimal.Decimal{}, err
-	}
-
-	price, err := decimal.NewFromString(resp.Price)
-	if err != nil {
-		return decimal.Decimal{}, err
-	}
-
-	return price, nil
-}
-
-func fetchCartItemsDetails(cart models.Cart, catalogClient catalogpb.CatalogServiceClient, ctx context.Context) error {
+func fetchCartItemsDetails(cart models.Cart, catalogClient *clients.CatalogClient, ctx context.Context) error {
 	for i := range cart.CartItems {
 		item := cart.CartItems[i]
-		details, err := resolveProductDetails(item.ProductID, catalogClient, ctx)
+		details, err := catalogClient.GetProduct(item.ProductID, ctx)
 		if err != nil {
 			return err
 		}
 
-		cart.CartItems[i].Details = models.ProductDetails{
-			Name:     details.Name,
-			Link:     details.Link,
-			ImageURL: details.ImageUrl,
-		}
+		cart.CartItems[i].Details = details
 	}
 
 	return nil
-}
-
-func resolveProductDetails(productID string, catalogClient catalogpb.CatalogServiceClient, ctx context.Context) (*catalogpb.GetProductResponse, error) {
-	tCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	resp, err := catalogClient.GetProduct(tCtx, &catalogpb.GetProductRequest{
-		Id: productID,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
 }

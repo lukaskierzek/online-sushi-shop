@@ -31,7 +31,7 @@ func TestSaveCart(t *testing.T) {
 	}
 	expectedCart := createTestCart("CART-1", "OWNER-1", items)
 
-	cart, err := r.SaveCart(t.Context(), expectedCart)
+	cart, err := r.SaveCart(expectedCart, t.Context())
 	assert.NoError(t, err)
 	assert.Equal(t, expectedCart, cart)
 
@@ -51,7 +51,7 @@ func TestGetEmptyCart(t *testing.T) {
 	defer rdb.Close()
 
 	r := &CartRepository{db: rdb, props: applicationProperties}
-	cart, err := r.GetCart(t.Context(), GetCartQuery{})
+	cart, err := r.GetCart(GetCartQuery{}, t.Context())
 	if err != nil {
 		assert.ErrorIs(t, err, redis.Nil)
 		assert.Equal(t, models.Cart{}, cart)
@@ -77,7 +77,7 @@ func TestGetOwnersCart(t *testing.T) {
 	cart := createTestCart("CART-2", "OWNER-2", items)
 	saveCartToRedis(t, rdb, cart.OwnerID, cart, applicationProperties.CartIDCookieTtl)
 
-	result, err := r.GetCart(t.Context(), GetCartQuery{OwnerID: cart.OwnerID})
+	result, err := r.GetCart(GetCartQuery{OwnerID: cart.OwnerID}, t.Context())
 	assert.NoError(t, err)
 	assert.Equal(t, cart, result)
 }
@@ -97,7 +97,7 @@ func TestGetGuestCart(t *testing.T) {
 	cart := createTestCart("CART-3", "", items)
 	saveCartToRedis(t, rdb, cart.ID, cart, applicationProperties.CartIDCookieTtl)
 
-	result, err := r.GetCart(t.Context(), GetCartQuery{ID: cart.ID})
+	result, err := r.GetCart(GetCartQuery{ID: cart.ID}, t.Context())
 	assert.NoError(t, err)
 	assert.Equal(t, cart, result)
 }
@@ -118,7 +118,7 @@ func TestGetTransferedCart(t *testing.T) {
 	saveCartToRedis(t, rdb, guestCart.ID, guestCart, applicationProperties.CartIDCookieTtl)
 
 	newOwnerID := "OWNER-4"
-	result, err := r.GetCart(t.Context(), GetCartQuery{ID: guestCart.ID, OwnerID: newOwnerID})
+	result, err := r.GetCart(GetCartQuery{ID: guestCart.ID, OwnerID: newOwnerID}, t.Context())
 	assert.NoError(t, err)
 
 	expected := guestCart
@@ -153,10 +153,10 @@ func TestGetMergedCart(t *testing.T) {
 	ownersCart := createTestCart("CART-6", ownerID, ownerItems)
 	saveCartToRedis(t, rdb, ownersCart.OwnerID, ownersCart, applicationProperties.CartIDCookieTtl)
 
-	result, err := r.GetCart(t.Context(), GetCartQuery{
+	result, err := r.GetCart(GetCartQuery{
 		ID:      guestCart.ID,
 		OwnerID: ownerID,
-	})
+	}, t.Context())
 	assert.NoError(t, err)
 
 	expectedItems := append(guestItems, ownerItems...)

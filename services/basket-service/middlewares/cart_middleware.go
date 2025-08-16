@@ -21,8 +21,6 @@ const cart_id = "cart_id"
 
 func NewCartMiddleware(r *repositories.CartRepository, applicationProperties utils.ApplicationProperties) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx := c.Request.Context()
-
 		host := c.Request.Host
 		if strings.Contains(host, ":") {
 			host = strings.Split(host, ":")[0]
@@ -33,21 +31,21 @@ func NewCartMiddleware(r *repositories.CartRepository, applicationProperties uti
 			return
 		}
 
-		cartID, err := ensureCartIDCookie(c, r, ctx, applicationProperties.CartIDCookieTtl, host)
+		cartID, err := ensureCartIDCookie(r, applicationProperties.CartIDCookieTtl, host, c)
 		if err != nil {
 			fmt.Printf("ERROR|%v", err)
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
-		userID, err := extractUserID(c, applicationProperties.JwtSecret)
+		userID, err := extractUserID(applicationProperties.JwtSecret, c)
 		if err != nil {
 			fmt.Printf("ERROR|%v", err)
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
-		cart, err := loadOrMergeCart(ctx, r, cartID, userID)
+		cart, err := loadOrMergeCart(r, cartID, userID, c)
 		if err != nil && err != redis.Nil {
 			fmt.Printf("ERROR|%v", err)
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
@@ -60,7 +58,7 @@ func NewCartMiddleware(r *repositories.CartRepository, applicationProperties uti
 			return
 		}
 
-		updateCartIDCookieIfNeeded(c, cart, userID, applicationProperties.CartIDCookieTtl, host)
+		updateCartIDCookieIfNeeded(cart, userID, applicationProperties.CartIDCookieTtl, host, c)
 
 		c.Set("cart", cart)
 
@@ -68,10 +66,10 @@ func NewCartMiddleware(r *repositories.CartRepository, applicationProperties uti
 	}
 }
 
-func ensureCartIDCookie(c *gin.Context, r *repositories.CartRepository, ctx context.Context, cartIDCookieTtl time.Duration, host string) (string, error) {
+func ensureCartIDCookie(r *repositories.CartRepository, cartIDCookieTtl time.Duration, host string, c *gin.Context) (string, error) {
 	cartID, err := c.Cookie(cart_id)
 	if err != nil || cartID == "" {
-		newCart, err := createNewCart(r, ctx)
+		newCart, err := createNewCart(r, c)
 		if err != nil {
 			return "", err
 		}
@@ -81,7 +79,7 @@ func ensureCartIDCookie(c *gin.Context, r *repositories.CartRepository, ctx cont
 	return cartID, nil
 }
 
-func extractUserID(c *gin.Context, jwtSecret string) (string, error) {
+func extractUserID(jwtSecret string, c *gin.Context) (string, error) {
 	auth := c.GetHeader("Authorization")
 	if after, ok := strings.CutPrefix(auth, "Bearer "); ok {
 		tokenString := after
@@ -102,14 +100,14 @@ func extractUserID(c *gin.Context, jwtSecret string) (string, error) {
 	return "", nil
 }
 
-func loadOrMergeCart(ctx context.Context, r *repositories.CartRepository, cartID, userID string) (models.Cart, error) {
-	return r.GetCart(ctx, repositories.GetCartQuery{
+func loadOrMergeCart(r *repositories.CartRepository, cartID, userID string, ctx context.Context) (models.Cart, error) {
+	return r.GetCart(repositories.GetCartQuery{
 		ID:      cartID,
 		OwnerID: userID,
-	})
+	}, ctx)
 }
 
-func updateCartIDCookieIfNeeded(c *gin.Context, cart models.Cart, userID string, cartIDCookieTtl time.Duration, host string) {
+func updateCartIDCookieIfNeeded(cart models.Cart, userID string, cartIDCookieTtl time.Duration, host string, c *gin.Context) {
 	if userID != "" && cart.OwnerID == userID && cart.ID != userID {
 		cart.ID = userID
 		c.SetCookie(cart_id, userID, int(cartIDCookieTtl.Seconds()), "/", host, false, true)
@@ -123,5 +121,5 @@ func createNewCart(r *repositories.CartRepository, ctx context.Context) (models.
 		CartItems:  []models.CartItem{},
 		TotalPrice: decimal.NewFromInt(0),
 	}
-	return r.SaveCart(ctx, newCart)
+	return r.SaveCart(newCart, ctx)
 }
