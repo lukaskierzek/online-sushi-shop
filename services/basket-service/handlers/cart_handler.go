@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/catalogpb"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/gRPC/catalogpb"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/repositories"
 	"github.com/shopspring/decimal"

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/catalogpb"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/gRPC/catalogpb"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/handlers"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/middlewares"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/repositories"
