@@ -3,9 +3,8 @@ package middlewares
 import (
 	"context"
 	"errors"
-	"fmt"
+	"log"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -19,46 +18,59 @@ import (
 
 const cart_id = "cart_id"
 
-func NewCartMiddleware(r *repositories.CartRepository, applicationProperties utils.ApplicationProperties) gin.HandlerFunc {
+type Middleware struct {
+	r *repositories.CartRepository
+	p *utils.ApplicationProperties
+	gin.HandlerFunc
+}
+
+func NewCartMiddleware(r *repositories.CartRepository, p *utils.ApplicationProperties) *Middleware {
+	return &Middleware{
+		r: r,
+		p: p,
+	}
+}
+
+func (m *Middleware) CartHandlerFunc() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		host := c.Request.Host
 		if strings.Contains(host, ":") {
 			host = strings.Split(host, ":")[0]
 		}
 		if host == "" {
-			fmt.Printf("ERROR|%s", "IP not found in the request")
+			log.Println("ERROR|", "IP not found in the request")
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
-		cartID, err := ensureCartIDCookie(r, applicationProperties.CartIDCookieTtl, host, c)
+		cartID, err := m.ensureCartIDCookie(host, c)
 		if err != nil {
-			fmt.Printf("ERROR|%v", err)
+			log.Println("ERROR|", err.Error())
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
-		userID, err := extractUserID(applicationProperties.JwtSecret, c)
+		userID, err := m.extractUserID(c)
 		if err != nil {
-			fmt.Printf("ERROR|%v", err)
+			log.Println("ERROR|", err.Error())
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
-		cart, err := loadOrMergeCart(r, cartID, userID, c)
+		cart, err := m.loadOrMergeCart(cartID, userID, c)
 		if err != nil && err != redis.Nil {
-			fmt.Printf("ERROR|%v", err)
+			log.Println("ERROR|", err.Error())
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
 		if cart.ID == "" {
-			fmt.Printf("ERROR|%v", "Cookie not found")
+			log.Println("ERROR|", "Cookie not found")
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
-		updateCartIDCookieIfNeeded(cart, userID, applicationProperties.CartIDCookieTtl, host, c)
+		m.updateCartIDCookieIfNeeded(cart, userID, host, c)
 
 		c.Set("cart", cart)
 
@@ -66,28 +78,28 @@ func NewCartMiddleware(r *repositories.CartRepository, applicationProperties uti
 	}
 }
 
-func ensureCartIDCookie(r *repositories.CartRepository, cartIDCookieTtl time.Duration, host string, c *gin.Context) (string, error) {
+func (m *Middleware) ensureCartIDCookie(host string, c *gin.Context) (string, error) {
 	cartID, err := c.Cookie(cart_id)
 	if err != nil || cartID == "" {
-		newCart, err := createNewCart(r, c)
+		newCart, err := m.createNewCart(c)
 		if err != nil {
 			return "", err
 		}
 		cartID = newCart.ID
-		c.SetCookie(cart_id, cartID, int(cartIDCookieTtl.Seconds()), "/", host, false, true)
+		c.SetCookie(cart_id, cartID, int(m.p.CartIDCookieTtl.Seconds()), "/", host, false, true)
 	}
 	return cartID, nil
 }
 
-func extractUserID(jwtSecret string, c *gin.Context) (string, error) {
+func (m *Middleware) extractUserID(c *gin.Context) (string, error) {
 	auth := c.GetHeader("Authorization")
 	if after, ok := strings.CutPrefix(auth, "Bearer "); ok {
 		tokenString := after
 		token, err := jwt.Parse(tokenString, func(t *jwt.Token) (any, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method")
+				return nil, errors.New("unexpected signing method")
 			}
-			return []byte(jwtSecret), nil
+			return []byte(m.p.JwtSecret), nil
 		})
 		if err == nil && token.Valid {
 			if claims, ok := token.Claims.(jwt.MapClaims); ok {
@@ -100,26 +112,26 @@ func extractUserID(jwtSecret string, c *gin.Context) (string, error) {
 	return "", nil
 }
 
-func loadOrMergeCart(r *repositories.CartRepository, cartID, userID string, ctx context.Context) (models.Cart, error) {
-	return r.GetCart(repositories.GetCartQuery{
+func (m *Middleware) loadOrMergeCart(cartID, userID string, ctx context.Context) (*models.Cart, error) {
+	return m.r.GetCart(repositories.GetCartQuery{
 		ID:      cartID,
 		OwnerID: userID,
 	}, ctx)
 }
 
-func updateCartIDCookieIfNeeded(cart models.Cart, userID string, cartIDCookieTtl time.Duration, host string, c *gin.Context) {
+func (m *Middleware) updateCartIDCookieIfNeeded(cart *models.Cart, userID string, host string, c *gin.Context) {
 	if userID != "" && cart.OwnerID == userID && cart.ID != userID {
 		cart.ID = userID
-		c.SetCookie(cart_id, userID, int(cartIDCookieTtl.Seconds()), "/", host, false, true)
+		c.SetCookie(cart_id, userID, int(m.p.CartIDCookieTtl.Seconds()), "/", host, false, true)
 	}
 }
 
-func createNewCart(r *repositories.CartRepository, ctx context.Context) (models.Cart, error) {
+func (m *Middleware) createNewCart(ctx context.Context) (*models.Cart, error) {
 	newCart := models.Cart{
 		ID:         uuid.New().String(),
 		OwnerID:    "",
 		CartItems:  []models.CartItem{},
 		TotalPrice: decimal.NewFromInt(0),
 	}
-	return r.SaveCart(newCart, ctx)
+	return m.r.SaveCart(newCart, ctx)
 }

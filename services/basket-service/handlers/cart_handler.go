@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,12 +15,12 @@ import (
 )
 
 type CartHandler struct {
-	cartRepository *repositories.CartRepository
-	catalogClient  *clients.CatalogClient
+	cr *repositories.CartRepository
+	cc *clients.CatalogClient
 }
 
-func NewCartHandler(cartRepository *repositories.CartRepository, catalogClient *clients.CatalogClient) *CartHandler {
-	return &CartHandler{cartRepository: cartRepository, catalogClient: catalogClient}
+func NewCartHandler(cr *repositories.CartRepository, cc *clients.CatalogClient) *CartHandler {
+	return &CartHandler{cr: cr, cc: cc}
 }
 
 // @Summary get user's cart
@@ -29,11 +29,11 @@ func NewCartHandler(cartRepository *repositories.CartRepository, catalogClient *
 // @Success 200 {object} models.Cart
 // @Param Authorization header string false "Optional bearer JWT"
 // @Router / [get]
-func (handler *CartHandler) GetCart(c *gin.Context) {
-	cart := c.MustGet("cart").(models.Cart)
-	err := fetchCartItemsDetails(cart, handler.catalogClient, c)
+func (h *CartHandler) GetCart(c *gin.Context) {
+	cart := *c.MustGet("cart").(*models.Cart)
+	err := h.fetchCartItemsDetails(cart, c)
 	if err != nil {
-		fmt.Printf("ERROR|%v", err)
+		log.Println("ERROR|", err.Error())
 		c.AbortWithError(500, errors.New("an internal server error occurred"))
 		return
 	}
@@ -50,20 +50,20 @@ func (handler *CartHandler) GetCart(c *gin.Context) {
 // @Param Authorization header string false "Optional bearer JWT"
 // @Success 200 {object} models.Cart
 // @Router / [put]
-func (handler *CartHandler) PutCart(c *gin.Context) {
-	cart := c.MustGet("cart").(models.Cart)
+func (h *CartHandler) PutCart(c *gin.Context) {
+	cart := *c.MustGet("cart").(*models.Cart)
 
-	input, err := bindPutCartInput(c)
+	input, err := h.bindPutCartInput(c)
 	if err != nil {
-		fmt.Printf("ERROR|%v", err)
+		log.Println("ERROR|", err.Error())
 		c.AbortWithError(400, err)
 		return
 	}
 
 	for _, item := range input.Items {
-		cart, err = updateCartItems(cart, item.ProductID, item.Quantity, handler.catalogClient, c)
+		cart, err = h.updateCartItems(cart, item.ProductID, item.Quantity, c)
 		if err != nil {
-			fmt.Printf("ERROR|%v", err)
+			log.Println("ERROR|", err.Error())
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
@@ -78,17 +78,17 @@ func (handler *CartHandler) PutCart(c *gin.Context) {
 		}
 	}
 
-	cart.TotalPrice = calculateTotal(cart.CartItems)
+	cart.TotalPrice = h.calculateTotal(cart.CartItems)
 
-	if _, err := handler.cartRepository.SaveCart(cart, c); err != nil {
-		fmt.Printf("ERROR|%v", err)
+	if _, err := h.cr.SaveCart(cart, c); err != nil {
+		log.Println("ERROR|", err.Error())
 		c.AbortWithError(500, errors.New("an internal server error occurred"))
 		return
 	}
 
-	erro := fetchCartItemsDetails(cart, handler.catalogClient, c)
+	erro := h.fetchCartItemsDetails(cart, c)
 	if erro != nil {
-		fmt.Printf("ERROR|%v", erro)
+		log.Println("ERROR|", err.Error())
 		c.AbortWithError(500, errors.New("an internal server error occurred"))
 		return
 	}
@@ -107,37 +107,41 @@ type putCartInput struct {
 	Quantity  int    `json:"quantity" binding:"required"`
 }
 
-func bindPutCartInput(c *gin.Context) (putCartRequest, error) {
-	var input putCartRequest
-	if err := c.ShouldBindJSON(&input); err != nil {
-		return input, err
+func (h *CartHandler) bindPutCartInput(c *gin.Context) (putCartRequest, error) {
+	var i putCartRequest
+	if err := c.ShouldBindJSON(&i); err != nil {
+		return i, err
 	}
-	return input, nil
+	return i, nil
 }
 
-func updateCartItems(cart models.Cart, productID string, quantity int, catalogClient *clients.CatalogClient, ctx context.Context) (models.Cart, error) {
-	price, err := catalogClient.GetProductPrice(productID, ctx)
+func (h *CartHandler) updateCartItems(cart models.Cart, id string, quantity int, ctx context.Context) (models.Cart, error) {
+	price, err := h.cc.GetProductPrice(id, ctx)
 	if err != nil {
 		return models.Cart{}, err
 	}
 
+	if price == nil {
+		return models.Cart{}, errors.New("product price not found")
+	}
+
 	for i, item := range cart.CartItems {
-		if item.ProductID == productID {
+		if item.ProductID == id {
 			cart.CartItems[i].Quantity = quantity
-			cart.CartItems[i].UnitPrice = price
+			cart.CartItems[i].UnitPrice = *price
 			return cart, nil
 		}
 	}
 	cart.CartItems = append(cart.CartItems, models.CartItem{
 		ID:        uuid.New().String(),
-		ProductID: productID,
+		ProductID: id,
 		Quantity:  quantity,
-		UnitPrice: price,
+		UnitPrice: *price,
 	})
 	return cart, nil
 }
 
-func calculateTotal(items []models.CartItem) decimal.Decimal {
+func (h *CartHandler) calculateTotal(items []models.CartItem) decimal.Decimal {
 	total := decimal.NewFromInt(0)
 	for _, item := range items {
 		total = total.Add(item.UnitPrice.Mul(decimal.NewFromInt(int64(item.Quantity))))
@@ -145,15 +149,15 @@ func calculateTotal(items []models.CartItem) decimal.Decimal {
 	return total
 }
 
-func fetchCartItemsDetails(cart models.Cart, catalogClient *clients.CatalogClient, ctx context.Context) error {
+func (h *CartHandler) fetchCartItemsDetails(cart models.Cart, ctx context.Context) error {
 	for i := range cart.CartItems {
 		item := cart.CartItems[i]
-		details, err := catalogClient.GetProduct(item.ProductID, ctx)
+		details, err := h.cc.GetProduct(item.ProductID, ctx)
 		if err != nil {
 			return err
 		}
 
-		cart.CartItems[i].Details = details
+		cart.CartItems[i].Details = *details
 	}
 
 	return nil

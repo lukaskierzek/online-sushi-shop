@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"encoding/json"
+	"log"
 	"testing"
 	"time"
 
@@ -15,15 +16,15 @@ import (
 
 func TestSaveCart(t *testing.T) {
 	t.Setenv("APP_ENV", "unit")
-	applicationProperties := utils.ResolveApplicationProperties("..")
+	p := utils.ResolveApplicationProperties("..")
 
 	s := miniredis.RunT(t)
 	defer s.Close()
 
-	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: applicationProperties.DBIndex})
+	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: p.DBIndex})
 	defer rdb.Close()
 
-	r := &CartRepository{db: rdb, props: applicationProperties}
+	r := &CartRepository{db: rdb, p: p}
 
 	items := []models.CartItem{
 		{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(10), Quantity: 2},
@@ -33,53 +34,56 @@ func TestSaveCart(t *testing.T) {
 
 	cart, err := r.SaveCart(expectedCart, t.Context())
 	assert.NoError(t, err)
-	assert.Equal(t, expectedCart, cart)
+	assert.Equal(t, expectedCart, *cart)
 
-	var savedCart models.Cart
-	data, _ := rdb.Get(t.Context(), "carts::"+cart.ID).Result()
-	assert.NoError(t, json.Unmarshal([]byte(data), &savedCart))
-	assert.Equal(t, expectedCart, savedCart)
+	savedCart, err := utils.FromRedis[models.Cart](rdb.Get(t.Context(), "carts::"+cart.ID).Result)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	assert.Equal(t, expectedCart, *savedCart)
 }
 
 func TestGetEmptyCart(t *testing.T) {
 	t.Setenv("APP_ENV", "unit")
-	applicationProperties := utils.ResolveApplicationProperties("..")
+	p := utils.ResolveApplicationProperties("..")
 
 	s := miniredis.RunT(t)
 	defer s.Close()
+
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
 	defer rdb.Close()
 
-	r := &CartRepository{db: rdb, props: applicationProperties}
+	r := &CartRepository{db: rdb, p: p}
 	cart, err := r.GetCart(GetCartQuery{}, t.Context())
 	if err != nil {
 		assert.ErrorIs(t, err, redis.Nil)
-		assert.Equal(t, models.Cart{}, cart)
+		assert.Nil(t, cart)
 		return
 	}
 
 	assert.NoError(t, err)
-	assert.Equal(t, models.Cart{}, cart)
+	assert.Nil(t, cart)
 }
 
 func TestGetOwnersCart(t *testing.T) {
 	t.Setenv("APP_ENV", "unit")
-	applicationProperties := utils.ResolveApplicationProperties("..")
+	p := utils.ResolveApplicationProperties("..")
 
 	s := miniredis.RunT(t)
 	defer s.Close()
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
 	defer rdb.Close()
 
-	r := &CartRepository{db: rdb, props: applicationProperties}
+	r := &CartRepository{db: rdb, p: p}
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(12), Quantity: 1}}
 	cart := createTestCart("CART-2", "OWNER-2", items)
-	saveCartToRedis(t, rdb, cart.OwnerID, cart, applicationProperties.CartIDCookieTtl)
+	saveCartToRedis(t, rdb, cart.OwnerID, cart, p.CartIDCookieTtl)
 
 	result, err := r.GetCart(GetCartQuery{OwnerID: cart.OwnerID}, t.Context())
 	assert.NoError(t, err)
-	assert.Equal(t, cart, result)
+	assert.Equal(t, cart, *result)
 }
 
 func TestGetGuestCart(t *testing.T) {
@@ -91,7 +95,7 @@ func TestGetGuestCart(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
 	defer rdb.Close()
 
-	r := &CartRepository{db: rdb, props: applicationProperties}
+	r := &CartRepository{db: rdb, p: applicationProperties}
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(8), Quantity: 2}}
 	cart := createTestCart("CART-3", "", items)
@@ -99,23 +103,23 @@ func TestGetGuestCart(t *testing.T) {
 
 	result, err := r.GetCart(GetCartQuery{ID: cart.ID}, t.Context())
 	assert.NoError(t, err)
-	assert.Equal(t, cart, result)
+	assert.Equal(t, cart, *result)
 }
 
 func TestGetTransferedCart(t *testing.T) {
 	t.Setenv("APP_ENV", "unit")
-	applicationProperties := utils.ResolveApplicationProperties("..")
+	p := utils.ResolveApplicationProperties("..")
 
 	s := miniredis.RunT(t)
 	defer s.Close()
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
 	defer rdb.Close()
 
-	r := &CartRepository{db: rdb, props: applicationProperties}
+	r := &CartRepository{db: rdb, p: p}
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(10), Quantity: 1}}
 	guestCart := createTestCart("CART-4", "", items)
-	saveCartToRedis(t, rdb, guestCart.ID, guestCart, applicationProperties.CartIDCookieTtl)
+	saveCartToRedis(t, rdb, guestCart.ID, guestCart, p.CartIDCookieTtl)
 
 	newOwnerID := "OWNER-4"
 	result, err := r.GetCart(GetCartQuery{ID: guestCart.ID, OwnerID: newOwnerID}, t.Context())
@@ -123,19 +127,19 @@ func TestGetTransferedCart(t *testing.T) {
 
 	expected := guestCart
 	expected.OwnerID = newOwnerID
-	assert.Equal(t, expected, result)
+	assert.Equal(t, expected, *result)
 }
 
 func TestGetMergedCart(t *testing.T) {
 	t.Setenv("APP_ENV", "unit")
-	applicationProperties := utils.ResolveApplicationProperties("..")
+	p := utils.ResolveApplicationProperties("..")
 
 	s := miniredis.RunT(t)
 	defer s.Close()
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
 	defer rdb.Close()
 
-	r := &CartRepository{db: rdb, props: applicationProperties}
+	r := &CartRepository{db: rdb, p: p}
 
 	ownerID := "OWNER-5"
 
@@ -144,14 +148,14 @@ func TestGetMergedCart(t *testing.T) {
 		{ID: "2", ProductID: "P2", UnitPrice: decimal.NewFromInt(20), Quantity: 2},
 	}
 	guestCart := createTestCart("CART-5", "", guestItems)
-	saveCartToRedis(t, rdb, guestCart.ID, guestCart, applicationProperties.CartIDCookieTtl)
+	saveCartToRedis(t, rdb, guestCart.ID, guestCart, p.CartIDCookieTtl)
 
 	ownerItems := []models.CartItem{
 		{ID: "3", ProductID: "P3", UnitPrice: decimal.NewFromInt(15), Quantity: 1},
 		{ID: "4", ProductID: "P4", UnitPrice: decimal.NewFromInt(25), Quantity: 1},
 	}
 	ownersCart := createTestCart("CART-6", ownerID, ownerItems)
-	saveCartToRedis(t, rdb, ownersCart.OwnerID, ownersCart, applicationProperties.CartIDCookieTtl)
+	saveCartToRedis(t, rdb, ownersCart.OwnerID, ownersCart, p.CartIDCookieTtl)
 
 	result, err := r.GetCart(GetCartQuery{
 		ID:      guestCart.ID,

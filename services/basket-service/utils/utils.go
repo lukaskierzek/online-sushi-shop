@@ -1,15 +1,17 @@
 package utils
 
 import (
+	"encoding/json"
 	"log"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 )
 
-func ResolveApplicationProperties(basePath string) ApplicationProperties {
+func ResolveApplicationProperties(basePath string) *ApplicationProperties {
 	loadLocalEnv(basePath)
 
 	dbi, err := strconv.Atoi(getEnv("DB_INDEX"))
@@ -22,7 +24,7 @@ func ResolveApplicationProperties(basePath string) ApplicationProperties {
 		log.Fatal(err)
 	}
 
-	return ApplicationProperties{
+	return &ApplicationProperties{
 		ServerPort:        getEnv("SERVER_PORT"),
 		JwtSecret:         getEnv("JWT_SECRET"),
 		DBUrl:             getEnv("DB_URL"),
@@ -62,4 +64,20 @@ type ApplicationProperties struct {
 	DBIndex           int
 	CatalogGrpcTarget string
 	CartIDCookieTtl   time.Duration
+}
+
+func FromRedis[T any](f func() (string, error)) (*T, error) {
+	jsonData, err := f()
+	if err == redis.Nil {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var result T
+	if err := json.Unmarshal([]byte(jsonData), &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }

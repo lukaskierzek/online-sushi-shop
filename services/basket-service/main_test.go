@@ -10,10 +10,13 @@ import (
 	"testing"
 
 	"github.com/alicebob/miniredis/v2"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/clients"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/db"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/gRPC/catalogpb"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/repositories"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/utils"
 	"github.com/redis/go-redis/v9"
 	"github.com/shopspring/decimal"
@@ -21,35 +24,80 @@ import (
 	"google.golang.org/grpc"
 )
 
-func TestGetCart(t *testing.T) {
+type testContext struct {
+	c   *gin.Context
+	r   *gin.Engine
+	s   *miniredis.Miniredis
+	p   *utils.ApplicationProperties
+	rdb *redis.Client
+	cr  *repositories.CatalogRepository
+	cc  *clients.CatalogClient
+	w   *httptest.ResponseRecorder
+}
+
+func createTestContext(t *testing.T) (*testContext, error) {
+	w := httptest.NewRecorder()
+	c, r := gin.CreateTestContext(w)
+
 	t.Setenv("APP_ENV", "unit")
-	applicationProperties := utils.ResolveApplicationProperties(".")
+	p := utils.ResolveApplicationProperties(".")
 
 	s := miniredis.RunT(t)
-	defer s.Close()
+	p.DBUrl = s.Addr()
 
-	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: applicationProperties.DBIndex})
-	defer rdb.Close()
+	rdb := db.NewRedisClient(p)
 
-	router := createRouter(rdb, nil)
+	cr := repositories.NewCatalogRepository(rdb, p)
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/v1/cart/", nil)
-	req.RemoteAddr = "127.0.0.1:8080"
-	router.ServeHTTP(w, req)
+	cc, err := clients.NewCatalogClient(createCatalogGrpcClientMock(), nil, cr)
+	if err != nil {
+		return nil, err
+	}
 
-	assertCartResponse(t, w, rdb)
+	createRouter(repositories.NewCartRepository(rdb, p), cc, r)
+
+	return &testContext{
+		c:   c,
+		r:   r,
+		s:   s,
+		p:   p,
+		rdb: rdb,
+		cr:  cr,
+		cc:  cc,
+		w:   w,
+	}, nil
+}
+
+func TestGetCart(t *testing.T) {
+	ctx, err := createTestContext(t)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer ctx.s.Close()
+	defer ctx.rdb.Close()
+	defer ctx.cc.Close()
+
+	ctx.c.Request, err = http.NewRequest(http.MethodGet, "/api/v1/cart/", bytes.NewBuffer([]byte("{}")))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx.c.Request.Host = "localhost"
+	ctx.r.ServeHTTP(ctx.w, ctx.c.Request)
+
+	assertCartResponse(t, ctx.w, ctx.rdb)
 }
 
 func TestPutCart(t *testing.T) {
-	t.Setenv("APP_ENV", "unit")
-	applicationProperties := utils.ResolveApplicationProperties(".")
+	ctx, err := createTestContext(t)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	s := miniredis.RunT(t)
-	defer s.Close()
-
-	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: applicationProperties.DBIndex})
-	defer rdb.Close()
+	defer ctx.s.Close()
+	defer ctx.rdb.Close()
+	defer ctx.cc.Close()
 
 	cartID := uuid.NewString()
 	cart := models.Cart{ID: cartID, OwnerID: "", CartItems: []models.CartItem{}, TotalPrice: decimal.NewFromInt(0)}
@@ -59,15 +107,10 @@ func TestPutCart(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	err = rdb.Set(t.Context(), "carts::"+cartID, data, 0).Err()
+	err = ctx.rdb.Set(t.Context(), "carts::"+cartID, data, 0).Err()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	catalogClient := createCatalogGrpcClientMock()
-	router := createRouter(rdb, clients.NewCatalogClient(catalogClient))
-
-	w := httptest.NewRecorder()
 
 	request := putCartRequest{Items: []putCartInput{
 		{
@@ -93,13 +136,15 @@ func TestPutCart(t *testing.T) {
 	}}
 
 	body, _ := json.Marshal(request)
-	req, _ := http.NewRequest("PUT", "/api/v1/cart/", bytes.NewBuffer(body))
-	req.Header.Set("Content-Type", "application/json")
-	req.RemoteAddr = "127.0.0.1:8080"
+	ctx.c.Request, err = http.NewRequest(http.MethodPut, "/api/v1/cart/", bytes.NewBuffer(body))
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	router.ServeHTTP(w, req)
+	ctx.c.Request.Host = "localhost"
+	ctx.r.ServeHTTP(ctx.w, ctx.c.Request)
 
-	assertCartResponse(t, w, rdb)
+	assertCartResponse(t, ctx.w, ctx.rdb)
 }
 
 func assertCartResponse(t *testing.T, w *httptest.ResponseRecorder, rdb *redis.Client) {

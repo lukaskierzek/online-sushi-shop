@@ -6,22 +6,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/clients"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/db"
 	_ "github.com/kamilszymanski707/online-sushi-shop/basket-service/docs"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/gRPC/catalogpb"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/handlers"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/middlewares"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/repositories"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/utils"
-	"github.com/redis/go-redis/v9"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 var (
-	applicationProperties = utils.ResolveApplicationProperties(".")
+	p = utils.ResolveApplicationProperties(".")
 )
 
 // @title Shopping Cart API
@@ -38,30 +35,32 @@ var (
 
 // @BasePath /api/v1/cart
 func main() {
-	catalogClient, conn := createCatalogGrpcClient()
+	csc, conn, err := clients.NewCatalogServiceClient(p)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	redisClient := createRedisClient()
-	router := createRouter(redisClient, catalogClient)
+	rdb := db.NewRedisClient(p)
 
-	defer redisClient.Close()
-	defer conn.Close()
+	cr := repositories.NewCatalogRepository(rdb, p)
 
-	router.Run(":" + applicationProperties.ServerPort)
+	cc, err := clients.NewCatalogClient(csc, conn, cr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cartr := repositories.NewCartRepository(rdb, p)
+
+	router := createRouter(cartr, cc, gin.New())
+
+	defer cc.Close()
+	defer rdb.Close()
+
+	router.Run(":" + p.ServerPort)
 }
 
-func createRedisClient() *redis.Client {
-	return redis.NewClient(&redis.Options{
-		Addr: applicationProperties.DBUrl,
-		DB:   applicationProperties.DBIndex,
-	})
-}
-
-func createRouter(redisClient *redis.Client, catalogClient *clients.CatalogClient) *gin.Engine {
-	r := repositories.NewCartRepository(redisClient, applicationProperties)
-
-	h := handlers.NewCartHandler(r, catalogClient)
-
-	router := gin.New()
+func createRouter(cr *repositories.CartRepository, cc *clients.CatalogClient, router *gin.Engine) *gin.Engine {
+	h := handlers.NewCartHandler(cr, cc)
 
 	router.Use(middlewares.NewErrorMiddleware())
 
@@ -72,24 +71,11 @@ func createRouter(redisClient *redis.Client, catalogClient *clients.CatalogClien
 
 	cartV1Protected := router.Group("/api/v1/cart")
 
-	cartV1Protected.Use(middlewares.NewCartMiddleware(r, applicationProperties))
+	m := middlewares.NewCartMiddleware(cr, p)
+	cartV1Protected.Use(m.CartHandlerFunc())
 
 	cartV1Protected.GET("/", h.GetCart)
 	cartV1Protected.PUT("/", h.PutCart)
 
 	return router
-}
-
-func createCatalogGrpcClient() (*clients.CatalogClient, *grpc.ClientConn) {
-	conn, err := grpc.NewClient(
-		applicationProperties.CatalogGrpcTarget,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	result := catalogpb.NewCatalogServiceClient(conn)
-	return clients.NewCatalogClient(result), conn
 }
