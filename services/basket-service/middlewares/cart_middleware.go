@@ -15,11 +15,11 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func NewCartMiddleware(r *repositories.CartRepository, jwtSecret string) gin.HandlerFunc {
+func NewCartMiddleware(r *repositories.CartRepository, jwtSecret string, cartIDCookieTtl int) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		cartID, err := ensureCartIDCookie(c, r, ctx)
+		cartID, err := ensureCartIDCookie(c, r, ctx, cartIDCookieTtl)
 		if err != nil {
 			fmt.Printf("ERROR|%v", err)
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
@@ -40,7 +40,7 @@ func NewCartMiddleware(r *repositories.CartRepository, jwtSecret string) gin.Han
 			return
 		}
 
-		updateCartIDCookieIfNeeded(c, cart, userID)
+		updateCartIDCookieIfNeeded(c, cart, userID, cartIDCookieTtl)
 
 		c.Set("cart", cart)
 
@@ -48,7 +48,7 @@ func NewCartMiddleware(r *repositories.CartRepository, jwtSecret string) gin.Han
 	}
 }
 
-func ensureCartIDCookie(c *gin.Context, r *repositories.CartRepository, ctx context.Context) (string, error) {
+func ensureCartIDCookie(c *gin.Context, r *repositories.CartRepository, ctx context.Context, cartIDCookieTtl int) (string, error) {
 	cartID, err := c.Cookie("cart_id")
 	if err != nil || cartID == "" {
 		newCart, err := createNewCart(r, ctx)
@@ -56,7 +56,7 @@ func ensureCartIDCookie(c *gin.Context, r *repositories.CartRepository, ctx cont
 			return "", err
 		}
 		cartID = newCart.ID
-		c.SetCookie("cart_id", cartID, 3600*24*7, "/", "localhost", false, true)
+		c.SetCookie("cart_id", cartID, cartIDCookieTtl, "/", "localhost", false, true)
 	}
 	return cartID, nil
 }
@@ -89,10 +89,10 @@ func loadOrMergeCart(ctx context.Context, r *repositories.CartRepository, cartID
 	})
 }
 
-func updateCartIDCookieIfNeeded(c *gin.Context, cart models.Cart, userID string) {
+func updateCartIDCookieIfNeeded(c *gin.Context, cart models.Cart, userID string, cartIDCookieTtl int) {
 	if userID != "" && cart.OwnerID == userID && cart.ID != userID {
 		cart.ID = userID
-		c.SetCookie("cart_id", userID, 3600*24*7, "/", "localhost", false, true)
+		c.SetCookie("cart_id", userID, cartIDCookieTtl, "/", "localhost", false, true)
 	}
 }
 

@@ -26,6 +26,7 @@ var (
 	dbURL             = utils.GetEnv("DB_URL")
 	dbIndex           = utils.GetEnv("DB_INDEX")
 	catalogGrpcTarget = utils.GetEnv("CATALOG_GRPC_TARGET")
+	cartIDCookieTtl   = utils.GetEnv("CART_ID_COOKIE_TTL")
 )
 
 // @title Shopping Cart API
@@ -79,7 +80,13 @@ func createRouter(redisClient *redis.Client, catalogClient catalogpb.CatalogServ
 	cartV1.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	cartV1Protected := router.Group("/api/v1/cart")
-	cartV1Protected.Use(middlewares.NewCartMiddleware(r, jwtSecret))
+
+	cartIDTtl, err := strconv.Atoi(cartIDCookieTtl)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cartV1Protected.Use(middlewares.NewCartMiddleware(r, jwtSecret, cartIDTtl))
 
 	cartV1Protected.GET("/", h.GetCart)
 	cartV1Protected.PUT("/", h.PutCart)
