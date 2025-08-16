@@ -6,34 +6,15 @@ import (
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/utils"
 	"github.com/redis/go-redis/v9"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 )
 
-func saveCartToRedis(t *testing.T, rdb *redis.Client, key string, cart models.Cart) {
-	t.Helper()
-	data, err := json.Marshal(cart)
-	assert.NoError(t, err)
-	assert.NoError(t, rdb.Set(t.Context(), "carts::"+key, data, 0).Err())
-}
-
-func createTestCart(id, ownerID string, items []models.CartItem) models.Cart {
-	return models.Cart{
-		ID:         id,
-		OwnerID:    ownerID,
-		CartItems:  items,
-		TotalPrice: calculateTotal(items),
-	}
-}
-
-func calculateTotal(items []models.CartItem) decimal.Decimal {
-	total := decimal.Zero
-	for _, item := range items {
-		total = total.Add(item.UnitPrice.Mul(decimal.NewFromInt(int64(item.Quantity))))
-	}
-	return total
-}
+var (
+	applicationProperties = utils.ResolveApplicationProperties("..")
+)
 
 func TestSaveCart(t *testing.T) {
 	s := miniredis.RunT(t)
@@ -42,7 +23,7 @@ func TestSaveCart(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
 	defer rdb.Close()
 
-	r := &CartRepository{db: rdb}
+	r := &CartRepository{db: rdb, props: applicationProperties}
 
 	items := []models.CartItem{
 		{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(10), Quantity: 2},
@@ -66,7 +47,7 @@ func TestGetEmptyCart(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
 	defer rdb.Close()
 
-	r := &CartRepository{db: rdb}
+	r := &CartRepository{db: rdb, props: applicationProperties}
 	cart, err := r.GetCart(t.Context(), GetCartQuery{})
 	if err != nil {
 		assert.ErrorIs(t, err, redis.Nil)
@@ -84,7 +65,7 @@ func TestGetOwnersCart(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
 	defer rdb.Close()
 
-	r := &CartRepository{db: rdb}
+	r := &CartRepository{db: rdb, props: applicationProperties}
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(12), Quantity: 1}}
 	cart := createTestCart("CART-2", "OWNER-2", items)
@@ -101,7 +82,7 @@ func TestGetGuestCart(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
 	defer rdb.Close()
 
-	r := &CartRepository{db: rdb}
+	r := &CartRepository{db: rdb, props: applicationProperties}
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(8), Quantity: 2}}
 	cart := createTestCart("CART-3", "", items)
@@ -118,7 +99,7 @@ func TestGetTransferedCart(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
 	defer rdb.Close()
 
-	r := &CartRepository{db: rdb}
+	r := &CartRepository{db: rdb, props: applicationProperties}
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(10), Quantity: 1}}
 	guestCart := createTestCart("CART-4", "", items)
@@ -139,7 +120,7 @@ func TestGetMergedCart(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: s.Addr(), DB: 0})
 	defer rdb.Close()
 
-	r := &CartRepository{db: rdb}
+	r := &CartRepository{db: rdb, props: applicationProperties}
 
 	ownerID := "OWNER-5"
 
@@ -169,4 +150,28 @@ func TestGetMergedCart(t *testing.T) {
 	assert.Equal(t, ownerID, result.OwnerID)
 	assert.True(t, expectedTotal.Equal(result.TotalPrice))
 	assert.ElementsMatch(t, expectedItems, result.CartItems)
+}
+
+func saveCartToRedis(t *testing.T, rdb *redis.Client, key string, cart models.Cart) {
+	t.Helper()
+	data, err := json.Marshal(cart)
+	assert.NoError(t, err)
+	assert.NoError(t, rdb.Set(t.Context(), "carts::"+key, data, 0).Err())
+}
+
+func createTestCart(id, ownerID string, items []models.CartItem) models.Cart {
+	return models.Cart{
+		ID:         id,
+		OwnerID:    ownerID,
+		CartItems:  items,
+		TotalPrice: calculateTotal(items),
+	}
+}
+
+func calculateTotal(items []models.CartItem) decimal.Decimal {
+	total := decimal.Zero
+	for _, item := range items {
+		total = total.Add(item.UnitPrice.Mul(decimal.NewFromInt(int64(item.Quantity))))
+	}
+	return total
 }

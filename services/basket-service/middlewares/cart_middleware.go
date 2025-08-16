@@ -11,22 +11,23 @@ import (
 	"github.com/google/uuid"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/repositories"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/utils"
 	"github.com/redis/go-redis/v9"
 	"github.com/shopspring/decimal"
 )
 
-func NewCartMiddleware(r *repositories.CartRepository, jwtSecret string, cartIDCookieTtl int) gin.HandlerFunc {
+func NewCartMiddleware(r *repositories.CartRepository, applicationProperties utils.ApplicationProperties) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		cartID, err := ensureCartIDCookie(c, r, ctx, cartIDCookieTtl)
+		cartID, err := ensureCartIDCookie(c, r, ctx, applicationProperties.CartIDCookieTtlMs)
 		if err != nil {
 			fmt.Printf("ERROR|%v", err)
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
-		userID, err := extractUserID(c, jwtSecret)
+		userID, err := extractUserID(c, applicationProperties.JwtSecret)
 		if err != nil {
 			fmt.Printf("ERROR|%v", err)
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
@@ -40,7 +41,7 @@ func NewCartMiddleware(r *repositories.CartRepository, jwtSecret string, cartIDC
 			return
 		}
 
-		updateCartIDCookieIfNeeded(c, cart, userID, cartIDCookieTtl)
+		updateCartIDCookieIfNeeded(c, cart, userID, applicationProperties.CartIDCookieTtlMs)
 
 		c.Set("cart", cart)
 

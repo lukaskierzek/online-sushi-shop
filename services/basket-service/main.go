@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"strconv"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/catalogpb"
@@ -20,13 +20,7 @@ import (
 )
 
 var (
-	_                 = utils.LoadLocalEnv()
-	serverPort        = utils.GetEnv("SERVER_PORT")
-	jwtSecret         = utils.GetEnv("JWT_SECRET")
-	dbURL             = utils.GetEnv("DB_URL")
-	dbIndex           = utils.GetEnv("DB_INDEX")
-	catalogGrpcTarget = utils.GetEnv("CATALOG_GRPC_TARGET")
-	cartIDCookieTtl   = utils.GetEnv("CART_ID_COOKIE_TTL")
+	applicationProperties = utils.ResolveApplicationProperties(".")
 )
 
 // @title Shopping Cart API
@@ -52,23 +46,18 @@ func main() {
 	defer redisClient.Close()
 	defer conn.Close()
 
-	router.Run(":" + serverPort)
+	router.Run(":" + applicationProperties.ServerPort)
 }
 
 func createRedisClient() *redis.Client {
-	idx, err := strconv.Atoi(dbIndex)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	return redis.NewClient(&redis.Options{
-		Addr: dbURL,
-		DB:   idx,
+		Addr: applicationProperties.DBUrl,
+		DB:   applicationProperties.DBIndex,
 	})
 }
 
 func createRouter(redisClient *redis.Client, catalogClient catalogpb.CatalogServiceClient) *gin.Engine {
-	r := repositories.NewCartRepository(redisClient)
+	r := repositories.NewCartRepository(redisClient, applicationProperties)
 
 	h := handlers.NewCartHandler(r, catalogClient)
 
@@ -76,17 +65,14 @@ func createRouter(redisClient *redis.Client, catalogClient catalogpb.CatalogServ
 
 	router.Use(middlewares.NewErrorMiddleware())
 
-	cartV1 := router.Group("/api/v1/cart")
-	cartV1.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	if os.Getenv("APP_ENV") != "prod" {
+		cartV1 := router.Group("/api/v1/cart")
+		cartV1.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 
 	cartV1Protected := router.Group("/api/v1/cart")
 
-	cartIDTtl, err := strconv.Atoi(cartIDCookieTtl)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	cartV1Protected.Use(middlewares.NewCartMiddleware(r, jwtSecret, cartIDTtl))
+	cartV1Protected.Use(middlewares.NewCartMiddleware(r, applicationProperties))
 
 	cartV1Protected.GET("/", h.GetCart)
 	cartV1Protected.PUT("/", h.PutCart)
@@ -96,7 +82,7 @@ func createRouter(redisClient *redis.Client, catalogClient catalogpb.CatalogServ
 
 func createCatalogGrpcClient() (catalogpb.CatalogServiceClient, *grpc.ClientConn) {
 	conn, err := grpc.NewClient(
-		catalogGrpcTarget,
+		applicationProperties.CatalogGrpcTarget,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 

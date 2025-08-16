@@ -3,13 +3,42 @@ package utils
 import (
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
 
-func LoadLocalEnv() interface{} {
+func ResolveApplicationProperties(basePath string) ApplicationProperties {
+	loadLocalEnv(basePath)
+
+	dbi, err := strconv.Atoi(getEnv("DB_INDEX"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cictm, err := strconv.Atoi(getEnv("CART_ID_COOKIE_TTL_MS"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return ApplicationProperties{
+		ServerPort:        getEnv("SERVER_PORT"),
+		JwtSecret:         getEnv("JWT_SECRET"),
+		DBUrl:             getEnv("DB_URL"),
+		DBIndex:           dbi,
+		CatalogGrpcTarget: getEnv("CATALOG_GRPC_TARGET"),
+		CartIDCookieTtlMs: cictm,
+	}
+}
+
+func loadLocalEnv(basePath string) interface{} {
+	environment := os.Getenv("APP_ENV")
+	if environment == "" {
+		environment = "local"
+	}
+
 	if _, runningInContainer := os.LookupEnv("CONTAINER"); !runningInContainer {
-		err := godotenv.Load(".env.local")
+		err := godotenv.Load(basePath + "/env/.env." + environment)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -17,10 +46,19 @@ func LoadLocalEnv() interface{} {
 	return nil
 }
 
-func GetEnv(key string) string {
+func getEnv(key string) string {
 	value, ok := os.LookupEnv(key)
 	if !ok {
 		log.Fatal("Environment variable not found: ", key)
 	}
 	return value
+}
+
+type ApplicationProperties struct {
+	ServerPort        string
+	JwtSecret         string
+	DBUrl             string
+	DBIndex           int
+	CatalogGrpcTarget string
+	CartIDCookieTtlMs int
 }

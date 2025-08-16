@@ -3,19 +3,23 @@ package repositories
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/utils"
 	"github.com/redis/go-redis/v9"
 	"github.com/shopspring/decimal"
 )
 
 type CartRepository struct {
-	db *redis.Client
+	db    *redis.Client
+	props utils.ApplicationProperties
 }
 
-func NewCartRepository(db *redis.Client) *CartRepository {
+func NewCartRepository(db *redis.Client, props utils.ApplicationProperties) *CartRepository {
 	return &CartRepository{
-		db: db,
+		db:    db,
+		props: props,
 	}
 }
 
@@ -25,7 +29,7 @@ func (r *CartRepository) SaveCart(ctx context.Context, cart models.Cart) (models
 		return models.Cart{}, err
 	}
 
-	err = r.db.Set(ctx, "carts::"+cart.ID, data, 0).Err()
+	err = r.db.SetEx(ctx, "carts::"+cart.ID, data, time.Duration(r.props.CartIDCookieTtlMs)).Err()
 	if err != nil {
 		return models.Cart{}, err
 	}
@@ -82,7 +86,7 @@ func (r *CartRepository) loadCartByID(ctx context.Context, id string) (*models.C
 
 func (r *CartRepository) saveCart(ctx context.Context, id string, cart models.Cart) error {
 	data, _ := json.Marshal(cart)
-	return r.db.Set(ctx, "carts::"+id, data, 0).Err()
+	return r.db.SetEx(ctx, "carts::"+id, data, time.Duration(r.props.CartIDCookieTtlMs)).Err()
 }
 
 func (r *CartRepository) deleteCart(ctx context.Context, id string) error {
