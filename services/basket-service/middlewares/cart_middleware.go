@@ -54,6 +54,12 @@ func NewCartMiddleware(r *repositories.CartRepository, applicationProperties uti
 			return
 		}
 
+		if cart.ID == "" {
+			fmt.Printf("ERROR|%v", "Cookie not found")
+			c.AbortWithError(500, errors.New("an internal server error occurred"))
+			return
+		}
+
 		updateCartIDCookieIfNeeded(c, cart, userID, applicationProperties.CartIDCookieTtl, host)
 
 		c.Set("cart", cart)
