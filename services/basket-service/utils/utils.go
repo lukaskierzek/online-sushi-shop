@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -22,12 +23,12 @@ func ResolveApplicationProperties(basePath string) ApplicationProperties {
 	}
 
 	return ApplicationProperties{
-		ServerPort:        getEnv("SERVER_PORT"),
-		JwtSecret:         getEnv("JWT_SECRET"),
-		DBUrl:             getEnv("DB_URL"),
-		DBIndex:           dbi,
-		CatalogGrpcTarget: getEnv("CATALOG_GRPC_TARGET"),
-		CartIDCookieTtlMs: cictm,
+		ServerPort:             getEnv("SERVER_PORT"),
+		JwtSecret:              getEnv("JWT_SECRET"),
+		DBUrl:                  getEnv("DB_URL"),
+		DBIndex:                dbi,
+		CatalogGrpcTarget:      getEnv("CATALOG_GRPC_TARGET"),
+		CartIDCookieTtlSeconds: time.Duration(cictm) * time.Second,
 	}
 }
 
@@ -55,10 +56,10 @@ func getEnv(key string) string {
 }
 
 type ApplicationProperties struct {
-	ServerPort        string
-	JwtSecret         string
-	DBUrl             string
-	DBIndex           int
-	CatalogGrpcTarget string
-	CartIDCookieTtlMs int
+	ServerPort             string
+	JwtSecret              string
+	DBUrl                  string
+	DBIndex                int
+	CatalogGrpcTarget      string
+	CartIDCookieTtlSeconds time.Duration
 }

@@ -31,6 +31,14 @@ const docTemplate = `{
                 ],
                 "summary": "get user's cart",
                 "operationId": "get-users-cart",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Optional bearer JWT",
+                        "name": "Authorization",
+                        "in": "header"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -55,6 +63,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/handlers.putCartRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional bearer JWT",
+                        "name": "Authorization",
+                        "in": "header"
                     }
                 ],
                 "responses": {

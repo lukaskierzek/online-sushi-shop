@@ -28,6 +28,7 @@ func NewCartHandler(cartRepository *repositories.CartRepository, catalogClient c
 // @ID get-users-cart
 // @Produce json
 // @Success 200 {object} models.Cart
+// @Param Authorization header string false "Optional bearer JWT"
 // @Router / [get]
 func (handler *CartHandler) GetCart(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
@@ -39,6 +40,7 @@ func (handler *CartHandler) GetCart(c *gin.Context) {
 // @ID update-users-cart
 // @Produce json
 // @Param data body putCartRequest true "put cart data"
+// @Param Authorization header string false "Optional bearer JWT"
 // @Success 200 {object} models.Cart
 // @Router / [put]
 func (handler *CartHandler) PutCart(c *gin.Context) {

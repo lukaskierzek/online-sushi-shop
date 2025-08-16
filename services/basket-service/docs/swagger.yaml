@@ -64,6 +64,11 @@ paths:
   /:
     get:
       operationId: get-users-cart
+      parameters:
+      - description: Optional bearer JWT
+        in: header
+        name: Authorization
+        type: string
       produces:
       - application/json
       responses:
@@ -81,6 +86,10 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/handlers.putCartRequest'
+      - description: Optional bearer JWT
+        in: header
+        name: Authorization
+        type: string
       produces:
       - application/json
       responses:

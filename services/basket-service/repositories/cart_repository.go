@@ -3,7 +3,6 @@ package repositories
 import (
 	"context"
 	"encoding/json"
-	"time"
 
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/utils"
@@ -29,7 +28,7 @@ func (r *CartRepository) SaveCart(ctx context.Context, cart models.Cart) (models
 		return models.Cart{}, err
 	}
 
-	err = r.db.SetEx(ctx, "carts::"+cart.ID, data, time.Duration(r.props.CartIDCookieTtlMs)).Err()
+	err = r.db.SetEx(ctx, "carts::"+cart.ID, data, r.props.CartIDCookieTtlSeconds).Err()
 	if err != nil {
 		return models.Cart{}, err
 	}
@@ -86,7 +85,7 @@ func (r *CartRepository) loadCartByID(ctx context.Context, id string) (*models.C
 
 func (r *CartRepository) saveCart(ctx context.Context, id string, cart models.Cart) error {
 	data, _ := json.Marshal(cart)
-	return r.db.SetEx(ctx, "carts::"+id, data, time.Duration(r.props.CartIDCookieTtlMs)).Err()
+	return r.db.SetEx(ctx, "carts::"+id, data, r.props.CartIDCookieTtlSeconds).Err()
 }
 
 func (r *CartRepository) deleteCart(ctx context.Context, id string) error {

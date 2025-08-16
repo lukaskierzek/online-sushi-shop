@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -16,11 +17,20 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+const cart_id = "cart_id"
+
 func NewCartMiddleware(r *repositories.CartRepository, applicationProperties utils.ApplicationProperties) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		cartID, err := ensureCartIDCookie(c, r, ctx, applicationProperties.CartIDCookieTtlMs)
+		clientIP := c.ClientIP()
+		if clientIP == "" {
+			fmt.Printf("ERROR|%s", "IP not found in the request")
+			c.AbortWithError(500, errors.New("an internal server error occurred"))
+			return
+		}
+
+		cartID, err := ensureCartIDCookie(c, r, ctx, applicationProperties.CartIDCookieTtlSeconds, clientIP)
 		if err != nil {
 			fmt.Printf("ERROR|%v", err)
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
@@ -41,7 +51,7 @@ func NewCartMiddleware(r *repositories.CartRepository, applicationProperties uti
 			return
 		}
 
-		updateCartIDCookieIfNeeded(c, cart, userID, applicationProperties.CartIDCookieTtlMs)
+		updateCartIDCookieIfNeeded(c, cart, userID, applicationProperties.CartIDCookieTtlSeconds, clientIP)
 
 		c.Set("cart", cart)
 
@@ -49,15 +59,15 @@ func NewCartMiddleware(r *repositories.CartRepository, applicationProperties uti
 	}
 }
 
-func ensureCartIDCookie(c *gin.Context, r *repositories.CartRepository, ctx context.Context, cartIDCookieTtl int) (string, error) {
-	cartID, err := c.Cookie("cart_id")
+func ensureCartIDCookie(c *gin.Context, r *repositories.CartRepository, ctx context.Context, cartIDCookieTtl time.Duration, clientIP string) (string, error) {
+	cartID, err := c.Cookie(cart_id)
 	if err != nil || cartID == "" {
 		newCart, err := createNewCart(r, ctx)
 		if err != nil {
 			return "", err
 		}
 		cartID = newCart.ID
-		c.SetCookie("cart_id", cartID, cartIDCookieTtl, "/", "localhost", false, true)
+		c.SetCookie(cart_id, cartID, int(cartIDCookieTtl.Seconds()), "/", clientIP, false, true)
 	}
 	return cartID, nil
 }
@@ -90,10 +100,10 @@ func loadOrMergeCart(ctx context.Context, r *repositories.CartRepository, cartID
 	})
 }
 
-func updateCartIDCookieIfNeeded(c *gin.Context, cart models.Cart, userID string, cartIDCookieTtl int) {
+func updateCartIDCookieIfNeeded(c *gin.Context, cart models.Cart, userID string, cartIDCookieTtl time.Duration, clientIP string) {
 	if userID != "" && cart.OwnerID == userID && cart.ID != userID {
 		cart.ID = userID
-		c.SetCookie("cart_id", userID, cartIDCookieTtl, "/", "localhost", false, true)
+		c.SetCookie(cart_id, userID, int(cartIDCookieTtl.Seconds()), "/", clientIP, false, true)
 	}
 }
 
