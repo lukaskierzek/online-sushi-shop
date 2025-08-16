@@ -127,9 +127,23 @@ func assertCartResponse(t *testing.T, w *httptest.ResponseRecorder, rdb *redis.C
 		log.Fatal(err)
 	}
 
+	fetchCartItemsDetails(dbCart)
+
 	assert.NotNil(t, dbCart)
 	assert.Equal(t, cartResponse.Cart, dbCart)
 	assert.Equal(t, dbCart.ID, cookies[0].Value)
+}
+
+func fetchCartItemsDetails(cart models.Cart) {
+	for i := range cart.CartItems {
+		id := cart.CartItems[i].ProductID
+
+		cart.CartItems[i].Details = models.ProductDetails{
+			Name:     "Product name: " + id,
+			Link:     "https://localhost:8080/products/" + id,
+			ImageURL: "https://localhost:8080/products/images/" + id,
+		}
+	}
 }
 
 type cartResponse struct {
@@ -147,9 +161,17 @@ type putCartInput struct {
 
 type mockCatalogClient struct{}
 
+func (m *mockCatalogClient) GetProductPrice(ctx context.Context, req *catalogpb.GetProductPriceRequest, opts ...grpc.CallOption) (*catalogpb.GetProductPriceResponse, error) {
+	return &catalogpb.GetProductPriceResponse{
+		Price: "999.99",
+	}, nil
+}
+
 func (m *mockCatalogClient) GetProduct(ctx context.Context, req *catalogpb.GetProductRequest, opts ...grpc.CallOption) (*catalogpb.GetProductResponse, error) {
 	return &catalogpb.GetProductResponse{
-		Price: "999.99",
+		Name:     "Product name: " + req.Id,
+		Link:     "https://localhost:8080/products/" + req.Id,
+		ImageUrl: "https://localhost:8080/products/images/" + req.Id,
 	}, nil
 }
 

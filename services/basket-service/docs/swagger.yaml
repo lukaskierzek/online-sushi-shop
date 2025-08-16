@@ -38,6 +38,8 @@ definitions:
   models.CartItem:
     description: Shopping cart item information
     properties:
+      details:
+        $ref: '#/definitions/models.ProductDetails'
       id:
         type: string
       price:
@@ -46,6 +48,16 @@ definitions:
         type: string
       quantity:
         type: integer
+    type: object
+  models.ProductDetails:
+    description: Shopping cart item product details
+    properties:
+      image_url:
+        type: string
+      link:
+        type: string
+      name:
+        type: string
     type: object
 host: localhost:8080
 info:

@@ -31,8 +31,16 @@ func NewCartHandler(cartRepository *repositories.CartRepository, catalogClient c
 // @Param Authorization header string false "Optional bearer JWT"
 // @Router / [get]
 func (handler *CartHandler) GetCart(c *gin.Context) {
+	cart := c.MustGet("cart").(models.Cart)
+	err := fetchCartItemsDetails(cart, handler.catalogClient, c.Request.Context())
+	if err != nil {
+		fmt.Printf("ERROR|%v", err)
+		c.AbortWithError(500, errors.New("an internal server error occurred"))
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"cart": c.MustGet("cart").(models.Cart),
+		"cart": cart,
 	})
 }
 
@@ -78,6 +86,13 @@ func (handler *CartHandler) PutCart(c *gin.Context) {
 
 	if _, err := handler.cartRepository.SaveCart(context.Background(), cart); err != nil {
 		fmt.Printf("ERROR|%v", err)
+		c.AbortWithError(500, errors.New("an internal server error occurred"))
+		return
+	}
+
+	erro := fetchCartItemsDetails(cart, handler.catalogClient, c.Request.Context())
+	if erro != nil {
+		fmt.Printf("ERROR|%v", erro)
 		c.AbortWithError(500, errors.New("an internal server error occurred"))
 		return
 	}
@@ -138,7 +153,7 @@ func resolveProductPrice(productID string, catalogClient catalogpb.CatalogServic
 	tCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	resp, err := catalogClient.GetProduct(tCtx, &catalogpb.GetProductRequest{
+	resp, err := catalogClient.GetProductPrice(tCtx, &catalogpb.GetProductPriceRequest{
 		Id: productID,
 	})
 	if err != nil {
@@ -151,4 +166,36 @@ func resolveProductPrice(productID string, catalogClient catalogpb.CatalogServic
 	}
 
 	return price, nil
+}
+
+func fetchCartItemsDetails(cart models.Cart, catalogClient catalogpb.CatalogServiceClient, ctx context.Context) error {
+	for i := range cart.CartItems {
+		item := cart.CartItems[i]
+		details, err := resolveProductDetails(item.ProductID, catalogClient, ctx)
+		if err != nil {
+			return err
+		}
+
+		cart.CartItems[i].Details = models.ProductDetails{
+			Name:     details.Name,
+			Link:     details.Link,
+			ImageURL: details.ImageUrl,
+		}
+	}
+
+	return nil
+}
+
+func resolveProductDetails(productID string, catalogClient catalogpb.CatalogServiceClient, ctx context.Context) (*catalogpb.GetProductResponse, error) {
+	tCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	resp, err := catalogClient.GetProduct(tCtx, &catalogpb.GetProductRequest{
+		Id: productID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }

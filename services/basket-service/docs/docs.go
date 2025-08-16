@@ -139,6 +139,9 @@ const docTemplate = `{
             "description": "Shopping cart item information",
             "type": "object",
             "properties": {
+                "details": {
+                    "$ref": "#/definitions/models.ProductDetails"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -150,6 +153,21 @@ const docTemplate = `{
                 },
                 "quantity": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.ProductDetails": {
+            "description": "Shopping cart item product details",
+            "type": "object",
+            "properties": {
+                "image_url": {
+                    "type": "string"
+                },
+                "link": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         }

@@ -9,6 +9,7 @@ type CartItem struct {
 	ProductID string          `json:"product_id"`
 	UnitPrice decimal.Decimal `json:"price"`
 	Quantity  int32           `json:"quantity"`
+	Details   ProductDetails  `json:"details"`
 }
 
 // Shopping cart info
@@ -18,4 +19,12 @@ type Cart struct {
 	OwnerID    string          `json:"owner_id"`
 	CartItems  []CartItem      `json:"cart_items"`
 	TotalPrice decimal.Decimal `json:"total_price"`
+}
+
+// Shopping cart item product details
+// @Description Shopping cart item product details
+type ProductDetails struct {
+	Name     string `json:"name"`
+	Link     string `json:"link"`
+	ImageURL string `json:"image_url"`
 }
