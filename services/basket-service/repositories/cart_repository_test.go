@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"testing"
-	"time"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
@@ -48,7 +47,7 @@ func (suite *TestSuite) TestSaveCart() {
 		{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(10), Quantity: 2},
 		{ID: "2", ProductID: "P2", UnitPrice: decimal.NewFromInt(5), Quantity: 3},
 	}
-	expectedCart := createTestCart(t, "CART-1", "OWNER-1", items)
+	expectedCart := suite.createTestCart("CART-1", "OWNER-1", items)
 
 	cart, err := suite.r.SaveCart(expectedCart, t.Context())
 	assert.NoError(t, err)
@@ -80,8 +79,8 @@ func (suite *TestSuite) TestGetOwnersCart() {
 	t := suite.T()
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(12), Quantity: 1}}
-	cart := createTestCart(t, "CART-2", "OWNER-2", items)
-	saveCartToRedis(t, suite.rdb, cart.OwnerID, cart, suite.p.CartIDCookieTtl)
+	cart := suite.createTestCart("CART-2", "OWNER-2", items)
+	suite.saveCartToRedis(cart.OwnerID, cart)
 
 	result, err := suite.r.GetCart(GetCartQuery{OwnerID: cart.OwnerID}, t.Context())
 	assert.NoError(t, err)
@@ -92,8 +91,8 @@ func (suite *TestSuite) TestGetGuestCart() {
 	t := suite.T()
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(8), Quantity: 2}}
-	cart := createTestCart(t, "CART-3", "", items)
-	saveCartToRedis(t, suite.rdb, cart.ID, cart, suite.p.CartIDCookieTtl)
+	cart := suite.createTestCart("CART-3", "", items)
+	suite.saveCartToRedis(cart.ID, cart)
 
 	result, err := suite.r.GetCart(GetCartQuery{ID: cart.ID}, t.Context())
 	assert.NoError(t, err)
@@ -104,8 +103,8 @@ func (suite *TestSuite) TestGetTransferedCart() {
 	t := suite.T()
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(10), Quantity: 1}}
-	guestCart := createTestCart(t, "CART-4", "", items)
-	saveCartToRedis(t, suite.rdb, guestCart.ID, guestCart, suite.p.CartIDCookieTtl)
+	guestCart := suite.createTestCart("CART-4", "", items)
+	suite.saveCartToRedis(guestCart.ID, guestCart)
 
 	newOwnerID := "OWNER-4"
 	result, err := suite.r.GetCart(GetCartQuery{ID: guestCart.ID, OwnerID: newOwnerID}, t.Context())
@@ -125,15 +124,15 @@ func (suite *TestSuite) TestGetMergedCart() {
 		{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(10), Quantity: 1},
 		{ID: "2", ProductID: "P2", UnitPrice: decimal.NewFromInt(20), Quantity: 2},
 	}
-	guestCart := createTestCart(t, "CART-5", "", guestItems)
-	saveCartToRedis(t, suite.rdb, guestCart.ID, guestCart, suite.p.CartIDCookieTtl)
+	guestCart := suite.createTestCart("CART-5", "", guestItems)
+	suite.saveCartToRedis(guestCart.ID, guestCart)
 
 	ownerItems := []models.CartItem{
 		{ID: "3", ProductID: "P3", UnitPrice: decimal.NewFromInt(15), Quantity: 1},
 		{ID: "4", ProductID: "P4", UnitPrice: decimal.NewFromInt(25), Quantity: 1},
 	}
-	ownersCart := createTestCart(t, "CART-6", ownerID, ownerItems)
-	saveCartToRedis(t, suite.rdb, ownersCart.OwnerID, ownersCart, suite.p.CartIDCookieTtl)
+	ownersCart := suite.createTestCart("CART-6", ownerID, ownerItems)
+	suite.saveCartToRedis(ownersCart.OwnerID, ownersCart)
 
 	result, err := suite.r.GetCart(GetCartQuery{
 		ID:      guestCart.ID,
@@ -149,27 +148,28 @@ func (suite *TestSuite) TestGetMergedCart() {
 	assert.ElementsMatch(t, expectedItems, result.CartItems)
 }
 
-func saveCartToRedis(t *testing.T, rdb *redis.Client, key string, cart models.Cart, ttl time.Duration) {
+func (suite *TestSuite) saveCartToRedis(key string, cart models.Cart) {
+	t := suite.T()
 	t.Helper()
 
 	data, err := json.Marshal(toCartEntity(cart))
 	assert.NoError(t, err)
-	assert.NoError(t, rdb.SetEx(t.Context(), "carts::"+key, data, ttl).Err())
+	assert.NoError(t, suite.rdb.SetEx(t.Context(), "carts::"+key, data, suite.p.CartIDCookieTtl).Err())
 }
 
-func createTestCart(t *testing.T, id, ownerID string, items []models.CartItem) models.Cart {
-	t.Helper()
+func (suite *TestSuite) createTestCart(id, ownerID string, items []models.CartItem) models.Cart {
+	suite.T().Helper()
 
 	return models.Cart{
 		ID:         id,
 		OwnerID:    ownerID,
 		CartItems:  items,
-		TotalPrice: calculateTotal(t, items),
+		TotalPrice: suite.calculateTotal(items),
 	}
 }
 
-func calculateTotal(t *testing.T, items []models.CartItem) decimal.Decimal {
-	t.Helper()
+func (suite *TestSuite) calculateTotal(items []models.CartItem) decimal.Decimal {
+	suite.T().Helper()
 
 	total := decimal.Zero
 	for _, item := range items {
