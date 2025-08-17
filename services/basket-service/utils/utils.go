@@ -21,7 +21,7 @@ func ResolveApplicationProperties(basePath string) (*ApplicationProperties, erro
 		return nil, err
 	}
 
-	dbi, err := strconv.Atoi(dbIndex)
+	dbi, err := strconv.Atoi(*dbIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func ResolveApplicationProperties(basePath string) (*ApplicationProperties, erro
 		return nil, err
 	}
 
-	cictm, err := strconv.Atoi(ttl)
+	cictm, err := strconv.Atoi(*ttl)
 	if err != nil {
 		return nil, err
 	}
@@ -57,11 +57,11 @@ func ResolveApplicationProperties(basePath string) (*ApplicationProperties, erro
 	}
 
 	return &ApplicationProperties{
-		ServerPort:        port,
-		JwtSecret:         secret,
-		DBUrl:             url,
+		ServerPort:        *port,
+		JwtSecret:         *secret,
+		DBUrl:             *url,
 		DBIndex:           dbi,
-		CatalogGrpcTarget: target,
+		CatalogGrpcTarget: *target,
 		CartIDCookieTtl:   time.Duration(cictm) * time.Second,
 	}, nil
 }
@@ -80,12 +80,12 @@ func loadLocalEnv(basePath string) error {
 	return nil
 }
 
-func getEnv(key string) (string, error) {
+func getEnv(key string) (*string, error) {
 	value, ok := os.LookupEnv(key)
 	if !ok {
-		return "", errors.New("Environment variable not found: " + key)
+		return nil, errors.New("Environment variable not found: " + key)
 	}
-	return value, nil
+	return &value, nil
 }
 
 type ApplicationProperties struct {

@@ -17,5 +17,6 @@ func NewCatalogServiceClient(p *utils.ApplicationProperties) (catalogpb.CatalogS
 		return nil, nil, err
 	}
 
-	return catalogpb.NewCatalogServiceClient(conn), conn, nil
+	csc := catalogpb.NewCatalogServiceClient(conn)
+	return csc, conn, nil
 }

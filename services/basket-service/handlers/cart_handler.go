@@ -54,20 +54,21 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 func (h *CartHandler) PutCart(c *gin.Context) {
 	cart := *c.MustGet("cart").(*models.Cart)
 
-	input, err := h.bindPutCartInput(c)
-	if err != nil {
+	var input putCartRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
 		h.logger.Error(err.Error())
 		c.AbortWithError(400, err)
 		return
 	}
 
 	for _, item := range input.Items {
-		cart, err = h.updateCartItems(cart, item.ProductID, item.Quantity, c)
+		updatedCart, err := h.updateCartItems(cart, item.ProductID, item.Quantity, c)
 		if err != nil {
 			h.logger.Error(err.Error())
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
+		cart = *updatedCart
 	}
 
 	if len(input.Items) == 0 {
@@ -87,8 +88,8 @@ func (h *CartHandler) PutCart(c *gin.Context) {
 		return
 	}
 
-	erro := h.fetchCartItemsDetails(cart, c)
-	if erro != nil {
+	err := h.fetchCartItemsDetails(cart, c)
+	if err != nil {
 		h.logger.Error(err.Error())
 		c.AbortWithError(500, errors.New("an internal server error occurred"))
 		return
@@ -108,29 +109,21 @@ type putCartInput struct {
 	Quantity  int    `json:"quantity" binding:"required"`
 }
 
-func (h *CartHandler) bindPutCartInput(c *gin.Context) (putCartRequest, error) {
-	var i putCartRequest
-	if err := c.ShouldBindJSON(&i); err != nil {
-		return i, err
-	}
-	return i, nil
-}
-
-func (h *CartHandler) updateCartItems(cart models.Cart, id string, quantity int, ctx context.Context) (models.Cart, error) {
+func (h *CartHandler) updateCartItems(cart models.Cart, id string, quantity int, ctx context.Context) (*models.Cart, error) {
 	price, err := h.cc.GetProductPrice(id, ctx)
 	if err != nil {
-		return models.Cart{}, err
+		return nil, err
 	}
 
 	if price == nil {
-		return models.Cart{}, errors.New("product price not found for: " + id)
+		return nil, errors.New("product price not found for: " + id)
 	}
 
 	for i, item := range cart.CartItems {
 		if item.ProductID == id {
 			cart.CartItems[i].Quantity = quantity
 			cart.CartItems[i].UnitPrice = *price
-			return cart, nil
+			return &cart, nil
 		}
 	}
 	cart.CartItems = append(cart.CartItems, models.CartItem{
@@ -139,7 +132,7 @@ func (h *CartHandler) updateCartItems(cart models.Cart, id string, quantity int,
 		Quantity:  quantity,
 		UnitPrice: *price,
 	})
-	return cart, nil
+	return &cart, nil
 }
 
 func (h *CartHandler) calculateTotal(items []models.CartItem) decimal.Decimal {
