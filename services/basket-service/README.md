@@ -34,7 +34,7 @@ Response 200:
     {
       "id": "string",
       "product_id": "string",
-      "quantity": 1,
+      "quantity": 2,
       "price": "12.50",
       "details": {
         "name": "Sushi Set",
