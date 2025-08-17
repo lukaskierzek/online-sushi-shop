@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	p = utils.ResolveApplicationProperties(".")
+	logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
 )
 
 // @title Shopping Cart API
@@ -35,32 +35,34 @@ var (
 
 // @BasePath /api/v1/cart
 func main() {
+	p, err := utils.ResolveApplicationProperties(".")
+	checkErr(err, "cannot resolve application properties")
+
 	csc, conn, err := clients.NewCatalogServiceClient(p)
-	if err != nil {
-		log.Fatal(err)
-	}
+	checkErr(err, "cannot resolve CatalogServiceClient")
 
 	rdb := db.NewRedisClient(p)
 
 	cr := repositories.NewCatalogRepository(rdb, p)
 
 	cc, err := clients.NewCatalogClient(csc, conn, cr)
-	if err != nil {
-		log.Fatal(err)
-	}
+	checkErr(err, "cannot resolve CatalogClient")
 
 	cartr := repositories.NewCartRepository(rdb, p)
 
-	router := createRouter(cartr, cc, gin.New())
+	router := createRouter(cartr, cc, p, gin.New())
 
 	defer cc.Close()
 	defer rdb.Close()
 
-	router.Run(":" + p.ServerPort)
+	if err := router.Run(":" + p.ServerPort); err != nil {
+		logger.Error("failed to start server", "error", err)
+		os.Exit(1)
+	}
 }
 
-func createRouter(cr *repositories.CartRepository, cc *clients.CatalogClient, router *gin.Engine) *gin.Engine {
-	h := handlers.NewCartHandler(cr, cc)
+func createRouter(cr *repositories.CartRepository, cc *clients.CatalogClient, p *utils.ApplicationProperties, router *gin.Engine) *gin.Engine {
+	h := handlers.NewCartHandler(cr, cc, logger)
 
 	router.Use(middlewares.NewErrorMiddleware())
 
@@ -71,11 +73,18 @@ func createRouter(cr *repositories.CartRepository, cc *clients.CatalogClient, ro
 
 	cartV1Protected := router.Group("/api/v1/cart")
 
-	m := middlewares.NewCartMiddleware(cr, p)
+	m := middlewares.NewCartMiddleware(cr, p, logger)
 	cartV1Protected.Use(m.CartHandlerFunc())
 
 	cartV1Protected.GET("/", h.GetCart)
 	cartV1Protected.PUT("/", h.PutCart)
 
 	return router
+}
+
+func checkErr(err error, msg string) {
+	if err != nil {
+		logger.Error(msg, "error", err)
+		os.Exit(1)
+	}
 }

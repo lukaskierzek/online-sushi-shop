@@ -80,7 +80,7 @@ func (r *CartRepository) GetCart(query GetCartQuery, ctx context.Context) (*mode
 }
 
 func (r *CartRepository) loadCartByID(id string, ctx context.Context) (*models.Cart, error) {
-	return utils.FromRedis[models.Cart](r.db.Get(ctx, "carts::"+id).Result)
+	return utils.FromRedis[models.Cart](r.db.Get(ctx, "carts::"+id))
 }
 
 func (r *CartRepository) saveCart(id string, cart models.Cart, ctx context.Context) error {

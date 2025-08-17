@@ -21,7 +21,7 @@ func NewCatalogRepository(db *redis.Client, p *utils.ApplicationProperties) *Cat
 }
 
 func (cr *CatalogRepository) GetProductPrice(id string, ctx context.Context) (*decimal.Decimal, error) {
-	return utils.FromRedis[decimal.Decimal](cr.db.Get(ctx, "products:prices::"+id).Result)
+	return utils.FromRedis[decimal.Decimal](cr.db.Get(ctx, "products:prices::"+id))
 }
 
 func (r *CatalogRepository) SaveProductPrice(id string, price decimal.Decimal, ctx context.Context) error {
@@ -33,7 +33,7 @@ func (r *CatalogRepository) SaveProductPrice(id string, price decimal.Decimal, c
 }
 
 func (cr *CatalogRepository) GetProduct(id string, ctx context.Context) (*models.ProductDetails, error) {
-	return utils.FromRedis[models.ProductDetails](cr.db.Get(ctx, "products:details::"+id).Result)
+	return utils.FromRedis[models.ProductDetails](cr.db.Get(ctx, "products:details::"+id))
 }
 
 func (r *CatalogRepository) SaveProduct(id string, details models.ProductDetails, ctx context.Context) error {

@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,12 +15,13 @@ import (
 )
 
 type CartHandler struct {
-	cr *repositories.CartRepository
-	cc *clients.CatalogClient
+	cr     *repositories.CartRepository
+	cc     *clients.CatalogClient
+	logger *slog.Logger
 }
 
-func NewCartHandler(cr *repositories.CartRepository, cc *clients.CatalogClient) *CartHandler {
-	return &CartHandler{cr: cr, cc: cc}
+func NewCartHandler(cr *repositories.CartRepository, cc *clients.CatalogClient, logger *slog.Logger) *CartHandler {
+	return &CartHandler{cr: cr, cc: cc, logger: logger}
 }
 
 // @Summary get user's cart
@@ -33,7 +34,7 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 	cart := *c.MustGet("cart").(*models.Cart)
 	err := h.fetchCartItemsDetails(cart, c)
 	if err != nil {
-		log.Println("ERROR|", err.Error())
+		h.logger.Error(err.Error())
 		c.AbortWithError(500, errors.New("an internal server error occurred"))
 		return
 	}
@@ -55,7 +56,7 @@ func (h *CartHandler) PutCart(c *gin.Context) {
 
 	input, err := h.bindPutCartInput(c)
 	if err != nil {
-		log.Println("ERROR|", err.Error())
+		h.logger.Error(err.Error())
 		c.AbortWithError(400, err)
 		return
 	}
@@ -63,7 +64,7 @@ func (h *CartHandler) PutCart(c *gin.Context) {
 	for _, item := range input.Items {
 		cart, err = h.updateCartItems(cart, item.ProductID, item.Quantity, c)
 		if err != nil {
-			log.Println("ERROR|", err.Error())
+			h.logger.Error(err.Error())
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
@@ -81,14 +82,14 @@ func (h *CartHandler) PutCart(c *gin.Context) {
 	cart.TotalPrice = h.calculateTotal(cart.CartItems)
 
 	if _, err := h.cr.SaveCart(cart, c); err != nil {
-		log.Println("ERROR|", err.Error())
+		h.logger.Error(err.Error())
 		c.AbortWithError(500, errors.New("an internal server error occurred"))
 		return
 	}
 
 	erro := h.fetchCartItemsDetails(cart, c)
 	if erro != nil {
-		log.Println("ERROR|", err.Error())
+		h.logger.Error(err.Error())
 		c.AbortWithError(500, errors.New("an internal server error occurred"))
 		return
 	}

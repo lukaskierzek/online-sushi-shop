@@ -3,7 +3,7 @@ package middlewares
 import (
 	"context"
 	"errors"
-	"log"
+	"log/slog"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -19,15 +19,17 @@ import (
 const cart_id = "cart_id"
 
 type Middleware struct {
-	r *repositories.CartRepository
-	p *utils.ApplicationProperties
+	r      *repositories.CartRepository
+	p      *utils.ApplicationProperties
+	logger *slog.Logger
 	gin.HandlerFunc
 }
 
-func NewCartMiddleware(r *repositories.CartRepository, p *utils.ApplicationProperties) *Middleware {
+func NewCartMiddleware(r *repositories.CartRepository, p *utils.ApplicationProperties, logger *slog.Logger) *Middleware {
 	return &Middleware{
-		r: r,
-		p: p,
+		r:      r,
+		p:      p,
+		logger: logger,
 	}
 }
 
@@ -38,34 +40,34 @@ func (m *Middleware) CartHandlerFunc() gin.HandlerFunc {
 			host = strings.Split(host, ":")[0]
 		}
 		if host == "" {
-			log.Println("ERROR|", "IP not found in the request")
+			m.logger.Error("IP not found in the request")
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
 		cartID, err := m.ensureCartIDCookie(host, c)
 		if err != nil {
-			log.Println("ERROR|", err.Error())
+			m.logger.Error(err.Error())
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
 		userID, err := m.extractUserID(c)
 		if err != nil {
-			log.Println("ERROR|", err.Error())
+			m.logger.Error(err.Error())
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
 		cart, err := m.loadOrMergeCart(cartID, userID, c)
 		if err != nil && err != redis.Nil {
-			log.Println("ERROR|", err.Error())
+			m.logger.Error(err.Error())
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}
 
 		if cart.ID == "" {
-			log.Println("ERROR|", "Cookie not found")
+			m.logger.Error("Cookie not found")
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
 			return
 		}

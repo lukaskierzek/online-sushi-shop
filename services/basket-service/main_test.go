@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/alicebob/miniredis/v2"
@@ -21,170 +22,122 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
 )
 
-type testContext struct {
-	c   *gin.Context
-	r   *gin.Engine
-	s   *miniredis.Miniredis
-	p   *utils.ApplicationProperties
-	rdb *redis.Client
-	cr  *repositories.CatalogRepository
-	cc  *clients.CatalogClient
-	w   *httptest.ResponseRecorder
+type TestSuite struct {
+	suite.Suite
+	p      *utils.ApplicationProperties
+	r      *gin.Engine
+	rdb    *redis.Client
+	logger *slog.Logger
 }
 
-func createTestContext(t *testing.T) (*testContext, error) {
-	w := httptest.NewRecorder()
-	c, r := gin.CreateTestContext(w)
+func (suite *TestSuite) SetupTest() {
+	suite.logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
 
+	t := suite.T()
 	t.Setenv("APP_ENV", "unit")
-	p := utils.ResolveApplicationProperties(".")
 
+	p, err := utils.ResolveApplicationProperties(".")
+	require.NoError(t, err)
+
+	suite.p = p
 	s := miniredis.RunT(t)
 	p.DBUrl = s.Addr()
 
-	rdb := db.NewRedisClient(p)
+	suite.rdb = db.NewRedisClient(p)
 
-	cr := repositories.NewCatalogRepository(rdb, p)
+	cr := repositories.NewCatalogRepository(suite.rdb, p)
 
 	cc, err := clients.NewCatalogClient(createCatalogGrpcClientMock(), nil, cr)
-	if err != nil {
-		return nil, err
-	}
+	require.NoError(t, err)
 
-	createRouter(repositories.NewCartRepository(rdb, p), cc, r)
-
-	return &testContext{
-		c:   c,
-		r:   r,
-		s:   s,
-		p:   p,
-		rdb: rdb,
-		cr:  cr,
-		cc:  cc,
-		w:   w,
-	}, nil
+	suite.r = gin.Default()
+	createRouter(repositories.NewCartRepository(suite.rdb, p), cc, p, suite.r)
 }
 
-func TestGetCart(t *testing.T) {
-	ctx, err := createTestContext(t)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer ctx.s.Close()
-	defer ctx.rdb.Close()
-	defer ctx.cc.Close()
-
-	ctx.c.Request, err = http.NewRequest(http.MethodGet, "/api/v1/cart/", bytes.NewBuffer([]byte("{}")))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx.c.Request.Host = "localhost"
-	ctx.r.ServeHTTP(ctx.w, ctx.c.Request)
-
-	assertCartResponse(t, ctx.w, ctx.rdb)
+func TestSuiteRun(t *testing.T) {
+	suite.Run(t, new(TestSuite))
 }
 
-func TestPutCart(t *testing.T) {
-	ctx, err := createTestContext(t)
-	if err != nil {
-		log.Fatal(err)
-	}
+func (suite *TestSuite) TestGetCart() {
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodGet, "/api/v1/cart/", nil)
+	require.NoError(suite.T(), err)
 
-	defer ctx.s.Close()
-	defer ctx.rdb.Close()
-	defer ctx.cc.Close()
+	req.Host = "localhost"
+	suite.r.ServeHTTP(w, req)
 
+	suite.assertCartResponse(w)
+}
+
+func (suite *TestSuite) TestPutCart() {
+	t := suite.T()
 	cartID := uuid.NewString()
 	cart := models.Cart{ID: cartID, OwnerID: "", CartItems: []models.CartItem{}, TotalPrice: decimal.NewFromInt(0)}
 
 	data, err := json.Marshal(cart)
-	if err != nil {
-		log.Fatal(err)
-	}
+	require.NoError(t, err)
 
-	err = ctx.rdb.Set(t.Context(), "carts::"+cartID, data, 0).Err()
-	if err != nil {
-		log.Fatal(err)
-	}
+	err = suite.rdb.Set(t.Context(), "carts::"+cartID, data, 0).Err()
+	require.NoError(t, err)
 
 	request := putCartRequest{Items: []putCartInput{
-		{
-			ProductID: uuid.NewString(),
-			Quantity:  2,
-		},
-		{
-			ProductID: uuid.NewString(),
-			Quantity:  3,
-		},
-		{
-			ProductID: uuid.NewString(),
-			Quantity:  4,
-		},
-		{
-			ProductID: uuid.NewString(),
-			Quantity:  5,
-		},
-		{
-			ProductID: uuid.NewString(),
-			Quantity:  6,
-		},
+		{ProductID: uuid.NewString(), Quantity: 2},
+		{ProductID: uuid.NewString(), Quantity: 3},
+		{ProductID: uuid.NewString(), Quantity: 4},
+		{ProductID: uuid.NewString(), Quantity: 5},
+		{ProductID: uuid.NewString(), Quantity: 6},
 	}}
 
-	body, _ := json.Marshal(request)
-	ctx.c.Request, err = http.NewRequest(http.MethodPut, "/api/v1/cart/", bytes.NewBuffer(body))
-	if err != nil {
-		log.Fatal(err)
-	}
+	body, err := json.Marshal(request)
+	require.NoError(t, err)
 
-	ctx.c.Request.Host = "localhost"
-	ctx.r.ServeHTTP(ctx.w, ctx.c.Request)
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPut, "/api/v1/cart/", bytes.NewBuffer(body))
+	require.NoError(t, err)
 
-	assertCartResponse(t, ctx.w, ctx.rdb)
+	req.Host = "localhost"
+	suite.r.ServeHTTP(w, req)
+
+	suite.assertCartResponse(w)
 }
 
-func assertCartResponse(t *testing.T, w *httptest.ResponseRecorder, rdb *redis.Client) {
+func (suite *TestSuite) assertCartResponse(w *httptest.ResponseRecorder) {
+	t := suite.T()
+	t.Helper()
+
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	cookies := w.Result().Cookies()
+	require.NotEmpty(t, cookies)
 	assert.Equal(t, "cart_id", cookies[0].Name)
 
 	var cartResponse cartResponse
 	err := json.Unmarshal(w.Body.Bytes(), &cartResponse)
-	if err != nil {
-		log.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	assert.NotNil(t, cartResponse)
 
-	jsonData, err := rdb.Get(t.Context(), "carts::"+cartResponse.Cart.ID).Result()
-	if err == redis.Nil {
-		log.Fatal(err)
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
+	dbCart, err := utils.FromRedis[models.Cart](suite.rdb.Get(t.Context(), "carts::"+cartResponse.Cart.ID))
+	require.NoError(t, err)
 
-	var dbCart models.Cart
-	if err := json.Unmarshal([]byte(jsonData), &dbCart); err != nil {
-		log.Fatal(err)
-	}
-
-	fetchCartItemsDetails(dbCart)
+	suite.fetchCartItemsDetails(dbCart)
 
 	assert.NotNil(t, dbCart)
-	assert.Equal(t, cartResponse.Cart, dbCart)
+	assert.Equal(t, cartResponse.Cart, *dbCart)
 	assert.Equal(t, dbCart.ID, cookies[0].Value)
 }
 
-func fetchCartItemsDetails(cart models.Cart) {
+func (suite *TestSuite) fetchCartItemsDetails(cart *models.Cart) {
+	t := suite.T()
+	t.Helper()
+
 	for i := range cart.CartItems {
 		id := cart.CartItems[i].ProductID
-
 		cart.CartItems[i].Details = models.ProductDetails{
 			Name:     "Product name: " + id,
 			Link:     "https://localhost:8080/products/" + id,
