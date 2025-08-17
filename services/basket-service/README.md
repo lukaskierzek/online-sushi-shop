@@ -14,11 +14,11 @@ Cart data is stored in Redis.
 - Redis 7+
 - Docker & Docker Compose (optional)
 # ▶️ Running the Service
-Locally
+### Locally
 - go mod tidy
 - go run main.go
 ### With Docker
-The file docker-compose.yml is located in the path ../../docker-config/docker-compose.yml
+The file docker-compose.yml is located in the path `../../docker-config/docker-compose.yml`
 # 📡 REST API
 ### Base Path
 - /api/v1/cart

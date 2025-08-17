@@ -123,7 +123,7 @@ func (h *CartHandler) updateCartItems(cart models.Cart, id string, quantity int,
 	}
 
 	if price == nil {
-		return models.Cart{}, errors.New("product price not found")
+		return models.Cart{}, errors.New("product price not found for: " + id)
 	}
 
 	for i, item := range cart.CartItems {
@@ -156,6 +156,10 @@ func (h *CartHandler) fetchCartItemsDetails(cart models.Cart, ctx context.Contex
 		details, err := h.cc.GetProduct(item.ProductID, ctx)
 		if err != nil {
 			return err
+		}
+
+		if details == nil {
+			return errors.New("product details not found for: " + item.ProductID)
 		}
 
 		cart.CartItems[i].Details = *details

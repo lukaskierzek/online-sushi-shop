@@ -14,14 +14,14 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type TestSuite struct {
+type CartRepositoryTestSuite struct {
 	suite.Suite
 	p   *utils.ApplicationProperties
 	r   *CartRepository
 	rdb *redis.Client
 }
 
-func (suite *TestSuite) SetupTest() {
+func (suite *CartRepositoryTestSuite) SetupTest() {
 	t := suite.T()
 	t.Setenv("APP_ENV", "unit")
 
@@ -36,11 +36,11 @@ func (suite *TestSuite) SetupTest() {
 	suite.r = &CartRepository{db: suite.rdb, p: p}
 }
 
-func TestSuiteRun(t *testing.T) {
-	suite.Run(t, new(TestSuite))
+func TestCartRepositoryTestSuite(t *testing.T) {
+	suite.Run(t, new(CartRepositoryTestSuite))
 }
 
-func (suite *TestSuite) TestSaveCart() {
+func (suite *CartRepositoryTestSuite) TestSaveCart() {
 	t := suite.T()
 
 	items := []models.CartItem{
@@ -61,7 +61,7 @@ func (suite *TestSuite) TestSaveCart() {
 	assert.Equal(t, expectedCart, *savedCart)
 }
 
-func (suite *TestSuite) TestGetEmptyCart() {
+func (suite *CartRepositoryTestSuite) TestGetEmptyCart() {
 	t := suite.T()
 
 	cart, err := suite.r.GetCart(GetCartQuery{}, t.Context())
@@ -75,7 +75,7 @@ func (suite *TestSuite) TestGetEmptyCart() {
 	assert.Nil(t, cart)
 }
 
-func (suite *TestSuite) TestGetOwnersCart() {
+func (suite *CartRepositoryTestSuite) TestGetOwnersCart() {
 	t := suite.T()
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(12), Quantity: 1}}
@@ -87,7 +87,7 @@ func (suite *TestSuite) TestGetOwnersCart() {
 	assert.Equal(t, cart, *result)
 }
 
-func (suite *TestSuite) TestGetGuestCart() {
+func (suite *CartRepositoryTestSuite) TestGetGuestCart() {
 	t := suite.T()
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(8), Quantity: 2}}
@@ -99,7 +99,7 @@ func (suite *TestSuite) TestGetGuestCart() {
 	assert.Equal(t, cart, *result)
 }
 
-func (suite *TestSuite) TestGetTransferedCart() {
+func (suite *CartRepositoryTestSuite) TestGetTransferedCart() {
 	t := suite.T()
 
 	items := []models.CartItem{{ID: "1", ProductID: "P1", UnitPrice: decimal.NewFromInt(10), Quantity: 1}}
@@ -115,7 +115,7 @@ func (suite *TestSuite) TestGetTransferedCart() {
 	assert.Equal(t, expected, *result)
 }
 
-func (suite *TestSuite) TestGetMergedCart() {
+func (suite *CartRepositoryTestSuite) TestGetMergedCart() {
 	t := suite.T()
 
 	ownerID := "OWNER-5"
@@ -148,7 +148,7 @@ func (suite *TestSuite) TestGetMergedCart() {
 	assert.ElementsMatch(t, expectedItems, result.CartItems)
 }
 
-func (suite *TestSuite) saveCartToRedis(key string, cart models.Cart) {
+func (suite *CartRepositoryTestSuite) saveCartToRedis(key string, cart models.Cart) {
 	t := suite.T()
 	t.Helper()
 
@@ -157,7 +157,7 @@ func (suite *TestSuite) saveCartToRedis(key string, cart models.Cart) {
 	assert.NoError(t, suite.rdb.SetEx(t.Context(), "carts::"+key, data, suite.p.CartIDCookieTtl).Err())
 }
 
-func (suite *TestSuite) createTestCart(id, ownerID string, items []models.CartItem) models.Cart {
+func (suite *CartRepositoryTestSuite) createTestCart(id, ownerID string, items []models.CartItem) models.Cart {
 	suite.T().Helper()
 
 	return models.Cart{
@@ -168,7 +168,7 @@ func (suite *TestSuite) createTestCart(id, ownerID string, items []models.CartIt
 	}
 }
 
-func (suite *TestSuite) calculateTotal(items []models.CartItem) decimal.Decimal {
+func (suite *CartRepositoryTestSuite) calculateTotal(items []models.CartItem) decimal.Decimal {
 	suite.T().Helper()
 
 	total := decimal.Zero
