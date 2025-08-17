@@ -61,7 +61,8 @@ Request body:
       "quantity": 1
     }
   ]
-}```
+}
+```
 Response 200: Returns the updated cart (same schema as GET /).
 # 📑 API Documentation
 ### Swagger UI is available at:
