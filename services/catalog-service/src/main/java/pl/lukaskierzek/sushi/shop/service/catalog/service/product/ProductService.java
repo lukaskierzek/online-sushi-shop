@@ -1,10 +1,12 @@
 package pl.lukaskierzek.sushi.shop.service.catalog.service.product;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import pl.lukaskierzek.sushi.shop.service.catalog.service.category.CategoryService;
+import pl.lukaskierzek.sushi.shop.service.catalog.service.kernel.DatabaseOperation;
 import pl.lukaskierzek.sushi.shop.service.catalog.service.product.DomainEvent.ProductPriceUpdated;
 import pl.lukaskierzek.sushi.shop.service.catalog.service.product.ProductController.ProductRequest;
 
@@ -16,10 +18,13 @@ class ProductService {
     private final ProductRepository productRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    void createProduct(ProductRequest request) {
+    @Transactional
+    public String createProduct(ProductRequest request) {
         var category = categoryService.getProductCategory(request.categoryId());
         validateProductName(request.name());
         var product = Product.create(request.name(), request.description(), new Money(Currency.PLN, request.price()), category);
+        productRepository.saveProduct(product, DatabaseOperation.CREATE);
+        return product.getId();
     }
 
     @EventListener
@@ -41,7 +46,7 @@ class ProductService {
 
     private Product getProductById(String productId) {
         return productRepository.getProductById(productId)
-            .orElseThrow(()-> new ProductNotFoundException("Product not found"));
+            .orElseThrow(() -> new ProductNotFoundException("Product not found"));
     }
 
 
