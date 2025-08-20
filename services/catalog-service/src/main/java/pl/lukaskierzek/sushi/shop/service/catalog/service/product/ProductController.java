@@ -1,13 +1,16 @@
 package pl.lukaskierzek.sushi.shop.service.catalog.service.product;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.lukaskierzek.sushi.shop.service.catalog.service.product.Product.ProductSnapshot;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.Map;
+
+import static org.springframework.http.ResponseEntity.created;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,6 +21,11 @@ class ProductController {
 
     //TODO: Controller Methods
 
+    @PostMapping
+    public ResponseEntity<String> post(@RequestBody ProductRequest request) {
+        String id = productService.createProduct(request);
+        return created(URI.create("/products/" + id)).body(id);
+    }
 
     @GetMapping("/{id}")
     public ProductSnapshot get(@PathVariable String id) {
