@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 import pl.lukaskierzek.sushi.shop.service.catalog.service.kernel.DatabaseOperation;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,8 +30,6 @@ class ProductRepository {
     void saveProduct(Product product, DatabaseOperation operation) {
         final var events = product.getEvents();
         product.clearEvents();
-
-        //TODO: save
 
         repository.save(new ProductEntity(product));
         historyRepository.save(new ProductHistoryEntity(product.toSnapshot(), operation));
@@ -60,6 +57,7 @@ class ProductRepository {
 
 interface ProductEntityRepository extends JpaRepository<ProductEntity, String> {
     Optional<ProductEntity> findByName(String name);
+
     Set<ProductEntity> findByCategoryId(String id);
 }
 
