@@ -27,6 +27,11 @@ class ProductController {
         return created(URI.create("/products/" + id)).body(id);
     }
 
+    @PatchMapping("/{id}")
+    public void patch(@PathVariable String id, @RequestBody ProductRequest request) {
+        productService.patchProduct(id, request);
+    }
+
     @GetMapping("/{id}")
     public ProductSnapshot get(@PathVariable String id) {
         return productService.getProductDetails(id);

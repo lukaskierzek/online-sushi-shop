@@ -10,6 +10,10 @@ import pl.lukaskierzek.sushi.shop.service.catalog.service.kernel.DatabaseOperati
 import pl.lukaskierzek.sushi.shop.service.catalog.service.product.DomainEvent.ProductPriceUpdated;
 import pl.lukaskierzek.sushi.shop.service.catalog.service.product.ProductController.ProductRequest;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static java.util.Optional.ofNullable;
+
 @Service
 @RequiredArgsConstructor
 class ProductService {
@@ -50,4 +54,44 @@ class ProductService {
     }
 
 
+    @Transactional
+    public void patchProduct(String id, ProductRequest request) {
+        var changed = new AtomicBoolean(false);
+        var product = getProductById(id);
+
+
+        ofNullable(request.name()).ifPresent(name -> {
+            if (!name.equals(product.getName())) {
+                validateProductName(name);
+                product.updateName(name);
+                changed.set(true);
+            }
+        });
+
+        ofNullable(request.price()).ifPresent(price -> {
+            if (!price.equals(product.getPrice().amount())) {
+                product.updatePrice(new Money(Currency.PLN, price));
+                changed.set(true);
+            }
+        });
+
+        ofNullable(request.description()).ifPresent(description -> {
+            if (!description.equals(product.getDescription())) {
+                product.updateDescription(description);
+                changed.set(true);
+            }
+        });
+
+        ofNullable(request.categoryId()).ifPresent(categoryId -> {
+            var productCategory = categoryService.getProductCategory(categoryId);
+            if (!productCategory.equals(product.getCategory())) {
+                product.updateCategory(productCategory);
+                changed.set(true);
+            }
+        });
+
+        if (changed.get()) {
+            productRepository.saveProduct(product, DatabaseOperation.UPDATE);
+        }
+    }
 }
