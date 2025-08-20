@@ -18,7 +18,6 @@ class ProductService {
 
     void createProduct(ProductRequest request) {
         var category = categoryService.getProductCategory(request.categoryId());
-        //TODO:  validation (name already exists)
         validateProductName(request.name());
         var product = Product.create(request.name(), request.description(), new Money(Currency.PLN, request.price()), category);
     }
@@ -34,4 +33,16 @@ class ProductService {
             throw new InvalidProductException("Product with provided name already exists");
         }
     }
+
+    public Product.ProductSnapshot getProductDetails(String productId) {
+        return getProductById(productId)
+            .toSnapshot();
+    }
+
+    private Product getProductById(String productId) {
+        return productRepository.getProductById(productId)
+            .orElseThrow(()-> new ProductNotFoundException("Product not found"));
+    }
+
+
 }
