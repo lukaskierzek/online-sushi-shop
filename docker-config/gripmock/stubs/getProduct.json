@@ -1,0 +1,9 @@
+{
+    "service":"CatalogService",
+    "method":"GetProductPrice",
+    "output":{
+      "data":{
+        "price": "999.99"
+      }
+    }
+  }

@@ -1,0 +1,11 @@
+{
+    "service":"CatalogService",
+    "method":"GetProduct",
+    "output":{
+      "data":{
+        "name": "Product name",
+        "imageUrl": "https://localhost:8080/products/images/aaabbbccc",
+        "link":"https://localhost:8080/products/{id}"
+      }
+    }
+  }
