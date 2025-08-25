@@ -13,6 +13,8 @@ import pl.lukaskierzek.sushi.shop.service.catalog.service.kernel.DatabaseOperati
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.time.Instant.now;
 import static java.util.UUID.randomUUID;
@@ -22,14 +24,15 @@ import static java.util.UUID.randomUUID;
 class ProductRepository {
 
     private final ProductEntityRepository repository;
+    private final ProductHistoryEntityRepository historyRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    void saveProduct(Product product) {
+    void saveProduct(Product product, DatabaseOperation operation) {
         final var events = product.getEvents();
         product.clearEvents();
 
-        //TODO: save
-
+        repository.save(new ProductEntity(product));
+        historyRepository.save(new ProductHistoryEntity(product.toSnapshot(), operation));
         events.forEach(eventPublisher::publishEvent);
     }
 
@@ -37,10 +40,28 @@ class ProductRepository {
         return repository.findByName(name)
             .map(ProductEntity::getProduct);
     }
+
+    Optional<Product> getProductById(String id) {
+        return repository.findById(id)
+            .map(ProductEntity::getProduct);
+    }
+
+    Set<Product> getProductsByCategoryId(String categoryId) {
+        return repository.findByCategoryId(categoryId)
+            .stream()
+            .map(ProductEntity::getProduct)
+            .collect(Collectors.toSet());
+    }
+
 }
 
 interface ProductEntityRepository extends JpaRepository<ProductEntity, String> {
     Optional<ProductEntity> findByName(String name);
+
+    Set<ProductEntity> findByCategoryId(String id);
+}
+
+interface ProductHistoryEntityRepository extends JpaRepository<ProductHistoryEntity, String> {
 }
 
 @NoArgsConstructor
@@ -59,6 +80,15 @@ class ProductEntity {
     @Column(columnDefinition = "jsonb")
     private Product product;
 
+    @Column
+    private String categoryId;
+
+    @Column
+    private Money price;
+
+    @Column
+    private String description;
+
     @Version
     private long version;
 
@@ -66,6 +96,9 @@ class ProductEntity {
         this.id = product.getId();
         this.name = product.getName();
         this.product = product;
+        this.price = product.getPrice();
+        this.categoryId = product.getCategory().id();
+        this.description = product.getDescription();
     }
 }
 

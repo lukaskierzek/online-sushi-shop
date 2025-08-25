@@ -3,7 +3,7 @@ package pl.lukaskierzek.sushi.shop.service.catalog.service.product;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import pl.lukaskierzek.sushi.shop.service.catalog.service.kernel.ProductCategory;
-import pl.lukaskierzek.sushi.shop.service.catalog.service.product.DomainEvent.ProductPriceUpdated;
+import pl.lukaskierzek.sushi.shop.service.catalog.service.product.DomainEvent.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,17 +30,19 @@ class Product {
                 validateName(name),
                 validateDescription(description),
                 validatePrice(price),
-                category,
+                validateCategory(category),
                 new ArrayList<>());
     }
 
     Product updateName(String name) {
         this.name = validateName(name);
+        events.add(new ProductNameUpdated(id, name));
         return this;
     }
 
     Product updateDescription(String description) {
         this.description = validateDescription(description);
+        events.add(new ProductDescriptionUpdated(id, description));
         return this;
     }
 
@@ -52,6 +54,7 @@ class Product {
 
     Product updateCategory(ProductCategory category) {
         this.category = category;
+        events.add(new ProductCategoryUpdated(id, category));
         return this;
     }
 
