@@ -19,15 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CatalogService_GetProductPrice_FullMethodName = "/catalog.CatalogService/GetProductPrice"
-	CatalogService_GetProduct_FullMethodName      = "/catalog.CatalogService/GetProduct"
+	CatalogService_GetProduct_FullMethodName = "/catalog.CatalogService/GetProduct"
 )
 
 // CatalogServiceClient is the client API for CatalogService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CatalogServiceClient interface {
-	GetProductPrice(ctx context.Context, in *GetProductPriceRequest, opts ...grpc.CallOption) (*GetProductPriceResponse, error)
 	GetProduct(ctx context.Context, in *GetProductRequest, opts ...grpc.CallOption) (*GetProductResponse, error)
 }
 
@@ -37,16 +35,6 @@ type catalogServiceClient struct {
 
 func NewCatalogServiceClient(cc grpc.ClientConnInterface) CatalogServiceClient {
 	return &catalogServiceClient{cc}
-}
-
-func (c *catalogServiceClient) GetProductPrice(ctx context.Context, in *GetProductPriceRequest, opts ...grpc.CallOption) (*GetProductPriceResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetProductPriceResponse)
-	err := c.cc.Invoke(ctx, CatalogService_GetProductPrice_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *catalogServiceClient) GetProduct(ctx context.Context, in *GetProductRequest, opts ...grpc.CallOption) (*GetProductResponse, error) {
@@ -63,7 +51,6 @@ func (c *catalogServiceClient) GetProduct(ctx context.Context, in *GetProductReq
 // All implementations must embed UnimplementedCatalogServiceServer
 // for forward compatibility.
 type CatalogServiceServer interface {
-	GetProductPrice(context.Context, *GetProductPriceRequest) (*GetProductPriceResponse, error)
 	GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error)
 	mustEmbedUnimplementedCatalogServiceServer()
 }
@@ -75,9 +62,6 @@ type CatalogServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedCatalogServiceServer struct{}
 
-func (UnimplementedCatalogServiceServer) GetProductPrice(context.Context, *GetProductPriceRequest) (*GetProductPriceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetProductPrice not implemented")
-}
 func (UnimplementedCatalogServiceServer) GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProduct not implemented")
 }
@@ -100,24 +84,6 @@ func RegisterCatalogServiceServer(s grpc.ServiceRegistrar, srv CatalogServiceSer
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&CatalogService_ServiceDesc, srv)
-}
-
-func _CatalogService_GetProductPrice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetProductPriceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CatalogServiceServer).GetProductPrice(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: CatalogService_GetProductPrice_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CatalogServiceServer).GetProductPrice(ctx, req.(*GetProductPriceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _CatalogService_GetProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -145,10 +111,6 @@ var CatalogService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "catalog.CatalogService",
 	HandlerType: (*CatalogServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetProductPrice",
-			Handler:    _CatalogService_GetProductPrice_Handler,
-		},
 		{
 			MethodName: "GetProduct",
 			Handler:    _CatalogService_GetProduct_Handler,

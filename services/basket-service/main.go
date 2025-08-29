@@ -1,90 +1,61 @@
 package main
 
 import (
-	"log/slog"
-	"os"
+	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/clients"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/db"
-	_ "github.com/kamilszymanski707/online-sushi-shop/basket-service/docs"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/app"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/gRPC/catalogpb"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/handlers"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/infra"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/middlewares"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/repositories"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/utils"
-
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
-var (
-	logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
-)
-
-// @title Shopping Cart API
-// @version 1.0
-// @description Shopping Cart API.
-// @termsOfService http://swagger.io/terms/
-
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
-
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @BasePath /api/v1/cart
 func main() {
-	p, err := utils.ResolveApplicationProperties(".")
-	checkErr(err, "cannot resolve application properties")
+	db := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
 
-	csc, conn, err := clients.NewCatalogServiceClient(p)
-	checkErr(err, "cannot resolve CatalogServiceClient")
-
-	rdb := db.NewRedisClient(p)
-
-	cr := repositories.NewCatalogRepository(rdb, p)
-
-	cc, err := clients.NewCatalogClient(csc, conn, cr)
-	checkErr(err, "cannot resolve CatalogClient")
-
-	cartr := repositories.NewCartRepository(rdb, p)
-
-	router := createRouter(cartr, cc, p, gin.New())
-
-	defer cc.Close()
-	defer rdb.Close()
-
-	if err := router.Run(":" + p.ServerPort); err != nil {
-		logger.Error("failed to start server", "error", err)
-		os.Exit(1)
-	}
-}
-
-func createRouter(cr *repositories.CartRepository, cc *clients.CatalogClient, p *utils.ApplicationProperties, router *gin.Engine) *gin.Engine {
-	h := handlers.NewCartHandler(cr, cc, logger)
-
-	router.Use(middlewares.NewErrorMiddleware())
-
-	if os.Getenv("APP_ENV") != "prod" {
-		cartV1 := router.Group("/api/v1/cart")
-		cartV1.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	}
-
-	cartV1Protected := router.Group("/api/v1/cart")
-
-	m := middlewares.NewCartMiddleware(cr, p, logger)
-	cartV1Protected.Use(m.CartHandlerFunc())
-
-	cartV1Protected.GET("/", h.GetCart)
-	cartV1Protected.PUT("/", h.PutCart)
-
-	return router
-}
-
-func checkErr(err error, msg string) {
+	conn, err := grpc.NewClient("localhost:4770", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		logger.Error(msg, "error", err)
-		os.Exit(1)
+		log.Fatalf("failed to connect to catalog service: %v", err)
+	}
+
+	defer db.Close()
+	defer conn.Close()
+
+	csc := catalogpb.NewCatalogServiceClient(conn)
+
+	br := infra.NewBasketRepository(db)
+	pr := infra.NewProductRepository(db, csc)
+
+	bs := app.NewBasketService(br, pr)
+
+	h := handlers.NewBasketHandler(bs)
+
+	mw := middlewares.NewCartMiddleware(br)
+
+	r := gin.Default()
+	r.Use(mw.CartHandlerFunc())
+
+	apiV1 := r.Group("/api/v1")
+	{
+		basket := apiV1.Group("/basket")
+		{
+			basket.GET("/", h.GetBasket)
+			basket.POST("/items", h.AddItem)
+			basket.DELETE("/items/:productID", h.RemoveItem)
+			basket.PUT("/items/:productID", h.ChangeQuantity)
+			basket.DELETE("/clear", h.Clear)
+		}
+	}
+
+	if err := r.Run(":8080"); err != nil {
+		log.Fatalf("failed to run server: %v", err)
 	}
 }
