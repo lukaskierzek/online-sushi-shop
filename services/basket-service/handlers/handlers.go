@@ -75,7 +75,7 @@ func (h *BasketHandler) AddItem(c *gin.Context) {
 		Quantity:  req.Quantity,
 	}
 
-	basket, err := h.service.AddItem(c, *b, item)
+	basket, err := h.service.AddItem(c, b, item)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -102,7 +102,7 @@ func (h *BasketHandler) RemoveItem(c *gin.Context) {
 
 	productID := c.Param("productID")
 
-	basket, err := h.service.RemoveItem(c, *b, productID)
+	basket, err := h.service.RemoveItem(c, b, productID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -142,7 +142,7 @@ func (h *BasketHandler) ChangeQuantity(c *gin.Context) {
 		return
 	}
 
-	basket, err := h.service.ChangeQuantity(c, *b, productID, req.Quantity)
+	basket, err := h.service.ChangeQuantity(c, b, productID, req.Quantity)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -166,7 +166,7 @@ func (h *BasketHandler) Clear(c *gin.Context) {
 		return
 	}
 
-	basket, err := h.service.Clear(c, *b)
+	basket, err := h.service.Clear(c, b)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -181,12 +181,9 @@ func (h *BasketHandler) resolveBasket(c *gin.Context) *domain.Basket {
 		return nil
 	}
 
-	if basket, ok := basketVal.(*domain.Basket); ok {
+	basket, ok := basketVal.(*domain.Basket)
+	if ok {
 		return basket
-	}
-
-	if basket, ok := basketVal.(domain.Basket); ok {
-		return &basket
 	}
 
 	return nil

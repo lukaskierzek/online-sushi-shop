@@ -17,7 +17,7 @@ func NewBasketService(brepo infra.BasketRepository, prepo infra.ProductRepositor
 	return &BasketService{brepo: brepo, prepo: prepo}
 }
 
-func (s *BasketService) AddItem(ctx context.Context, b domain.Basket, item domain.BasketItem) (*domain.Basket, error) {
+func (s *BasketService) AddItem(ctx context.Context, b *domain.Basket, item domain.BasketItem) (*domain.Basket, error) {
 	details, err := s.prepo.GetProductDetails(ctx, item.ProductID)
 	if err != nil {
 		return nil, err
@@ -29,41 +29,45 @@ func (s *BasketService) AddItem(ctx context.Context, b domain.Basket, item domai
 
 	item.ProductDetails = *details
 
-	b.AddItem(item)
+	if err := b.AddItem(item); err != nil {
+		return nil, err
+	}
+
 	if err := s.brepo.SaveBasket(ctx, b); err != nil {
 		return nil, err
 	}
-	return &b, nil
+
+	return b, nil
 }
 
-func (s *BasketService) RemoveItem(ctx context.Context, b domain.Basket, productID string) (*domain.Basket, error) {
+func (s *BasketService) RemoveItem(ctx context.Context, b *domain.Basket, productID string) (*domain.Basket, error) {
 	b.RemoveItem(productID)
 	if err := s.brepo.SaveBasket(ctx, b); err != nil {
 		return nil, err
 	}
-	return &b, nil
+	return b, nil
 }
 
-func (s *BasketService) ChangeQuantity(ctx context.Context, b domain.Basket, productID string, qty int32) (*domain.Basket, error) {
+func (s *BasketService) ChangeQuantity(ctx context.Context, b *domain.Basket, productID string, qty int32) (*domain.Basket, error) {
 	b.ChangeItemQuantity(productID, qty)
 	if err := s.brepo.SaveBasket(ctx, b); err != nil {
 		return nil, err
 	}
-	return &b, nil
+	return b, nil
 }
 
-func (s *BasketService) Clear(ctx context.Context, b domain.Basket) (*domain.Basket, error) {
+func (s *BasketService) Clear(ctx context.Context, b *domain.Basket) (*domain.Basket, error) {
 	b.Clear()
 	if err := s.brepo.SaveBasket(ctx, b); err != nil {
 		return nil, err
 	}
-	return &b, nil
+	return b, nil
 }
 
-func (s *BasketService) Complete(ctx context.Context, b domain.Basket) (*domain.Basket, error) {
+func (s *BasketService) Complete(ctx context.Context, b *domain.Basket) (*domain.Basket, error) {
 	b.Complete()
 	if err := s.brepo.SaveBasket(ctx, b); err != nil {
 		return nil, err
 	}
-	return &b, nil
+	return b, nil
 }

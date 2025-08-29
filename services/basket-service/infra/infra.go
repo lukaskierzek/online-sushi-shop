@@ -18,7 +18,7 @@ const (
 )
 
 type BasketRepository interface {
-	SaveBasket(ctx context.Context, basket domain.Basket) error
+	SaveBasket(ctx context.Context, basket *domain.Basket) error
 	GetBasketByID(ctx context.Context, id string) (*domain.Basket, error)
 	CreateEmptyBasket(ctx context.Context) (*domain.Basket, error)
 	DeleteBasket(ctx context.Context, id string) error
@@ -45,7 +45,7 @@ func NewProductRepository(db *redis.Client, cc catalogpb.CatalogServiceClient) P
 	return &productRepositoryImpl{db: db, cc: cc}
 }
 
-func (r *basketRepositoryImpl) SaveBasket(ctx context.Context, basket domain.Basket) error {
+func (r *basketRepositoryImpl) SaveBasket(ctx context.Context, basket *domain.Basket) error {
 	data, err := json.Marshal(basket)
 	if err != nil {
 		return err
@@ -72,14 +72,14 @@ func (r *basketRepositoryImpl) GetBasketByID(ctx context.Context, id string) (*d
 }
 
 func (r *basketRepositoryImpl) CreateEmptyBasket(ctx context.Context) (*domain.Basket, error) {
-	b := domain.Basket{
+	b := &domain.Basket{
 		ID:         uuid.New().String(),
 		Items:      []domain.BasketItem{},
 		TotalPrice: decimal.NewFromInt(0),
 	}
 
 	err := r.SaveBasket(ctx, b)
-	return &b, err
+	return b, err
 }
 
 func (r *basketRepositoryImpl) DeleteBasket(ctx context.Context, id string) error {

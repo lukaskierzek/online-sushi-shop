@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"errors"
+	"sync"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -17,6 +19,7 @@ type Basket struct {
 	Items        []BasketItem
 	TotalPrice   decimal.Decimal
 	CompleteDate *time.Time
+	mu           sync.Mutex
 }
 
 type BasketItemDetails struct {
@@ -26,48 +29,72 @@ type BasketItemDetails struct {
 	Price    decimal.Decimal
 }
 
-func (b *Basket) AddItem(item BasketItem) {
+func (b *Basket) AddItem(item BasketItem) error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	if item.Quantity <= 0 {
+		return errors.New("quantity must be positive")
+	}
 	for i := range b.Items {
 		if b.Items[i].ProductID == item.ProductID {
 			b.Items[i].Quantity += item.Quantity
 			b.recalculateTotal()
-			return
+			return nil
 		}
 	}
 	b.Items = append(b.Items, item)
 	b.recalculateTotal()
+	return nil
 }
 
-func (b *Basket) RemoveItem(productID string) {
+func (b *Basket) RemoveItem(productID string) error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
 	for i := range b.Items {
 		if b.Items[i].ProductID == productID {
 			b.Items = append(b.Items[:i], b.Items[i+1:]...)
 			b.recalculateTotal()
-			return
+			return nil
 		}
 	}
+	return errors.New("item not found")
 }
 
-func (b *Basket) ChangeItemQuantity(productID string, qty int32) {
+func (b *Basket) ChangeItemQuantity(productID string, qty int32) error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	if qty < 0 {
+		return errors.New("quantity cannot be negative")
+	}
 	for i := range b.Items {
 		if b.Items[i].ProductID == productID {
-			if qty <= 0 {
-				b.RemoveItem(productID)
+			if qty == 0 {
+				b.Items = append(b.Items[:i], b.Items[i+1:]...)
 			} else {
 				b.Items[i].Quantity = qty
 			}
 			b.recalculateTotal()
-			return
+			return nil
 		}
 	}
+	return errors.New("item not found")
 }
 
 func (b *Basket) Clear() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
 	b.Items = []BasketItem{}
 	b.TotalPrice = decimal.NewFromInt(0)
 }
 
 func (b *Basket) Complete() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
 	now := time.Now()
 	b.CompleteDate = &now
 }
