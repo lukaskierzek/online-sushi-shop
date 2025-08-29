@@ -4,7 +4,7 @@
 // - protoc             v6.31.1
 // source: catalog.proto
 
-package catalogpb
+package proto_lib
 
 import (
 	context "context"
