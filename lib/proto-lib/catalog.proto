@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package catalog;
-option go_package = "github.com/kamilszymanski707/online-sushi-shop/lib/proto-lib";
+option go_package = "github.com/kamilszymanski707/online-sushi-shop/lib/proto-lib/catalogpb";
 
 message GetProductRequest {
   string id = 1;
