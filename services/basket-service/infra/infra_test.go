@@ -12,11 +12,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/domain"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/gRPC/catalogpb"
 	"github.com/shopspring/decimal"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+
+	catalog_v1 "github.com/kamilszymanski707/proto-lib/catalog.v1"
 )
 
 type InfraTestSuite struct {
@@ -93,7 +94,7 @@ func (suite *InfraTestSuite) TestProductRepository_GetProductDetails_FromGRPC() 
 		Link:     "mocklink",
 		Price:    decimal.NewFromInt(15),
 	}
-	expectedResp := &catalogpb.GetProductResponse{
+	expectedResp := &catalog_v1.GetProductResponse{
 		Name:     expectedDetails.Name,
 		ImageUrl: expectedDetails.ImageURL,
 		Link:     expectedDetails.Link,
@@ -137,7 +138,7 @@ type MockCatalogServiceClient struct {
 	mock.Mock
 }
 
-func (m *MockCatalogServiceClient) GetProduct(ctx context.Context, in *catalogpb.GetProductRequest, opts ...grpc.CallOption) (*catalogpb.GetProductResponse, error) {
+func (m *MockCatalogServiceClient) GetProduct(ctx context.Context, in *catalog_v1.GetProductRequest, opts ...grpc.CallOption) (*catalog_v1.GetProductResponse, error) {
 	args := m.Called(ctx, in)
-	return args.Get(0).(*catalogpb.GetProductResponse), args.Error(1)
+	return args.Get(0).(*catalog_v1.GetProductResponse), args.Error(1)
 }

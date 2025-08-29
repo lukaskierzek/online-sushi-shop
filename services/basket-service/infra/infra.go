@@ -7,9 +7,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/domain"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/gRPC/catalogpb"
 	"github.com/redis/go-redis/v9"
 	"github.com/shopspring/decimal"
+
+	catalog_v1 "github.com/kamilszymanski707/proto-lib/catalog.v1"
 )
 
 const (
@@ -30,7 +31,7 @@ type basketRepositoryImpl struct {
 
 type productRepositoryImpl struct {
 	db *redis.Client
-	cc catalogpb.CatalogServiceClient
+	cc catalog_v1.CatalogServiceClient
 }
 
 type ProductRepository interface {
@@ -41,7 +42,7 @@ func NewBasketRepository(db *redis.Client) BasketRepository {
 	return &basketRepositoryImpl{db: db}
 }
 
-func NewProductRepository(db *redis.Client, cc catalogpb.CatalogServiceClient) ProductRepository {
+func NewProductRepository(db *redis.Client, cc catalog_v1.CatalogServiceClient) ProductRepository {
 	return &productRepositoryImpl{db: db, cc: cc}
 }
 
@@ -101,7 +102,7 @@ func (r *productRepositoryImpl) GetProductDetails(ctx context.Context, id string
 		return &product, nil
 	}
 
-	clntPrdc, err := r.cc.GetProduct(ctx, &catalogpb.GetProductRequest{Id: id})
+	clntPrdc, err := r.cc.GetProduct(ctx, &catalog_v1.GetProductRequest{Id: id})
 	if err != nil {
 		return nil, err
 	}

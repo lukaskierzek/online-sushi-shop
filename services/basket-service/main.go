@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/app"
 	_ "github.com/kamilszymanski707/online-sushi-shop/basket-service/docs"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/gRPC/catalogpb"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/handlers"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/infra"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/middlewares"
@@ -16,6 +15,8 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	catalog_v1 "github.com/kamilszymanski707/proto-lib/catalog.v1"
 )
 
 // @title Online Sushi Shop Basket Service API
@@ -47,7 +48,7 @@ func main() {
 	defer db.Close()
 	defer conn.Close()
 
-	csc := catalogpb.NewCatalogServiceClient(conn)
+	csc := catalog_v1.NewCatalogServiceClient(conn)
 
 	br := infra.NewBasketRepository(db)
 	pr := infra.NewProductRepository(db, csc)

@@ -13,21 +13,22 @@ import (
 	"github.com/google/uuid"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/app"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/domain"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/gRPC/catalogpb"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/infra"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
+
+	catalog_v1 "github.com/kamilszymanski707/proto-lib/catalog.v1"
 )
 
 type MockCatalogServiceClient struct {
 	mock.Mock
 }
 
-func (m *MockCatalogServiceClient) GetProduct(ctx context.Context, in *catalogpb.GetProductRequest, opts ...grpc.CallOption) (*catalogpb.GetProductResponse, error) {
+func (m *MockCatalogServiceClient) GetProduct(ctx context.Context, in *catalog_v1.GetProductRequest, opts ...grpc.CallOption) (*catalog_v1.GetProductResponse, error) {
 	args := m.Called(ctx, in)
-	return args.Get(0).(*catalogpb.GetProductResponse), args.Error(1)
+	return args.Get(0).(*catalog_v1.GetProductResponse), args.Error(1)
 }
 
 type HandlerIntegrationSuite struct {
@@ -144,7 +145,7 @@ func (suite *HandlerIntegrationSuite) TestClear() {
 }
 
 func (suite *HandlerIntegrationSuite) TestAddItem() {
-	suite.gRPC.On("GetProduct", mock.Anything, mock.Anything).Return(&catalogpb.GetProductResponse{
+	suite.gRPC.On("GetProduct", mock.Anything, mock.Anything).Return(&catalog_v1.GetProductResponse{
 		Name:     "Sushi",
 		ImageUrl: "img.jpg",
 		Link:     "link",
