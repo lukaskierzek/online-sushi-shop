@@ -11,6 +11,12 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+const (
+	pricesPrefix  = "products:prices::"
+	detailsPrefix = "products:details::"
+	defaultTtl    = 3600
+)
+
 type CatalogRepository struct {
 	db *redis.Client
 	p  *utils.ApplicationProperties
@@ -21,7 +27,7 @@ func NewCatalogRepository(db *redis.Client, p *utils.ApplicationProperties) *Cat
 }
 
 func (cr *CatalogRepository) GetProductPrice(id string, ctx context.Context) (*decimal.Decimal, error) {
-	return utils.FromRedis[decimal.Decimal](cr.db.Get(ctx, "products:prices::"+id))
+	return utils.FromRedis[decimal.Decimal](cr.db.Get(ctx, pricesPrefix+id))
 }
 
 func (r *CatalogRepository) SaveProductPrice(id string, price decimal.Decimal, ctx context.Context) error {
@@ -29,11 +35,11 @@ func (r *CatalogRepository) SaveProductPrice(id string, price decimal.Decimal, c
 	if err != nil {
 		return err
 	}
-	return r.db.SetEx(ctx, "products:prices::"+id, data, time.Duration(7200)*time.Second).Err()
+	return r.db.SetEx(ctx, pricesPrefix+id, data, time.Duration(defaultTtl)*time.Second).Err()
 }
 
 func (cr *CatalogRepository) GetProduct(id string, ctx context.Context) (*models.ProductDetails, error) {
-	return utils.FromRedis[models.ProductDetails](cr.db.Get(ctx, "products:details::"+id))
+	return utils.FromRedis[models.ProductDetails](cr.db.Get(ctx, detailsPrefix+id))
 }
 
 func (r *CatalogRepository) SaveProduct(id string, details models.ProductDetails, ctx context.Context) error {
@@ -41,5 +47,5 @@ func (r *CatalogRepository) SaveProduct(id string, details models.ProductDetails
 	if err != nil {
 		return err
 	}
-	return r.db.SetEx(ctx, "products:details::"+id, data, time.Duration(7200)*time.Second).Err()
+	return r.db.SetEx(ctx, detailsPrefix+id, data, time.Duration(defaultTtl)*time.Second).Err()
 }

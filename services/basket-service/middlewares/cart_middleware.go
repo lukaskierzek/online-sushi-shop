@@ -1,22 +1,16 @@
 package middlewares
 
 import (
-	"context"
 	"errors"
 	"log/slog"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/repositories"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/utils"
 	"github.com/redis/go-redis/v9"
-	"github.com/shopspring/decimal"
 )
-
-const cart_id = "cart_id"
 
 type Middleware struct {
 	r      *repositories.CartRepository
@@ -59,7 +53,11 @@ func (m *Middleware) CartHandlerFunc() gin.HandlerFunc {
 			return
 		}
 
-		cart, err := m.loadOrMergeCart(cartID, userID, c)
+		cart, err := m.r.GetCart(repositories.GetCartQuery{
+			ID:      cartID,
+			OwnerID: userID,
+		}, c)
+
 		if err != nil && err != redis.Nil {
 			m.logger.Error(err.Error())
 			c.AbortWithError(500, errors.New("an internal server error occurred"))
@@ -72,8 +70,6 @@ func (m *Middleware) CartHandlerFunc() gin.HandlerFunc {
 			return
 		}
 
-		m.updateCartIDCookieIfNeeded(cart, userID, host, c)
-
 		c.Set("cart", cart)
 
 		c.Next()
@@ -81,14 +77,14 @@ func (m *Middleware) CartHandlerFunc() gin.HandlerFunc {
 }
 
 func (m *Middleware) ensureCartIDCookie(host string, c *gin.Context) (string, error) {
-	cartID, err := c.Cookie(cart_id)
+	cartID, err := c.Cookie("cart_id")
 	if err != nil || cartID == "" {
-		newCart, err := m.createNewCart(c)
+		newCart, err := m.r.CreateEmptyCart(c)
 		if err != nil {
 			return "", err
 		}
 		cartID = newCart.ID
-		c.SetCookie(cart_id, cartID, int(m.p.CartIDCookieTtl.Seconds()), "/", host, false, true)
+		c.SetCookie("cart_id", cartID, int(m.p.CartIDCookieTtl.Seconds()), "/", host, false, true)
 	}
 	return cartID, nil
 }
@@ -112,28 +108,4 @@ func (m *Middleware) extractUserID(c *gin.Context) (string, error) {
 		}
 	}
 	return "", nil
-}
-
-func (m *Middleware) loadOrMergeCart(cartID, userID string, ctx context.Context) (*models.Cart, error) {
-	return m.r.GetCart(repositories.GetCartQuery{
-		ID:      cartID,
-		OwnerID: userID,
-	}, ctx)
-}
-
-func (m *Middleware) updateCartIDCookieIfNeeded(cart *models.Cart, userID string, host string, c *gin.Context) {
-	if userID != "" && cart.OwnerID == userID && cart.ID != userID {
-		cart.ID = userID
-		c.SetCookie(cart_id, userID, int(m.p.CartIDCookieTtl.Seconds()), "/", host, false, true)
-	}
-}
-
-func (m *Middleware) createNewCart(ctx context.Context) (*models.Cart, error) {
-	newCart := models.Cart{
-		ID:         uuid.New().String(),
-		OwnerID:    "",
-		CartItems:  []models.CartItem{},
-		TotalPrice: decimal.NewFromInt(0),
-	}
-	return m.r.SaveCart(newCart, ctx)
 }

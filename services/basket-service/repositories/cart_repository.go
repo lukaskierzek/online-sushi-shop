@@ -4,10 +4,15 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/google/uuid"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/models"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/utils"
 	"github.com/redis/go-redis/v9"
 	"github.com/shopspring/decimal"
+)
+
+const (
+	cartsPrefix = "carts::"
 )
 
 type cartEntity struct {
@@ -42,12 +47,22 @@ func (r *CartRepository) SaveCart(cart models.Cart, ctx context.Context) (*model
 		return nil, err
 	}
 
-	err = r.db.SetEx(ctx, "carts::"+cart.ID, data, r.p.CartIDCookieTtl).Err()
+	err = r.db.SetEx(ctx, cartsPrefix+cart.ID, data, r.p.CartIDCookieTtl).Err()
 	if err != nil {
 		return nil, err
 	}
 
 	return &cart, nil
+}
+
+func (r *CartRepository) CreateEmptyCart(ctx context.Context) (*models.Cart, error) {
+	newCart := models.Cart{
+		ID:         uuid.New().String(),
+		OwnerID:    "",
+		CartItems:  []models.CartItem{},
+		TotalPrice: decimal.NewFromInt(0),
+	}
+	return r.SaveCart(newCart, ctx)
 }
 
 type GetCartQuery struct {
@@ -80,7 +95,7 @@ func (r *CartRepository) GetCart(query GetCartQuery, ctx context.Context) (*mode
 }
 
 func (r *CartRepository) loadCartByID(id string, ctx context.Context) (*models.Cart, error) {
-	return utils.FromRedis[models.Cart](r.db.Get(ctx, "carts::"+id))
+	return utils.FromRedis[models.Cart](r.db.Get(ctx, cartsPrefix+id))
 }
 
 func (r *CartRepository) saveCart(id string, cart models.Cart, ctx context.Context) error {
@@ -89,11 +104,11 @@ func (r *CartRepository) saveCart(id string, cart models.Cart, ctx context.Conte
 		return err
 	}
 
-	return r.db.SetEx(ctx, "carts::"+id, data, r.p.CartIDCookieTtl).Err()
+	return r.db.SetEx(ctx, cartsPrefix+id, data, r.p.CartIDCookieTtl).Err()
 }
 
 func (r *CartRepository) deleteCart(ctx context.Context, id string) error {
-	return r.db.Del(ctx, "carts::"+id).Err()
+	return r.db.Del(ctx, cartsPrefix+id).Err()
 }
 
 func (r *CartRepository) mergeAndSaveCarts(userCart, guestCart models.Cart, ownerID string, ctx context.Context) (*models.Cart, error) {
