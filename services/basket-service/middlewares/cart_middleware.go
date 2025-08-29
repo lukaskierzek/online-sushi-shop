@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -25,20 +26,23 @@ func (m *CartMiddleware) CartHandlerFunc() gin.HandlerFunc {
 
 		cartID, err := m.ensureCartIDCookie(host, c)
 		if err != nil {
-			c.AbortWithStatus(500)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create or retrieve cart ID"})
+			c.Abort()
 			return
 		}
 
 		cart, err := m.br.GetBasketByID(c, cartID)
 		if err != nil && err != redis.Nil {
-			c.AbortWithStatus(500)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not retrieve basket"})
+			c.Abort()
 			return
 		}
 
-		if cart.ID == "" {
+		if cart == nil || cart.ID == "" {
 			newCart, err := m.br.CreateEmptyBasket(c)
 			if err != nil {
-				c.AbortWithStatus(500)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create new basket"})
+				c.Abort()
 				return
 			}
 			cart = newCart

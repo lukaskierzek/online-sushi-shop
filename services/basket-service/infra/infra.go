@@ -55,7 +55,11 @@ func (r *basketRepositoryImpl) SaveBasket(ctx context.Context, basket domain.Bas
 
 func (r *basketRepositoryImpl) GetBasketByID(ctx context.Context, id string) (*domain.Basket, error) {
 	val, err := r.db.Get(ctx, basketPrefix+id).Result()
-	if err != nil && err != redis.Nil {
+	if err == redis.Nil {
+		return nil, nil
+	}
+
+	if err != nil {
 		return nil, err
 	}
 
@@ -114,7 +118,12 @@ func (r *productRepositoryImpl) GetProductDetails(ctx context.Context, id string
 		Price:    price,
 	}
 
-	err = r.db.SetEx(ctx, productPrefix+id, product, time.Hour*12).Err()
+	data, err := json.Marshal(product)
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.db.SetEx(ctx, productPrefix+id, data, time.Hour*12).Err()
 	if err != nil && err != redis.Nil {
 		return nil, err
 	}

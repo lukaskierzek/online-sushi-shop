@@ -1,0 +1,209 @@
+basePath: /api/v1
+definitions:
+  domain.Basket:
+    properties:
+      completeDate:
+        type: string
+      id:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/domain.BasketItem'
+        type: array
+      totalPrice:
+        type: number
+    type: object
+  domain.BasketItem:
+    properties:
+      productDetails:
+        $ref: '#/definitions/domain.BasketItemDetails'
+      productID:
+        type: string
+      quantity:
+        format: int32
+        type: integer
+    type: object
+  domain.BasketItemDetails:
+    properties:
+      imageURL:
+        type: string
+      link:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  handlers.addItemRequest:
+    properties:
+      product_id:
+        type: string
+      quantity:
+        type: integer
+    type: object
+  handlers.changeQuantityRequest:
+    properties:
+      quantity:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@sushi-shop.com
+    name: API Support
+  description: API for managing baskets in the online sushi shop.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Online Sushi Shop Basket Service API
+  version: "1.0"
+paths:
+  /basket/:
+    get:
+      description: Get the current basket
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Basket'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get basket
+      tags:
+      - basket
+  /basket/clear:
+    delete:
+      description: Remove all items from the user's basket
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Basket'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Clear basket
+      tags:
+      - basket
+  /basket/items:
+    post:
+      consumes:
+      - application/json
+      description: Add a product to the user's basket
+      parameters:
+      - description: Add Item
+        in: body
+        name: addItemRequest
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.addItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Basket'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add item to basket
+      tags:
+      - basket
+  /basket/items/{productID}:
+    delete:
+      description: Remove a product from the user's basket
+      parameters:
+      - description: Product ID
+        in: path
+        name: productID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Basket'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Remove item from basket
+      tags:
+      - basket
+    put:
+      consumes:
+      - application/json
+      description: Change the quantity of a product in the user's basket
+      parameters:
+      - description: Product ID
+        in: path
+        name: productID
+        required: true
+        type: string
+      - description: Change quantity request
+        in: body
+        name: changeQuantityRequest
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.changeQuantityRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Basket'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Change item quantity
+      tags:
+      - basket
+swagger: "2.0"

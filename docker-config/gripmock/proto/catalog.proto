@@ -3,25 +3,17 @@ syntax = "proto3";
 package catalog;
 option go_package = "/catalogpb";
 
-message GetProductPriceRequest {
-  string id = 1;
-}
-
 message GetProductRequest {
   string id = 1;
-}
-
-message GetProductPriceResponse {
-  string price = 1;
 }
 
 message GetProductResponse {
   string name = 1;
   string link = 2;
   string image_url = 3;
+  string price = 4;
 }
 
 service CatalogService {
-  rpc GetProductPrice(GetProductPriceRequest) returns (GetProductPriceResponse);
   rpc GetProduct(GetProductRequest) returns (GetProductResponse);
 }

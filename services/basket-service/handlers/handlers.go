@@ -12,22 +12,58 @@ type BasketHandler struct {
 	service *app.BasketService
 }
 
+// addItemRequest represents the request to add an item to the basket.
+// swagger:model addItemRequest
+type addItemRequest struct {
+	ProductID string `json:"product_id"`
+	Quantity  int32  `json:"quantity"`
+}
+
+// changeQuantityRequest represents the request to change the quantity of an item in the basket.
+// swagger:model changeQuantityRequest
+type changeQuantityRequest struct {
+	Quantity int32 `json:"quantity"`
+}
+
 func NewBasketHandler(service *app.BasketService) *BasketHandler {
 	return &BasketHandler{service: service}
 }
 
+// @Summary Get basket
+// @Description Get the current basket
+// @Tags basket
+// @Produce json
+// @Success 200 {object} domain.Basket
+// @Failure 400 {object} map[string]string
+// @Router /basket/ [get]
 func (h *BasketHandler) GetBasket(c *gin.Context) {
-	basket := c.MustGet("cart").(domain.Basket)
-	c.JSON(http.StatusOK, basket)
+	b := h.resolveBasket(c)
+	if b == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Basket not found in context"})
+		return
+	}
+
+	c.JSON(http.StatusOK, b)
 }
 
+// @Summary Add item to basket
+// @Description Add a product to the user's basket
+// @Tags basket
+// @Accept json
+// @Produce json
+// @Param addItemRequest body addItemRequest true "Add Item"
+// @Success 200 {object} domain.Basket
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /basket/items [post]
 func (h *BasketHandler) AddItem(c *gin.Context) {
-	b := c.MustGet("cart").(domain.Basket)
-
-	var req struct {
-		ProductID string `json:"product_id"`
-		Quantity  int32  `json:"quantity"`
+	b := h.resolveBasket(c)
+	if b == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Basket not found in context"})
+		return
 	}
+
+	var req addItemRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -39,7 +75,7 @@ func (h *BasketHandler) AddItem(c *gin.Context) {
 		Quantity:  req.Quantity,
 	}
 
-	basket, err := h.service.AddItem(c, b, item)
+	basket, err := h.service.AddItem(c, *b, item)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -48,11 +84,25 @@ func (h *BasketHandler) AddItem(c *gin.Context) {
 	c.JSON(http.StatusOK, basket)
 }
 
+// @Summary Remove item from basket
+// @Description Remove a product from the user's basket
+// @Tags basket
+// @Produce json
+// @Param productID path string true "Product ID"
+// @Success 200 {object} domain.Basket
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /basket/items/{productID} [delete]
 func (h *BasketHandler) RemoveItem(c *gin.Context) {
-	b := c.MustGet("cart").(domain.Basket)
+	b := h.resolveBasket(c)
+	if b == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Basket not found in context"})
+		return
+	}
+
 	productID := c.Param("productID")
 
-	basket, err := h.service.RemoveItem(c, b, productID)
+	basket, err := h.service.RemoveItem(c, *b, productID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -61,24 +111,38 @@ func (h *BasketHandler) RemoveItem(c *gin.Context) {
 	c.JSON(http.StatusOK, basket)
 }
 
+// @Summary Change item quantity
+// @Description Change the quantity of a product in the user's basket
+// @Tags basket
+// @Accept json
+// @Produce json
+// @Param productID path string true "Product ID"
+// @Param changeQuantityRequest body changeQuantityRequest true "Change quantity request"
+// @Success 200 {object} domain.Basket
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /basket/items/{productID} [put]
 func (h *BasketHandler) ChangeQuantity(c *gin.Context) {
-	b := c.MustGet("cart").(domain.Basket)
+	b := h.resolveBasket(c)
+	if b == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Basket not found in context"})
+		return
+	}
+
 	productID := c.Param("productID")
 	if productID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No product ID in the request"})
 		return
 	}
 
-	var req struct {
-		Quantity int32 `json:"quantity"`
-	}
+	var req changeQuantityRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	basket, err := h.service.ChangeQuantity(c, b, productID, req.Quantity)
+	basket, err := h.service.ChangeQuantity(c, *b, productID, req.Quantity)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -87,14 +151,43 @@ func (h *BasketHandler) ChangeQuantity(c *gin.Context) {
 	c.JSON(http.StatusOK, basket)
 }
 
+// @Summary Clear basket
+// @Description Remove all items from the user's basket
+// @Tags basket
+// @Produce json
+// @Success 200 {object} domain.Basket
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /basket/clear [delete]
 func (h *BasketHandler) Clear(c *gin.Context) {
-	b := c.MustGet("cart").(domain.Basket)
+	b := h.resolveBasket(c)
+	if b == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Basket not found in context"})
+		return
+	}
 
-	basket, err := h.service.Clear(c, b)
+	basket, err := h.service.Clear(c, *b)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, basket)
+}
+
+func (h *BasketHandler) resolveBasket(c *gin.Context) *domain.Basket {
+	basketVal, exists := c.Get("cart")
+	if !exists || basketVal == nil {
+		return nil
+	}
+
+	if basket, ok := basketVal.(*domain.Basket); ok {
+		return basket
+	}
+
+	if basket, ok := basketVal.(domain.Basket); ok {
+		return &basket
+	}
+
+	return nil
 }
