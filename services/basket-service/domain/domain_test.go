@@ -24,8 +24,10 @@ func (suite *BasketTestSuite) TestAddItem() {
 		ProductID: "prod1",
 		Quantity:  2,
 		ProductDetails: BasketItemDetails{
-			Name:  "Sushi",
-			Price: decimal.NewFromInt(10),
+			Name:     "Sushi",
+			Price:    decimal.NewFromInt(10),
+			ImageURL: "img.jpg",
+			Link:     "link",
 		},
 	}
 	err := suite.basket.AddItem(item)
@@ -60,8 +62,10 @@ func (suite *BasketTestSuite) TestAddItemInvalidQuantity() {
 		ProductID: "prod2",
 		Quantity:  0,
 		ProductDetails: BasketItemDetails{
-			Name:  "Sushi",
-			Price: decimal.NewFromInt(10),
+			Name:     "Sushi",
+			Price:    decimal.NewFromInt(10),
+			ImageURL: "img.jpg",
+			Link:     "link",
 		},
 	}
 	err := suite.basket.AddItem(item)

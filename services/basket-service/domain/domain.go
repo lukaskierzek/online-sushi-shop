@@ -48,11 +48,11 @@ func (b *Basket) AddItem(item BasketItem) error {
 	return nil
 }
 
-func (b *Basket) AddItemDetails(id string, details BasketItemDetails) error {
+func (b *Basket) AddItemDetails(itemID string, details BasketItemDetails) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	if details.Price == decimal.Zero {
+	if details.Price.LessThanOrEqual(decimal.Zero) {
 		return errors.New("product price cannot be nil")
 	}
 
@@ -69,7 +69,7 @@ func (b *Basket) AddItemDetails(id string, details BasketItemDetails) error {
 	}
 
 	for i := range b.Items {
-		if b.Items[i].ProductID == id {
+		if b.Items[i].ProductID == itemID {
 			b.Items[i].ProductDetails = details
 			b.recalculateTotal()
 			return nil

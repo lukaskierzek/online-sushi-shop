@@ -61,8 +61,8 @@ func (suite *BasketServiceTestSuite) SetupTest() {
 
 func (suite *BasketServiceTestSuite) TestAddItem_Success() {
 	ctx := context.Background()
-	item := domain.BasketItem{ProductID: "prod1", Quantity: 2}
-	details := &domain.BasketItemDetails{Name: "Sushi", Price: decimal.NewFromInt(10)}
+	details := &domain.BasketItemDetails{Name: "Sushi", Price: decimal.NewFromInt(10), ImageURL: "img.jpg", Link: "link"}
+	item := domain.BasketItem{ProductID: "prod1", Quantity: 2, ProductDetails: *details}
 
 	suite.prepo.On("GetProductDetails", ctx, "prod1").Return(details, nil)
 	suite.brepo.On("SaveBasket", ctx, mock.AnythingOfType("*domain.Basket")).Return(nil)

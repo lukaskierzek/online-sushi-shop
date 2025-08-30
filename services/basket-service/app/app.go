@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/domain"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/infra"
@@ -17,16 +18,22 @@ func NewBasketService(brepo infra.BasketRepository, prepo infra.ProductRepositor
 }
 
 func (s *BasketService) AddItem(ctx context.Context, b *domain.Basket, item domain.BasketItem) (*domain.Basket, error) {
-	details, err := s.prepo.GetProductDetails(ctx, item.ProductID)
+	pid := item.ProductID
+
+	details, err := s.prepo.GetProductDetails(ctx, pid)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := b.AddItemDetails(item.ProductID, *details); err != nil {
-		return nil, err
+	if details == nil {
+		return nil, fmt.Errorf("product %s not found", pid)
 	}
 
 	if err := b.AddItem(item); err != nil {
+		return nil, err
+	}
+
+	if err := b.AddItemDetails(pid, *details); err != nil {
 		return nil, err
 	}
 
