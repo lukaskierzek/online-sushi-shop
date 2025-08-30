@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/domain"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/infra"
@@ -23,11 +22,9 @@ func (s *BasketService) AddItem(ctx context.Context, b *domain.Basket, item doma
 		return nil, err
 	}
 
-	if details == nil {
-		return nil, fmt.Errorf("product details not found for productID: %s", item.ProductID)
+	if err := b.AddItemDetails(item.ProductID, *details); err != nil {
+		return nil, err
 	}
-
-	item.ProductDetails = *details
 
 	if err := b.AddItem(item); err != nil {
 		return nil, err

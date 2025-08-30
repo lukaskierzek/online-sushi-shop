@@ -48,6 +48,37 @@ func (b *Basket) AddItem(item BasketItem) error {
 	return nil
 }
 
+func (b *Basket) AddItemDetails(id string, details BasketItemDetails) error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	if details.Price == decimal.Zero {
+		return errors.New("product price cannot be nil")
+	}
+
+	if details.Name == "" {
+		return errors.New("product name cannot be empty")
+	}
+
+	if details.ImageURL == "" {
+		return errors.New("product image URL cannot be empty")
+	}
+
+	if details.Link == "" {
+		return errors.New("product link cannot be empty")
+	}
+
+	for i := range b.Items {
+		if b.Items[i].ProductID == id {
+			b.Items[i].ProductDetails = details
+			b.recalculateTotal()
+			return nil
+		}
+	}
+
+	return errors.New("item not found in basket")
+}
+
 func (b *Basket) RemoveItem(productID string) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()

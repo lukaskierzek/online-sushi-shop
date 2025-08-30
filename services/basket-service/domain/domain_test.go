@@ -34,6 +34,27 @@ func (suite *BasketTestSuite) TestAddItem() {
 	assert.Equal(suite.T(), decimal.NewFromInt(20), suite.basket.TotalPrice)
 }
 
+func (suite *BasketTestSuite) TestAddItemDetails() {
+	item := BasketItem{
+		ProductID: "prod1",
+		Quantity:  2,
+	}
+
+	err := suite.basket.AddItem(item)
+	assert.NoError(suite.T(), err)
+
+	err = suite.basket.AddItemDetails("prod1", BasketItemDetails{
+		ImageURL: "img.jpg",
+		Link:     "link",
+		Name:     "Sushi",
+		Price:    decimal.NewFromInt(10),
+	})
+
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), 1, len(suite.basket.Items))
+	assert.Equal(suite.T(), decimal.NewFromInt(20), suite.basket.TotalPrice)
+}
+
 func (suite *BasketTestSuite) TestAddItemInvalidQuantity() {
 	item := BasketItem{
 		ProductID: "prod2",
