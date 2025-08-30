@@ -47,13 +47,12 @@ services:
   basket-service:
     restart: always
     environment:
-      SERVER_PORT: 8080
-      JWT_SECRET: a-string-secret-at-least-256-bits-long
-      DB_URL: redis:6379
-      DB_INDEX: 0
-      CATALOG_GRPC_TARGET: gripmock:4770
-      CART_ID_COOKIE_TTL: 604800
       CONTAINER: true
+      APP_PORT: :8080
+      COOKIE_CART_ID_TTL: 604800
+      REDIS_ADDRESS: redis:6379
+      REDIS_DB: 0
+      GRPC_CATALOG_TARGET: gripmock:4770
     build:
       context: ../services/basket-service
     depends_on:

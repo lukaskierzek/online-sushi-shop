@@ -32,7 +32,7 @@ func (suite *InfraTestSuite) SetupSuite() {
 	suite.client = redis.NewClient(&redis.Options{
 		Addr: suite.server.Addr(),
 	})
-	suite.repo = NewBasketRepository(suite.client)
+	suite.repo = NewBasketRepository(suite.client, 3600)
 }
 
 func (suite *InfraTestSuite) TearDownSuite() {

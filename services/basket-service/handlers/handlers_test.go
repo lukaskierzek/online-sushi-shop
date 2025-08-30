@@ -48,7 +48,7 @@ func (suite *HandlerIntegrationSuite) SetupSuite() {
 	suite.server = miniredis.RunT(suite.T())
 	suite.client = redis.NewClient(&redis.Options{Addr: suite.server.Addr()})
 	suite.gRPC = new(MockCatalogServiceClient)
-	suite.brepo = infra.NewBasketRepository(suite.client)
+	suite.brepo = infra.NewBasketRepository(suite.client, 3600)
 	suite.prepo = infra.NewProductRepository(suite.client, suite.gRPC)
 	suite.svc = app.NewBasketService(suite.brepo, suite.prepo)
 	suite.router = gin.New()

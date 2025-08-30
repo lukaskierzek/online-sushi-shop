@@ -16,6 +16,7 @@ import (
 const (
 	basketPrefix  = "basket::"
 	productPrefix = "product::"
+	defaultTTL    = 1800 // in seconds
 )
 
 type BasketRepository interface {
@@ -26,7 +27,8 @@ type BasketRepository interface {
 }
 
 type basketRepositoryImpl struct {
-	db *redis.Client
+	db        *redis.Client
+	cookieTTL int
 }
 
 type productRepositoryImpl struct {
@@ -38,8 +40,8 @@ type ProductRepository interface {
 	GetProductDetails(ctx context.Context, id string) (*domain.BasketItemDetails, error)
 }
 
-func NewBasketRepository(db *redis.Client) BasketRepository {
-	return &basketRepositoryImpl{db: db}
+func NewBasketRepository(db *redis.Client, cookieTTL int) BasketRepository {
+	return &basketRepositoryImpl{db: db, cookieTTL: cookieTTL}
 }
 
 func NewProductRepository(db *redis.Client, cc catalog_v1.CatalogServiceClient) ProductRepository {
@@ -51,7 +53,7 @@ func (r *basketRepositoryImpl) SaveBasket(ctx context.Context, basket *domain.Ba
 	if err != nil {
 		return err
 	}
-	return r.db.Set(ctx, basketPrefix+basket.ID, data, time.Hour*24).Err()
+	return r.db.SetEx(ctx, basketPrefix+basket.ID, data, time.Duration(r.cookieTTL)*time.Second).Err()
 }
 
 func (r *basketRepositoryImpl) GetBasketByID(ctx context.Context, id string) (*domain.Basket, error) {
@@ -124,7 +126,7 @@ func (r *productRepositoryImpl) GetProductDetails(ctx context.Context, id string
 		return nil, err
 	}
 
-	err = r.db.SetEx(ctx, productPrefix+id, data, time.Hour*12).Err()
+	err = r.db.SetEx(ctx, productPrefix+id, data, defaultTTL*time.Second).Err()
 	if err != nil && err != redis.Nil {
 		return nil, err
 	}

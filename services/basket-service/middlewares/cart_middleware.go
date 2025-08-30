@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -9,12 +10,17 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+var (
+	err_message = gin.H{"error": "An internal error occurred"}
+)
+
 type CartMiddleware struct {
-	br infra.BasketRepository
+	br        infra.BasketRepository
+	cookieTTL int
 }
 
-func NewCartMiddleware(br infra.BasketRepository) *CartMiddleware {
-	return &CartMiddleware{br: br}
+func NewCartMiddleware(br infra.BasketRepository, cookieTTL int) *CartMiddleware {
+	return &CartMiddleware{br: br, cookieTTL: cookieTTL}
 }
 
 func (m *CartMiddleware) CartHandlerFunc() gin.HandlerFunc {
@@ -24,16 +30,25 @@ func (m *CartMiddleware) CartHandlerFunc() gin.HandlerFunc {
 			host = strings.Split(host, ":")[0]
 		}
 
+		if host == "" {
+			slog.Error("Could not retrieve host from request")
+			c.JSON(http.StatusInternalServerError, err_message)
+			c.Abort()
+			return
+		}
+
 		cartID, err := m.ensureCartIDCookie(host, c)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create or retrieve cart ID"})
+			slog.Error("Could not ensure cart ID cookie", slog.String("error", err.Error()))
+			c.JSON(http.StatusInternalServerError, err_message)
 			c.Abort()
 			return
 		}
 
 		cart, err := m.br.GetBasketByID(c, cartID)
 		if err != nil && err != redis.Nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not retrieve basket"})
+			slog.Error("Could not retrieve basket", slog.String("error", err.Error()))
+			c.JSON(http.StatusInternalServerError, err_message)
 			c.Abort()
 			return
 		}
@@ -41,7 +56,8 @@ func (m *CartMiddleware) CartHandlerFunc() gin.HandlerFunc {
 		if cart == nil || cart.ID == "" {
 			newCart, err := m.br.CreateEmptyBasket(c)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create new basket"})
+				slog.Error("Could not create new basket", slog.String("error", err.Error()))
+				c.JSON(http.StatusInternalServerError, err_message)
 				c.Abort()
 				return
 			}
@@ -61,7 +77,7 @@ func (m *CartMiddleware) ensureCartIDCookie(host string, c *gin.Context) (string
 			return "", err
 		}
 		cartID = newCart.ID
-		c.SetCookie("cart_id", cartID, 604800, "/", host, false, true)
+		c.SetCookie("cart_id", cartID, m.cookieTTL, "/", host, false, true)
 	}
 	return cartID, nil
 }

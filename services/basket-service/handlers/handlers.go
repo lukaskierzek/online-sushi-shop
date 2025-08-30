@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -39,6 +40,7 @@ func NewBasketHandler(service *app.BasketService) *BasketHandler {
 func (h *BasketHandler) GetBasket(c *gin.Context) {
 	b := h.resolveBasket(c)
 	if b == nil {
+		slog.Error("Basket not found in context")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Basket not found in context"})
 		return
 	}
@@ -59,6 +61,7 @@ func (h *BasketHandler) GetBasket(c *gin.Context) {
 func (h *BasketHandler) AddItem(c *gin.Context) {
 	b := h.resolveBasket(c)
 	if b == nil {
+		slog.Error("Basket not found in context")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Basket not found in context"})
 		return
 	}
@@ -66,7 +69,8 @@ func (h *BasketHandler) AddItem(c *gin.Context) {
 	var req addItemRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		slog.Error("Invalid request body", slog.String("error", err.Error()))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
 
@@ -77,7 +81,8 @@ func (h *BasketHandler) AddItem(c *gin.Context) {
 
 	basket, err := h.service.AddItem(c, b, item)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		slog.Error("Failed to add item to basket", slog.String("error", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred while adding the item to the basket"})
 		return
 	}
 
@@ -96,6 +101,7 @@ func (h *BasketHandler) AddItem(c *gin.Context) {
 func (h *BasketHandler) RemoveItem(c *gin.Context) {
 	b := h.resolveBasket(c)
 	if b == nil {
+		slog.Error("Basket not found in context")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Basket not found in context"})
 		return
 	}
@@ -104,7 +110,8 @@ func (h *BasketHandler) RemoveItem(c *gin.Context) {
 
 	basket, err := h.service.RemoveItem(c, b, productID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		slog.Error("Failed to remove item from basket", slog.String("error", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred while removing the item from the basket"})
 		return
 	}
 
@@ -125,12 +132,14 @@ func (h *BasketHandler) RemoveItem(c *gin.Context) {
 func (h *BasketHandler) ChangeQuantity(c *gin.Context) {
 	b := h.resolveBasket(c)
 	if b == nil {
+		slog.Error("Basket not found in context")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Basket not found in context"})
 		return
 	}
 
 	productID := c.Param("productID")
 	if productID == "" {
+		slog.Error("No product ID in the request")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No product ID in the request"})
 		return
 	}
@@ -138,13 +147,15 @@ func (h *BasketHandler) ChangeQuantity(c *gin.Context) {
 	var req changeQuantityRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		slog.Error("Invalid request body", slog.String("error", err.Error()))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
 
 	basket, err := h.service.ChangeQuantity(c, b, productID, req.Quantity)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		slog.Error("Failed to change item quantity", slog.String("error", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred while changing item quantity"})
 		return
 	}
 
@@ -162,13 +173,15 @@ func (h *BasketHandler) ChangeQuantity(c *gin.Context) {
 func (h *BasketHandler) Clear(c *gin.Context) {
 	b := h.resolveBasket(c)
 	if b == nil {
+		slog.Error("Basket not found in context")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Basket not found in context"})
 		return
 	}
 
 	basket, err := h.service.Clear(c, b)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		slog.Error("Failed to clear basket", slog.String("error", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred while clearing the basket"})
 		return
 	}
 

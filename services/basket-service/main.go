@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/app"
@@ -10,6 +11,7 @@ import (
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/handlers"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/infra"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/middlewares"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/props"
 	"github.com/redis/go-redis/v9"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -27,22 +29,36 @@ import (
 // @contact.email support@sushi-shop.com
 // @license.name MIT
 // @license.url https://opensource.org/licenses/MIT
-// @host localhost:8080
 // @BasePath /api/v1
 func main() {
+	handler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	})
+
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
+
+	prps, err := props.LoadProps(".")
+	if err != nil {
+		slog.Error("failed to load properties", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
 	db := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
+		Addr:     prps.RedisAddress,
+		Password: prps.RedisPassword,
+		DB:       prps.RedisDB,
 	})
 
 	if err := db.Ping(context.Background()).Err(); err != nil {
-		log.Fatalf("failed to connect to Redis: %v", err)
+		slog.Error("failed to connect to Redis", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
 
-	conn, err := grpc.NewClient("localhost:4770", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(prps.GrpcCatalogTarget, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("failed to connect to catalog service: %v", err)
+		slog.Error("failed to connect to catalog service", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
 
 	defer db.Close()
@@ -50,14 +66,14 @@ func main() {
 
 	csc := catalog_v1.NewCatalogServiceClient(conn)
 
-	br := infra.NewBasketRepository(db)
+	br := infra.NewBasketRepository(db, prps.CookieCartIDTTL)
 	pr := infra.NewProductRepository(db, csc)
 
 	bs := app.NewBasketService(br, pr)
 
 	h := handlers.NewBasketHandler(bs)
 
-	mw := middlewares.NewCartMiddleware(br)
+	mw := middlewares.NewCartMiddleware(br, prps.CookieCartIDTTL)
 
 	r := gin.Default()
 	r.Use(mw.CartHandlerFunc())
@@ -75,7 +91,8 @@ func main() {
 		}
 	}
 
-	if err := r.Run(":8080"); err != nil {
-		log.Fatalf("failed to run server: %v", err)
+	if err := r.Run(prps.AppPort); err != nil {
+		slog.Error("failed to run server", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
 }
