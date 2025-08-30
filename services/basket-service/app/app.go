@@ -52,7 +52,7 @@ func (s *BasketService) RemoveItem(ctx context.Context, b *domain.Basket, produc
 	return b, nil
 }
 
-func (s *BasketService) ChangeQuantity(ctx context.Context, b *domain.Basket, productID string, qty int32) (*domain.Basket, error) {
+func (s *BasketService) ChangeQuantity(ctx context.Context, b *domain.Basket, productID string, qty int) (*domain.Basket, error) {
 	b.ChangeItemQuantity(productID, qty)
 	if err := s.brepo.SaveBasket(ctx, b); err != nil {
 		return nil, err

@@ -99,7 +99,7 @@ func (suite *BasketTestSuite) TestChangeItemQuantity() {
 	_ = suite.basket.AddItem(item)
 	err := suite.basket.ChangeItemQuantity("prod1", 3)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), int32(3), suite.basket.Items[0].Quantity)
+	assert.Equal(suite.T(), 3, suite.basket.Items[0].Quantity)
 	assert.Equal(suite.T(), decimal.NewFromInt(30), suite.basket.TotalPrice)
 }
 

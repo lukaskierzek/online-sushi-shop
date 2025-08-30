@@ -123,7 +123,7 @@ func (suite *HandlerIntegrationSuite) TestChangeQuantity() {
 	suite.Equal(http.StatusOK, w.Code)
 	var resp domain.Basket
 	json.NewDecoder(w.Body).Decode(&resp)
-	suite.Equal(int32(5), resp.Items[0].Quantity)
+	suite.Equal(5, resp.Items[0].Quantity)
 }
 
 func (suite *HandlerIntegrationSuite) TestClear() {

@@ -104,7 +104,7 @@ func (suite *BasketServiceTestSuite) TestChangeQuantity() {
 	basket, err := suite.svc.ChangeQuantity(ctx, suite.basket, "prod1", 3)
 	suite.NoError(err)
 	suite.NotNil(basket)
-	suite.Equal(int32(3), basket.Items[0].Quantity)
+	suite.Equal(3, basket.Items[0].Quantity)
 	suite.brepo.AssertExpectations(suite.T())
 }
 

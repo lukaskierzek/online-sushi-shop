@@ -63,7 +63,7 @@ func (suite *InfraTestSuite) TestSaveAndGetBasket() {
 	suite.NoError(err)
 	suite.NotNil(got)
 	suite.Equal(basket.ID, got.ID)
-	suite.Equal(int32(2), got.Items[0].Quantity)
+	suite.Equal(2, got.Items[0].Quantity)
 }
 
 func (suite *InfraTestSuite) TestGetBasketByID_NotFound() {

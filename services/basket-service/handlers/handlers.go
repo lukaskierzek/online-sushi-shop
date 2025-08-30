@@ -17,13 +17,13 @@ type BasketHandler struct {
 // swagger:model addItemRequest
 type addItemRequest struct {
 	ProductID string `json:"product_id"`
-	Quantity  int32  `json:"quantity"`
+	Quantity  int    `json:"quantity"`
 }
 
 // changeQuantityRequest represents the request to change the quantity of an item in the basket.
 // swagger:model changeQuantityRequest
 type changeQuantityRequest struct {
-	Quantity int32 `json:"quantity"`
+	Quantity int `json:"quantity"`
 }
 
 func NewBasketHandler(service *app.BasketService) *BasketHandler {

@@ -10,7 +10,7 @@ import (
 
 type BasketItem struct {
 	ProductID      string
-	Quantity       int32
+	Quantity       int
 	ProductDetails BasketItemDetails
 }
 
@@ -93,7 +93,7 @@ func (b *Basket) RemoveItem(productID string) error {
 	return errors.New("item not found")
 }
 
-func (b *Basket) ChangeItemQuantity(productID string, qty int32) error {
+func (b *Basket) ChangeItemQuantity(productID string, qty int) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
