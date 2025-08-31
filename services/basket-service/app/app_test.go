@@ -120,17 +120,6 @@ func (suite *BasketServiceTestSuite) TestClear() {
 	suite.brepo.AssertExpectations(suite.T())
 }
 
-func (suite *BasketServiceTestSuite) TestComplete() {
-	ctx := context.Background()
-	suite.brepo.On("SaveBasket", ctx, suite.basket).Return(nil)
-
-	basket, err := suite.svc.Complete(ctx, suite.basket)
-	suite.NoError(err)
-	suite.NotNil(basket)
-	suite.NotNil(basket.CompleteDate)
-	suite.brepo.AssertExpectations(suite.T())
-}
-
 func TestBasketServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(BasketServiceTestSuite))
 }
