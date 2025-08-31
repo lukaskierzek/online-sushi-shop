@@ -75,3 +75,19 @@ func (s *BasketService) Complete(ctx context.Context, b *domain.Basket) (*domain
 	}
 	return b, nil
 }
+
+func (s *BasketService) HandleOrderEvent(ctx context.Context, userID string) error {
+	basket, err := s.brepo.GetBasketByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if basket == nil {
+		return nil
+	}
+
+	basket.Complete()
+	if err := s.brepo.SaveBasket(ctx, basket); err != nil {
+		return err
+	}
+	return nil
+}

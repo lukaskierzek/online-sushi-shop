@@ -9,12 +9,15 @@ import (
 )
 
 type Props struct {
-	AppPort           string
-	CookieCartIDTTL   int // in seconds
-	RedisAddress      string
-	RedisPassword     string
-	RedisDB           int
-	GrpcCatalogTarget string
+	AppPort               string
+	CookieCartIDTTL       int // in seconds
+	RedisAddress          string
+	RedisPassword         string
+	RedisDB               int
+	GrpcCatalogTarget     string
+	KafkaBootstrapServers string
+	KafkaOrderTopic       string
+	KafkaConsumerGroupID  string
 }
 
 func LoadProps(basePath string) (*Props, error) {
@@ -33,12 +36,15 @@ func LoadProps(basePath string) (*Props, error) {
 	}
 
 	return &Props{
-		AppPort:           getEnvStr("APP_PORT", ":8080"),
-		CookieCartIDTTL:   cookieCartIDTTL,
-		RedisAddress:      getEnvStr("REDIS_ADDRESS", "localhost:6379"),
-		RedisPassword:     getEnvStr("REDIS_PASSWORD", ""),
-		RedisDB:           redisDB,
-		GrpcCatalogTarget: getEnvStr("GRPC_CATALOG_TARGET", "localhost:4770"),
+		AppPort:               getEnvStr("APP_PORT", ":8080"),
+		CookieCartIDTTL:       cookieCartIDTTL,
+		RedisAddress:          getEnvStr("REDIS_ADDRESS", "localhost:6379"),
+		RedisPassword:         getEnvStr("REDIS_PASSWORD", ""),
+		RedisDB:               redisDB,
+		GrpcCatalogTarget:     getEnvStr("GRPC_CATALOG_TARGET", "localhost:4770"),
+		KafkaBootstrapServers: getEnvStr("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
+		KafkaOrderTopic:       getEnvStr("KAFKA_TOPIC_ORDERS", "orders"),
+		KafkaConsumerGroupID:  getEnvStr("KAFKA_CONSUMER_GROUP_ID", "basket-service"),
 	}, nil
 }
 
