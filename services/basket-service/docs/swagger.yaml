@@ -1,105 +1,149 @@
-basePath: /api/v1/cart
+basePath: /api/v1
 definitions:
-  handlers.putCartInput:
-    description: PUT cart input
+  domain.Basket:
     properties:
-      product_id:
+      completeDate:
         type: string
-      quantity:
-        type: integer
-    required:
-    - product_id
-    - quantity
-    type: object
-  handlers.putCartRequest:
-    description: PUT cart data
-    properties:
+      id:
+        type: string
       items:
         items:
-          $ref: '#/definitions/handlers.putCartInput'
+          $ref: '#/definitions/domain.BasketItem'
         type: array
-    required:
-    - items
-    type: object
-  models.Cart:
-    description: Shopping cart information
-    properties:
-      cart_items:
-        items:
-          $ref: '#/definitions/models.CartItem'
-        type: array
-      id:
-        type: string
-      owner_id:
-        type: string
-      total_price:
+      totalPrice:
         type: number
     type: object
-  models.CartItem:
-    description: Shopping cart item information
+  domain.BasketItem:
     properties:
-      details:
-        $ref: '#/definitions/models.ProductDetails'
-      id:
-        type: string
-      price:
-        type: number
-      product_id:
+      productDetails:
+        $ref: '#/definitions/domain.BasketItemDetails'
+      productID:
         type: string
       quantity:
+        format: int32
         type: integer
     type: object
-  models.ProductDetails:
-    description: Shopping cart item product details
+  domain.BasketItemDetails:
     properties:
-      image_url:
+      imageURL:
         type: string
       link:
         type: string
       name:
         type: string
+      price:
+        type: number
+    type: object
+  handlers.addItemRequest:
+    properties:
+      product_id:
+        type: string
+      quantity:
+        type: integer
+    type: object
+  handlers.changeQuantityRequest:
+    properties:
+      quantity:
+        type: integer
     type: object
 info:
   contact:
-    email: support@swagger.io
+    email: support@sushi-shop.com
     name: API Support
-    url: http://www.swagger.io/support
-  description: Shopping Cart API.
+  description: API for managing baskets in the online sushi shop.
   license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
+    name: MIT
+    url: https://opensource.org/licenses/MIT
   termsOfService: http://swagger.io/terms/
-  title: Shopping Cart API
+  title: Online Sushi Shop Basket Service API
   version: "1.0"
 paths:
-  /:
+  /basket/:
     get:
-      operationId: get-users-cart
-      parameters:
-      - description: Optional bearer JWT
-        in: header
-        name: Authorization
-        type: string
+      description: Get the current basket
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Cart'
-      summary: get user's cart
-    put:
-      operationId: update-users-cart
+            $ref: '#/definitions/domain.Basket'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get basket
+      tags:
+      - basket
+  /basket/clear:
+    delete:
+      description: Remove all items from the user's basket
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Basket'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Clear basket
+      tags:
+      - basket
+  /basket/items:
+    post:
+      consumes:
+      - application/json
+      description: Add a product to the user's basket
       parameters:
-      - description: put cart data
+      - description: Add Item
         in: body
-        name: data
+        name: addItemRequest
         required: true
         schema:
-          $ref: '#/definitions/handlers.putCartRequest'
-      - description: Optional bearer JWT
-        in: header
-        name: Authorization
+          $ref: '#/definitions/handlers.addItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Basket'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add item to basket
+      tags:
+      - basket
+  /basket/items/{productID}:
+    delete:
+      description: Remove a product from the user's basket
+      parameters:
+      - description: Product ID
+        in: path
+        name: productID
+        required: true
         type: string
       produces:
       - application/json
@@ -107,6 +151,58 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Cart'
-      summary: update user's cart
+            $ref: '#/definitions/domain.Basket'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Remove item from basket
+      tags:
+      - basket
+    put:
+      consumes:
+      - application/json
+      description: Change the quantity of a product in the user's basket
+      parameters:
+      - description: Product ID
+        in: path
+        name: productID
+        required: true
+        type: string
+      - description: Change quantity request
+        in: body
+        name: changeQuantityRequest
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.changeQuantityRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Basket'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Change item quantity
+      tags:
+      - basket
 swagger: "2.0"

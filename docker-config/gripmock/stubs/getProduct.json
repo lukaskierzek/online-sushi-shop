@@ -1,9 +1,17 @@
 {
-    "service":"CatalogService",
-    "method":"GetProductPrice",
-    "output":{
-      "data":{
-        "price": "999.99"
-      }
+  "service": "CatalogService",
+  "method": "GetProduct",
+  "input": {
+    "matches": {
+      "id": ".*"
+    }
+  },
+  "output": {
+    "data": {
+      "price": "999.99",
+      "name": "Product name",
+      "imageUrl": "https://localhost:8080/products/images/aaabbbccc",
+      "link": "https://localhost:8080/products/{id}"
     }
   }
+}

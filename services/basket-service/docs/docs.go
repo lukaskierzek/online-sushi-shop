@@ -12,70 +12,235 @@ const docTemplate = `{
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",
-            "url": "http://www.swagger.io/support",
-            "email": "support@swagger.io"
+            "email": "support@sushi-shop.com"
         },
         "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
         },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/": {
+        "/basket/": {
             "get": {
+                "description": "Get the current basket",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "get user's cart",
-                "operationId": "get-users-cart",
+                "tags": [
+                    "basket"
+                ],
+                "summary": "Get basket",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Basket"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/basket/clear": {
+            "delete": {
+                "description": "Remove all items from the user's basket",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "basket"
+                ],
+                "summary": "Clear basket",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Basket"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/basket/items": {
+            "post": {
+                "description": "Add a product to the user's basket",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "basket"
+                ],
+                "summary": "Add item to basket",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Optional bearer JWT",
-                        "name": "Authorization",
-                        "in": "header"
+                        "description": "Add Item",
+                        "name": "addItemRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.addItemRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Cart"
+                            "$ref": "#/definitions/domain.Basket"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/basket/items/{productID}": {
+            "put": {
+                "description": "Change the quantity of a product in the user's basket",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "basket"
+                ],
+                "summary": "Change item quantity",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "productID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Change quantity request",
+                        "name": "changeQuantityRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.changeQuantityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Basket"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             },
-            "put": {
+            "delete": {
+                "description": "Remove a product from the user's basket",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "update user's cart",
-                "operationId": "update-users-cart",
+                "tags": [
+                    "basket"
+                ],
+                "summary": "Remove item from basket",
                 "parameters": [
                     {
-                        "description": "put cart data",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handlers.putCartRequest"
-                        }
-                    },
-                    {
                         "type": "string",
-                        "description": "Optional bearer JWT",
-                        "name": "Authorization",
-                        "in": "header"
+                        "description": "Product ID",
+                        "name": "productID",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Cart"
+                            "$ref": "#/definitions/domain.Basket"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -83,84 +248,45 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.putCartInput": {
-            "description": "PUT cart input",
+        "domain.Basket": {
             "type": "object",
-            "required": [
-                "product_id",
-                "quantity"
-            ],
             "properties": {
-                "product_id": {
+                "completeDate": {
                     "type": "string"
                 },
-                "quantity": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.putCartRequest": {
-            "description": "PUT cart data",
-            "type": "object",
-            "required": [
-                "items"
-            ],
-            "properties": {
+                "id": {
+                    "type": "string"
+                },
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/handlers.putCartInput"
-                    }
-                }
-            }
-        },
-        "models.Cart": {
-            "description": "Shopping cart information",
-            "type": "object",
-            "properties": {
-                "cart_items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.CartItem"
+                        "$ref": "#/definitions/domain.BasketItem"
                     }
                 },
-                "id": {
-                    "type": "string"
-                },
-                "owner_id": {
-                    "type": "string"
-                },
-                "total_price": {
+                "totalPrice": {
                     "type": "number"
                 }
             }
         },
-        "models.CartItem": {
-            "description": "Shopping cart item information",
+        "domain.BasketItem": {
             "type": "object",
             "properties": {
-                "details": {
-                    "$ref": "#/definitions/models.ProductDetails"
+                "productDetails": {
+                    "$ref": "#/definitions/domain.BasketItemDetails"
                 },
-                "id": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "product_id": {
+                "productID": {
                     "type": "string"
                 },
                 "quantity": {
-                    "type": "integer"
+                    "type": "integer",
+                    "format": "int32"
                 }
             }
         },
-        "models.ProductDetails": {
-            "description": "Shopping cart item product details",
+        "domain.BasketItemDetails": {
             "type": "object",
             "properties": {
-                "image_url": {
+                "imageURL": {
                     "type": "string"
                 },
                 "link": {
@@ -168,6 +294,28 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                }
+            }
+        },
+        "handlers.addItemRequest": {
+            "type": "object",
+            "properties": {
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.changeQuantityRequest": {
+            "type": "object",
+            "properties": {
+                "quantity": {
+                    "type": "integer"
                 }
             }
         }
@@ -178,10 +326,10 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "",
-	BasePath:         "/api/v1/cart",
+	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "Shopping Cart API",
-	Description:      "Shopping Cart API.",
+	Title:            "Online Sushi Shop Basket Service API",
+	Description:      "API for managing baskets in the online sushi shop.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

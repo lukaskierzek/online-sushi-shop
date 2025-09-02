@@ -1,90 +1,182 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"os"
 
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/gin-gonic/gin"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/clients"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/db"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/app"
 	_ "github.com/kamilszymanski707/online-sushi-shop/basket-service/docs"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/handlers"
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/infra"
 	"github.com/kamilszymanski707/online-sushi-shop/basket-service/middlewares"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/repositories"
-	"github.com/kamilszymanski707/online-sushi-shop/basket-service/utils"
-
+	"github.com/kamilszymanski707/online-sushi-shop/basket-service/props"
+	"github.com/redis/go-redis/v9"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
+	catalog_v1 "github.com/kamilszymanski707/proto-lib/catalog.v1"
 )
 
-var (
-	logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
-)
-
-// @title Shopping Cart API
+// @title Online Sushi Shop Basket Service API
 // @version 1.0
-// @description Shopping Cart API.
+// @description API for managing baskets in the online sushi shop.
 // @termsOfService http://swagger.io/terms/
-
 // @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
-
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @BasePath /api/v1/cart
+// @contact.email support@sushi-shop.com
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+// @BasePath /api/v1
 func main() {
-	p, err := utils.ResolveApplicationProperties(".")
-	checkErr(err, "cannot resolve application properties")
+	createLogger()
 
-	csc, conn, err := clients.NewCatalogServiceClient(p)
-	checkErr(err, "cannot resolve CatalogServiceClient")
+	prps := createProps()
 
-	rdb := db.NewRedisClient(p)
+	db := createDB(prps)
+	defer db.Close()
 
-	cr := repositories.NewCatalogRepository(rdb, p)
+	conn := createGRPCConn(prps)
+	defer conn.Close()
 
-	cc, err := clients.NewCatalogClient(csc, conn, cr)
-	checkErr(err, "cannot resolve CatalogClient")
+	cons := createKafkaConsumer(prps)
+	defer cons.Close()
 
-	cartr := repositories.NewCartRepository(rdb, p)
+	csc := catalog_v1.NewCatalogServiceClient(conn)
 
-	router := createRouter(cartr, cc, p, gin.New())
+	br := infra.NewBasketRepository(db, prps.CookieCartIDTTL)
+	pr := infra.NewProductRepository(db, csc)
 
-	defer cc.Close()
-	defer rdb.Close()
+	bs := app.NewBasketService(br, pr)
+	go startKafkaConsumer(cons, bs, prps)
 
-	if err := router.Run(":" + p.ServerPort); err != nil {
-		logger.Error("failed to start server", "error", err)
+	h := handlers.NewBasketHandler(bs)
+
+	mw := middlewares.NewCartMiddleware(br, prps.CookieCartIDTTL)
+
+	r := createRouter(h, mw)
+
+	if err := r.Run(prps.AppPort); err != nil {
+		slog.Error("failed to run server", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 }
 
-func createRouter(cr *repositories.CartRepository, cc *clients.CatalogClient, p *utils.ApplicationProperties, router *gin.Engine) *gin.Engine {
-	h := handlers.NewCartHandler(cr, cc, logger)
+func createLogger() {
+	handler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	})
 
-	router.Use(middlewares.NewErrorMiddleware())
-
-	if os.Getenv("APP_ENV") != "prod" {
-		cartV1 := router.Group("/api/v1/cart")
-		cartV1.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	}
-
-	cartV1Protected := router.Group("/api/v1/cart")
-
-	m := middlewares.NewCartMiddleware(cr, p, logger)
-	cartV1Protected.Use(m.CartHandlerFunc())
-
-	cartV1Protected.GET("/", h.GetCart)
-	cartV1Protected.PUT("/", h.PutCart)
-
-	return router
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
 }
 
-func checkErr(err error, msg string) {
+func createProps() *props.Props {
+	prps, err := props.LoadProps(".")
 	if err != nil {
-		logger.Error(msg, "error", err)
+		slog.Error("failed to load properties", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
+	return prps
+}
+
+func createDB(prps *props.Props) *redis.Client {
+	db := redis.NewClient(&redis.Options{
+		Addr:     prps.RedisAddress,
+		Password: prps.RedisPassword,
+		DB:       prps.RedisDB,
+	})
+
+	if err := db.Ping(context.Background()).Err(); err != nil {
+		slog.Error("failed to connect to Redis", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
+	return db
+}
+
+func createGRPCConn(prps *props.Props) *grpc.ClientConn {
+	conn, err := grpc.NewClient(prps.GrpcCatalogTarget, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		slog.Error("failed to connect to catalog service", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+	return conn
+}
+
+func createKafkaConsumer(prps *props.Props) *kafka.Consumer {
+	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
+		"bootstrap.servers":               prps.KafkaBootstrapServers,
+		"group.id":                        prps.KafkaConsumerGroupID,
+		"go.application.rebalance.enable": true,
+		"auto.offset.reset":               "earliest"})
+
+	if err != nil {
+		slog.Error("failed to create kafka consumer", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
+	return consumer
+}
+
+func createRouter(h *handlers.BasketHandler, mw *middlewares.CartMiddleware) *gin.Engine {
+	r := gin.Default()
+	r.Use(mw.CartHandlerFunc())
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	apiV1 := r.Group("/api/v1")
+	{
+		basket := apiV1.Group("/basket")
+		{
+			basket.GET("/", h.GetBasket)
+			basket.POST("/items", h.AddItem)
+			basket.DELETE("/items/:productID", h.RemoveItem)
+			basket.PUT("/items/:productID", h.ChangeQuantity)
+			basket.DELETE("/clear", h.Clear)
+		}
+	}
+
+	return r
+}
+
+func startKafkaConsumer(consumer *kafka.Consumer, bs *app.BasketService, prps *props.Props) {
+	ctx := context.Background()
+
+	if err := consumer.SubscribeTopics([]string{prps.KafkaOrderTopic}, nil); err != nil {
+		slog.Error("failed to subscribe to kafka topic", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
+	slog.Info("Kafka consumer started", slog.String("topic", prps.KafkaOrderTopic))
+
+	go func() {
+		defer consumer.Close()
+
+		for {
+			msg, err := consumer.ReadMessage(-1)
+			if err != nil {
+				slog.Error("Kafka read error", slog.String("error", err.Error()))
+				continue
+			}
+
+			userID := string(msg.Value)
+			if userID == "" {
+				slog.Warn("Received Kafka message with empty userID")
+				continue
+			}
+
+			slog.Info("Received Kafka message",
+				slog.String("topic", *msg.TopicPartition.Topic),
+				slog.String("userID", userID))
+
+			if err := bs.HandleOrderEvent(ctx, userID); err != nil {
+				slog.Error("failed to handle order event",
+					slog.String("userID", userID),
+					slog.String("error", err.Error()))
+			}
+		}
+	}()
 }
