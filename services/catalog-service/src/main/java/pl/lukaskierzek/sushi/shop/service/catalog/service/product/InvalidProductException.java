@@ -10,3 +10,9 @@ class InvalidProductException extends RuntimeException {
         super(message);
     }
 }
+
+class ProductNotFoundException extends RuntimeException {
+    ProductNotFoundException(String message) {
+        super(message);
+    }
+}

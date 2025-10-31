@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_package = "pl.lukaskierzek.sushi.shop.service";
+option java_multiple_files = true;
+
+message GetProductRequest {
+    optional string id = 1;
+}
+
+message GetProductResponse {
+    Money price = 1;
+}
+
+message Money {
+    Currency currency = 1;
+    string amount = 2;
+}
+
+enum Currency {
+    PLN = 0;
+}
+
+service ProductService {
+    rpc GetProduct(GetProductRequest) returns (GetProductResponse);
+}
