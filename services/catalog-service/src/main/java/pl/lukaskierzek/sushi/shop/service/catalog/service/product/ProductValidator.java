@@ -1,9 +1,9 @@
 package pl.lukaskierzek.sushi.shop.service.catalog.service.product;
 
-import jdk.jfr.Category;
 import lombok.experimental.UtilityClass;
 import pl.lukaskierzek.sushi.shop.service.catalog.service.kernel.ProductCategory;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import static java.math.BigDecimal.ZERO;
@@ -26,26 +26,13 @@ class ProductValidator {
         return description;
     }
 
-    static Money validatePrice(Money price) {
+    static BigDecimal validatePrice(BigDecimal price) {
         if (price == null) {
             throw new InvalidProductException("Product price must not be null");
         }
-        if (price.currency() == null) {
-            throw new InvalidProductException("Price currency must not be null");
-        }
-        if (price.amount() == null) {
-            throw new InvalidProductException("Price amount must not be null");
-        }
-        if (price.amount().compareTo(ZERO) <= 0) {
+
+        if (price.compareTo(ZERO) <= 0) {
             throw new InvalidProductException("Price must be greater than 0");
-        }
-
-        var precision = price.amount().precision();
-        var scale = price.amount().scale();
-        var integerPart = precision - scale;
-
-        if (integerPart > 12 || scale > 3) {
-            throw new InvalidProductException("Price must have up to 12 digits before and 3 after decimal point");
         }
 
         return price;

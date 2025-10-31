@@ -26,7 +26,7 @@ class ProductService {
     public String createProduct(ProductRequest request) {
         var category = categoryService.getProductCategory(request.categoryId());
         validateProductName(request.name());
-        var product = Product.create(request.name(), request.description(), new Money(Currency.PLN, request.price()), category);
+        var product = Product.create(request.name(), request.description(), request.price(), category);
         productRepository.saveProduct(product, DatabaseOperation.CREATE);
         return product.getId();
     }
@@ -69,8 +69,8 @@ class ProductService {
         });
 
         ofNullable(request.price()).ifPresent(price -> {
-            if (!price.equals(product.getPrice().amount())) {
-                product.updatePrice(new Money(Currency.PLN, price));
+            if (!price.equals(product.getPrice())) {
+                product.updatePrice(price);
                 changed.set(true);
             }
         });

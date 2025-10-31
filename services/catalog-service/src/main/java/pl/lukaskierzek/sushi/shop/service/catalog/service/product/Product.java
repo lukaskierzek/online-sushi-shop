@@ -5,6 +5,7 @@ import lombok.Getter;
 import pl.lukaskierzek.sushi.shop.service.catalog.service.kernel.ProductCategory;
 import pl.lukaskierzek.sushi.shop.service.catalog.service.product.DomainEvent.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,11 +21,11 @@ class Product {
     final String id;
     private String name;
     private String description;
-    private Money price;
+    private BigDecimal price;
     private ProductCategory category;
     private final List<DomainEvent> events;
 
-    static Product create(String name, String description, Money price, ProductCategory category) {
+    static Product create(String name, String description, BigDecimal price, ProductCategory category) {
         return new Product(
                 randomUUID().toString(),
                 validateName(name),
@@ -46,7 +47,7 @@ class Product {
         return this;
     }
 
-    Product updatePrice(Money price) {
+    Product updatePrice(BigDecimal price) {
         this.price = validatePrice(price);
         events.add(new ProductPriceUpdated(id, price));
         return this;
@@ -70,6 +71,6 @@ class Product {
         return new ProductSnapshot(id, name, description, price, category);
     }
 
-    record ProductSnapshot(String id, String name, String description, Money price, ProductCategory category) {
+    record ProductSnapshot(String id, String name, String description, BigDecimal price, ProductCategory category) {
     }
 }

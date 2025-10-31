@@ -51,7 +51,7 @@ class ProductExceptionHandler {
         return Map.of("error", ex.getMessage());
     }
 
-    @ExceptionHandler(InvalidProductException.class)
+    @ExceptionHandler(ProductNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleProductNotFound(ProductNotFoundException ex) {
         return Map.of("error", ex.getMessage());

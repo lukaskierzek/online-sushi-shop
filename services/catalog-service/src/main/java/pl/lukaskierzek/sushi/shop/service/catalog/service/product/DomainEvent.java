@@ -7,6 +7,8 @@ import lombok.NonNull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import pl.lukaskierzek.sushi.shop.service.catalog.service.kernel.ProductCategory;
 
+import java.math.BigDecimal;
+
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
 import static org.apache.commons.lang3.builder.ToStringStyle.JSON_STYLE;
 
@@ -18,7 +20,7 @@ import static org.apache.commons.lang3.builder.ToStringStyle.JSON_STYLE;
 })
 interface DomainEvent {
 
-    record ProductPriceUpdated(String id, Money price) implements DomainEvent {
+    record ProductPriceUpdated(String id, BigDecimal price) implements DomainEvent {
 
         @NonNull
         @Override

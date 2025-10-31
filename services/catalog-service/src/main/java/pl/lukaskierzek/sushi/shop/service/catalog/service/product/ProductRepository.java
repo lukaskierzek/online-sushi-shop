@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import pl.lukaskierzek.sushi.shop.service.catalog.service.kernel.DatabaseOperation;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
@@ -84,7 +85,7 @@ class ProductEntity {
     private String categoryId;
 
     @Column
-    private Money price;
+    private BigDecimal price;
 
     @Column
     private String description;

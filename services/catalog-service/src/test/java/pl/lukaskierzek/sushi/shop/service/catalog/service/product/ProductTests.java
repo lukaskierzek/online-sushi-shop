@@ -14,10 +14,7 @@ class ProductTests {
     void shouldNewProductHasValidCategory() {
         String name = "Sushi";
         String description = "A product description for Sushi";
-        Money price = new Money(
-            Currency.PLN,
-            new BigDecimal("50.00")
-        );
+        BigDecimal price = new BigDecimal("50.00");
         ProductCategory category = new ProductCategory(
             "category-id",
             "MainCategory",
@@ -39,7 +36,7 @@ class ProductTests {
     void shouldThrowExceptionWhenProductCategoryNameIsTooShort() {
         InvalidProductException ex = assertThrows(
             InvalidProductException.class,
-            () -> Product.create("valid name", "valid description", new Money(Currency.PLN, new BigDecimal("50.00")),
+            () -> Product.create("valid name", "valid description", new BigDecimal("50.00"),
                 new ProductCategory(
                     "valid category-id",
                     "no",
@@ -55,7 +52,7 @@ class ProductTests {
     void shouldThrowExceptionWhenProductCategoryDescriptionIsTooShort() {
         InvalidProductException ex = assertThrows(
             InvalidProductException.class,
-            () -> Product.create("valid name", "valid description", new Money(Currency.PLN, new BigDecimal("50.00")),
+            () -> Product.create("valid name", "valid description", new BigDecimal("50.00"),
                 new ProductCategory(
                     "valid category-id",
                     "valid name",
@@ -74,7 +71,7 @@ class ProductTests {
             () -> Product.create(
                 "Su",
                 "Valid description",
-                new Money(Currency.PLN, new BigDecimal("50.00")),
+                new BigDecimal("50.00"),
                 new ProductCategory(
                     "category-id",
                     "MainCategory",
@@ -93,7 +90,7 @@ class ProductTests {
             () -> Product.create(
                 "Valid name",
                 "no",
-                new Money(Currency.PLN, new BigDecimal("50.00")),
+                new BigDecimal("50.00"),
                 new ProductCategory(
                     "valid-id",
                     "valid product category",
@@ -110,7 +107,7 @@ class ProductTests {
         Product product = Product.create(
             "valid name",
             "valid description",
-            new Money(Currency.PLN, new BigDecimal("50.00")),
+            new BigDecimal("50.00"),
             new ProductCategory(
                 "valid-id",
                 "valid product category",
@@ -129,7 +126,7 @@ class ProductTests {
         Product product = Product.create(
             "valid name",
             "valid description",
-            new Money(Currency.PLN, new BigDecimal("50.00")),
+            new BigDecimal("50.00"),
             new ProductCategory(
                 "valid-id",
                 "valid product category",
@@ -148,7 +145,7 @@ class ProductTests {
         Product product = Product.create(
             "valid name",
             "valid description",
-            new Money(Currency.PLN, new BigDecimal("50.00")),
+            new BigDecimal("50.00"),
             new ProductCategory(
                 "valid-id",
                 "valid product category",
@@ -173,7 +170,7 @@ class ProductTests {
         Product product = Product.create(
             "valid name",
             "valid description",
-            new Money(Currency.PLN, new BigDecimal("50.00")),
+            new BigDecimal("50.00"),
             new ProductCategory(
                 "valid category-id",
                 "valid category name",
